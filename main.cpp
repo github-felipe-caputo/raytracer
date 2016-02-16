@@ -2,9 +2,11 @@
 #include <iostream>
 
 #include <SFML/Graphics.hpp>
-#include "canvas.h"
 
-using namespace std;
+#include "canvas.h"
+#include "mathHelper.h"
+#include "object.h"
+#include "world.h"
 
 #define PI 3.14159265
 
@@ -22,8 +24,7 @@ float unitsWidth = viewPlaneWidth/imageWidth;
 
 float focalLength = -0.5f;
 
-
-
+// functions
 void spawnRays ( float x0, float y0, float z0, int x, int y, Canvas &c );
 void normalize(float &x, float &y, float &z);
 bool intersectWithSphere(float x0, float y0, float z0, float dx, float dy, float dz);
@@ -40,6 +41,24 @@ int main(void) {
             spawnRays(0,0,0,i,j,canvas);
 
     sf::RenderWindow window(sf::VideoMode(imageWidth, imageHeight), "Ray Tracer");
+
+/*
+    Point p(1,1,1);
+    Point q(2,2,2);
+
+    std::cout << distance(p,q) << std::endl;
+
+    Vector v(1,2,3);
+    normalize(v);
+
+    std::cout << v.x << " " << v.y  << " " << v.z << std::endl;
+
+    Vector a(2,1,-1);
+    Vector b(-3,4,1);
+    Vector c = cross(a,b);
+
+    std::cout << c.x << " " << c.y  << " " << c.z << std::endl;
+*/
 
     // run the program as long as the window is open
     while (window.isOpen())
@@ -155,10 +174,12 @@ bool intersectWithSphere2(float x0, float y0, float z0, float dx, float dy, floa
 
 bool intersectWithFloor(float x0, float y0, float z0, float dx, float dy, float dz){
     // vertices of the floor / polygon
+    /*
     float v1[] = {0.8,0.1,2.6};
     float v2[] = {0.8,0.1,-7.0};
     float v3[] = {-2.3,0.1,2.6};
     float v4[] = {-2.3,0.1,-7.0};
+    */
 
     float vertices[][3] = {{-0.3,0.1,2.6},{-0.3,0.1,-1.5},{0.1,0.1,-1.5},{0.1,0.1,2.6}};
 
@@ -170,7 +191,7 @@ bool intersectWithFloor(float x0, float y0, float z0, float dx, float dy, float 
 
     // ray-plane intersection
     float w = -(nx*x0 + ny*y0 + nz*z0 + f) / (nx*dx + ny*dy + nz*dz);
-    float wx, wy, wz;
+    float wx, wz; //wy
 
     // there was a intersection
     if (w > 0) {
