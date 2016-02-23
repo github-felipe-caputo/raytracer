@@ -13,7 +13,7 @@ main.o: main.cpp
 
 # Dependencies
 
-main.o: canvas.h mathHelper.h
+main.o: canvas.h mathHelper.h object.h world.h
 
 # Clean
 

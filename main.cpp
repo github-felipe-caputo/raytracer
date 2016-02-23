@@ -181,7 +181,7 @@ bool intersectWithFloor(float x0, float y0, float z0, float dx, float dy, float 
     float v4[] = {-2.3,0.1,-7.0};
     */
 
-    float vertices[][3] = {{-0.3,0.1,2.6},{-0.3,0.1,-1.5},{0.1,0.1,-1.5},{0.1,0.1,2.6}};
+    float vertices[][3] = {{-0.3,0.1,2.6},{-0.3,0.1,-1.5},{0.12,0.1,-1.5},{0.1,0.1,2.6}};
 
     // for the plane where the floor is
     float nx = 0.0;

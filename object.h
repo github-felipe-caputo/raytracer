@@ -9,7 +9,8 @@ protected:
     Color col;
 public:
     Object(Color col) : col(col) {}
-    virtual Point interesect (Ray ray) = 0;
+    virtual Point intersect (Ray ray) = 0;// { return ray.getOrigin(); }
+    virtual Color getColor () = 0;// { return Color(0,0,0); }
 };
 
 class Sphere : public Object {
@@ -21,7 +22,7 @@ public:
 
     Sphere ( Point c, float r, Color col) :  Object(col), c(c), r(r) {}
 
-    Point interesect (Ray ray) {
+    Point intersect (Ray ray) {
         Point o = ray.getOrigin();
         Vector d = ray.getDirection();
         normalize(d);
@@ -86,7 +87,7 @@ public:
         normalize(n);
     }
 
-    bool interesect (Ray ray) {
+    bool intersect (Ray ray) {
         Point o = ray.getOrigin();
         Vector d = ray.getDirection();
 
@@ -112,6 +113,10 @@ public:
             return result;
         }
         return false;
+    }
+
+    Color getColor () {
+        return col;
     }
 };
 */
