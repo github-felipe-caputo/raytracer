@@ -1,6 +1,8 @@
 #ifndef _OBJECT_H
 #define _OBJECT_H
 
+#include <vector>
+#include <cmath>
 #include "mathHelper.h"
 
 class Object {
@@ -20,7 +22,7 @@ class Sphere : public Object {
 
 public:
 
-    Sphere ( Point c, float r, Color col) :  Object(col), c(c), r(r) {}
+    Sphere ( Point c, float r, Color col) : Object(col), c(c), r(r) {}
 
     Point intersect (Ray ray) {
         Point o = ray.getOrigin();
@@ -52,73 +54,65 @@ public:
         return col;
     }
 };
-/*
-class Quad : public Object {
-    // Quadrilateral, 4 points and a normal
-    // I assume they are in the same plane
-    Point a, b, c, d;
+
+class Polygon : public Object {
+    // Polygon can have three or more vertices
+    // here I assume they are definetly on the same plane
+    std::vector<Point> vertices;
+
+    // normal
     Vector n;
 
-    // need shortest distance between origin and quad/polygon for intersection
+    // need shortest distance between origin and polygon for intersection
     float f;
 
 public:
-    // four points should be in clockwise direction
-    //
-    //  a -- > b
-    //  /\     |
-    //  |      \/
-    //  d < -- c
-    //
 
-    // PRO-TIP: THIS IS PROBABLE WRONG, NEED TO FIX IT (LATER)
+    // normal should be normalized before constructing the polygon
+    Polygon ( std::vector<Point> vert , Vector n,  Color col) : Object(col), vertices(vert), n(n) {
 
-    Quad ( Point a, Point b, Point c, Point d ) : a(a), b(b), c(c), d(d) {
-        Vector v(a,b);
-        Vector u(a,d);
-
-        // get plane normal
-        n = cross(v,u);
-
-        // find value f
-        float k = - (n.x * a.x + n.y * a.y + n.z * a.z);
-        f = k / sqrt(n.x*n.x + n.y*n.y + n.z*n.z);
-
-        normalize(n);
+        // for now I'm assuming all the vertices are on the same plane, and that place
+        // has a normal (0,1,0), and all the points are on a plane parallel to the x and z plane
+        // so f will always be y of any of the vertices (they are always the same)
+        f = std::abs( vert[0].y );
     }
 
-    bool intersect (Ray ray) {
+
+
+    Point intersect (Ray ray) {
         Point o = ray.getOrigin();
         Vector d = ray.getDirection();
 
         // ray-plane intersection
         float w = -(n.x*o.x + n.y*o.y + n.z*o.z + f) / (n.x*d.x + n.y*d.y + n.z*d.z);
-        float wx, wz; //wy
+        float wx, wy, wz;
 
         // there was a intersection
-        if (w > 0) {
+        if ( w >  0) {
             // actual intersection point
             wx = o.x + d.x * w;
+            wy = o.y + d.y * w;
             wz = o.z + d.z * w;
 
-            float vertices[][3] = {{a.x,a.y,a.z},{b.x,b.y,b.z},{c.x,c.y,c.z},{d.x,d.y,d.z}};
-
-            int i, j;
+            unsigned int i, j;
             bool result = false;
-            for (i = 0, j = 3; i < 4; j = i++) {
-                if ( ((vertices[i][2]>wz) != (vertices[j][2]>wz)) && 
-                    (wx < (vertices[j][0]-vertices[i][0]) * (wz-vertices[i][2]) / (vertices[j][2]-vertices[i][2]) + vertices[i][0]) )
+            for (i = 0, j = vertices.size() - 1; i < vertices.size(); j = i++) {
+                if ( ((vertices[i].z > wz) != (vertices[j].z > wz)) && 
+                    (wx < (vertices[j].x-vertices[i].x) * (wz-vertices[i].z) / (vertices[j].z-vertices[i].z) + vertices[i].x) )
                     result = !result;
             }
-            return result;
+
+            if(result) 
+                return Point(wx, wy, wz);
         }
-        return false;
+
+        return o;
     }
 
     Color getColor () {
         return col;
     }
 };
-*/
+
 
 #endif

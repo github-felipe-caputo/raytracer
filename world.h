@@ -8,7 +8,8 @@
 class World {
     std::vector<Object*> objectList;
     // attributes?
-private:
+
+public:
     void addObject(Object *obj) {
         objectList.push_back(obj);
     }
@@ -18,7 +19,7 @@ private:
         std::vector<Object*>::iterator it;
         std::vector<Point> vPoint;
         std::vector<Color> vColor;
-        int i = 0;
+        unsigned int i = 0;
 
         // we will go through the objects in the world and look for intersections
         for(it = objectList.begin() ; it < objectList.end() ; ++it, ++i) {
@@ -26,6 +27,9 @@ private:
             vColor.push_back( (*it)->getColor() );
         }
         
+        /* This part of the code is goddamn DISGUSTING and I need to think of a better way to go about it */
+
+
         // check which intersection point is closer to ray origin
         float auxDist, minDist = -1;
         Color finalColor; 
@@ -36,7 +40,7 @@ private:
             if (auxDist != 0 && minDist == -1) {
                 minDist = auxDist;
                 finalColor = vColor[i];
-            } else if (auxDist < minDist) {
+            } else if (auxDist != 0 && auxDist < minDist) {
                 minDist = auxDist;
                 finalColor = vColor[i];
             }

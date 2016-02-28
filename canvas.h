@@ -35,8 +35,8 @@ public:
 
     void clear() {
         // set all pixels to black
-        for (int i=0; i < width; ++i)
-            for (int j=0; j < height; ++j)
+        for (int i = 0; i < width; ++i)
+            for (int j = 0; j < height; ++j)
                 myImage.setPixel (i, j, sf::Color(0, 0, 0));
     }
 
