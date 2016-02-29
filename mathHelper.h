@@ -27,7 +27,7 @@ struct Point {
     float x, y, z;
 
     //default
-    Point( float s = 0 ) : x(s), y(s), z(s) {}
+    Point ( float s = 0 ) : x(s), y(s), z(s) {}
 
     // constructors
     Point ( float x, float y, float z ) : x(x), y(y), z(z) {}
@@ -42,7 +42,7 @@ struct Vector {
     float x, y, z;
 
     //default
-    Vector( float s = 0 ) : x(s), y(s), z(s) {}
+    Vector ( float s = 0 ) : x(s), y(s), z(s) {}
 
     // constructor, considering a vector from origin -> (x,y,z)
     Vector ( float x, float y, float z ) : x(x), y(y), z(z) {}
@@ -109,5 +109,16 @@ Vector cross ( const Vector v, const Vector u ) {
 float dot ( const Vector v , const Vector u ) {
     return ( v.x*u.x + v.y*u.y + v.z*u.z );
 }
+
+// normal should be normalized
+Vector reflect ( Vector incoming, Vector normal ) {
+    normalize( incoming );
+
+    float twoMulDotProd = 2 * dot(incoming, normal);
+
+    return Vector(incoming.x - twoMulDotProd * normal.x, incoming.y - twoMulDotProd * normal.y, incoming.z - twoMulDotProd * normal.z);
+}
+
+
 
 #endif

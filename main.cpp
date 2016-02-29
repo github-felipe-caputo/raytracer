@@ -9,6 +9,8 @@
 #include "object.h"
 #include "world.h"
 #include "camera.h"
+#include "lightSource.h"
+#include "illuminationModel.h"
 
 #define PI 3.14159265
 
@@ -19,7 +21,6 @@ int imageWidth = 512;
 // keeping the aspect ratio of the window pixels
 float viewPlaneHeigth = 0.5;
 float viewPlaneWidth = 0.5;
-
 
 int main(void) {
     // SFML canvas and window

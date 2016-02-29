@@ -8,11 +8,51 @@
 class Object {
 protected:
     // material?
+
+    // color, also ambient/diffuse for phong
     Color col;
+
+    // other phong values
+    Color specular;
+    float ka, kd, ks, ke;
+
 public:
     Object(Color col) : col(col) {}
+    
     virtual Point intersect (Ray ray) = 0;// { return ray.getOrigin(); }
-    virtual Color getColor () = 0;// { return Color(0,0,0); }
+
+    Color getColor () {
+        return col;
+    }
+
+    void setUpPhong(Color spec, float newka, float newkd, float newks, float newke) { 
+        specular = spec;
+        ka = newka;
+        kd = newkd;
+        ks = newks;
+        ke = newke; 
+    }
+
+    Color getSpecularColor () {
+        return specular;
+    }
+
+    float getKa() {
+        return ka;
+    }
+
+    float getKd() {
+        return kd;
+    }
+
+    float getKs() {
+        return ks;
+    }
+
+    float getKe() {
+        return ke;
+    }
+
 };
 
 class Sphere : public Object {
@@ -35,7 +75,7 @@ public:
         float C = (o.x - c.x)*(o.x - c.x) + (o.y - c.y)*(o.y - c.y) + (o.z - c.z)*(o.z - c.z) - r*r;
         float w;
 
-        if(B*B - 4.0f*C >= 0.0f) {
+        if( B*B - 4.0f*C >= 0.0f ) {
             float w1 = - (B + sqrt(B*B - 4.0f*C)) / 2;
             float w2 = - (B - sqrt(B*B - 4.0f*C)) / 2;
 
@@ -48,11 +88,7 @@ public:
         }
 
         return o; // will return the point origin if there is no intersection
-    }
-
-    Color getColor () {
-        return col;
-    }
+    }    
 };
 
 class Polygon : public Object {
@@ -76,8 +112,6 @@ public:
         // so f will always be y of any of the vertices (they are always the same)
         f = std::abs( vert[0].y );
     }
-
-
 
     Point intersect (Ray ray) {
         Point o = ray.getOrigin();
@@ -107,10 +141,6 @@ public:
         }
 
         return o;
-    }
-
-    Color getColor () {
-        return col;
     }
 };
 
