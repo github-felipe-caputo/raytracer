@@ -15,24 +15,21 @@ class World {
     std::vector<LightSource> lightList;
 
     // the world might have a illumination model
-    IlluminationModel *illuminationModel;
+    bool phongIllumination;
 
     // Attribute for phong illumination
-    Color ambientLight;
-    bool phong;
+    Color backgroundRadiance;
 
 public:
 
     World () {
-        // Every illumination model is set off by default
-        phong = false;
+        // Illumination set off by default
+        phongIllumination = false;
     }
 
     void setUpPhongIllumination(Color amLight) {
-        Phong ph;
-        illuminationModel = &ph;
-        ambientLight = amLight;
-        phong = true;
+        phongIllumination = true;
+        backgroundRadiance = amLight;
     }
 
     void addObject(Object *obj) {
@@ -61,6 +58,8 @@ public:
         // check which intersection point is closer to ray origin
         float auxDist, minDist = -1;
         Color finalColor; 
+
+        int objHit = -1; // need to know which object is hit so we grab its values for phong
         
         for(i = 0; i < objectList.size(); ++i) {
             auxDist = distance(ray.getOrigin(), vPoint[i]);
@@ -68,26 +67,52 @@ public:
             if (auxDist != 0 && minDist == -1) {
                 minDist = auxDist;
                 finalColor = vColor[i];
+                objHit = i;
             } else if (auxDist != 0 && auxDist < minDist) {
                 minDist = auxDist;
                 finalColor = vColor[i];
+                objHit = i;
             }
         }
 
-        // if minDist still equal -1, return black (background)
-        if (minDist == -1)
-            return Color(0,0,0);
+
+        if( phongIllumination ) 
+        {
+            if (minDist == -1)
+                return backgroundRadiance;
+            else {
+                //return ambientComponent( objectList[objHit], backgroundRadiance );
+
+                Vector view(vPoint[objHit], ray.getOrigin());
+                normalize(view);
+
+                //illuminate( objectList[objHit], view, vPoint[objHit], objectList[objHit].getNormal(vPoint[objHit]), lightList);
+            
+                Color amb = ambientComponent( objectList[objHit], backgroundRadiance );
+                Color diff_spec = illuminate( objectList[objHit], view, vPoint[objHit], objectList[objHit]->getNormal(vPoint[objHit]), lightList);
+
+                return Color(amb.r + diff_spec.r, amb.g + diff_spec.g, amb.b + diff_spec.b);
+            }
+                
+        } 
+        else 
+        {
+            if (minDist == -1) 
+                return Color(0,0,0); 
+            else 
+                return finalColor;
+        }
+
 
         //
         // having the point here is prob where I should check if from that point I reach the light position,
         // If I do, start the illumination stuff
         //
-        //
-        //if(phong) {
-        //    // do stuff
-        //}
+        
+        // if there was a intersection, let's do first the ambient component
+        
 
-        return finalColor;
+        // return finalColor;
     }
     
 

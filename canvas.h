@@ -54,9 +54,9 @@ public:
 
     void setPixel ( int x, int y, float r, float g, float b ) {
         // RGB values
-        unsigned char R = (unsigned char)(r * 255);
-        unsigned char G = (unsigned char)(g * 255);
-        unsigned char B = (unsigned char)(b * 255);
+        unsigned int R = (unsigned int)(r * 255);
+        unsigned int G = (unsigned int)(g * 255);
+        unsigned int B = (unsigned int)(b * 255);
 
         // Set color
         myImage.setPixel (x, y, sf::Color (R, G, B));

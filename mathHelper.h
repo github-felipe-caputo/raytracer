@@ -9,13 +9,13 @@
 
 struct Color {
     // RGB
-    int r, g, b;
+    float r, g, b;
 
     //default
-    Color( int s = 0 ) : r(s), g(s), b(s) {}
+    Color( float s = 0 ) : r(s), g(s), b(s) {}
 
     // constructors
-    Color ( int r, int g, int b ) : r(r), g(g), b(b) {}
+    Color ( float r, float g, float b ) : r(r), g(g), b(b) {}
 };
 
 /*

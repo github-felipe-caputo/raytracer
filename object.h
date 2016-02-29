@@ -19,12 +19,15 @@ protected:
 public:
     Object(Color col) : col(col) {}
     
-    virtual Point intersect (Ray ray) = 0;// { return ray.getOrigin(); }
+    virtual Point intersect (Ray ray) = 0;
+
+    virtual Vector getNormal (Point p) = 0;
 
     Color getColor () {
         return col;
     }
 
+    // kd + ks < 1 YOU PAY ATTENTION JESUS
     void setUpPhong(Color spec, float newka, float newkd, float newks, float newke) { 
         specular = spec;
         ka = newka;
@@ -88,7 +91,13 @@ public:
         }
 
         return o; // will return the point origin if there is no intersection
-    }    
+    } 
+
+    Vector getNormal (Point p) {
+        Vector normal(c, p);
+        normalize(normal);
+        return normal;
+    }
 };
 
 class Polygon : public Object {
@@ -141,6 +150,10 @@ public:
         }
 
         return o;
+    }
+
+    Vector getNormal (Point p) {
+        return n;
     }
 };
 

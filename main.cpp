@@ -29,20 +29,32 @@ int main(void) {
 
     // first create our objects
     Sphere greenSphere( Point(0.0f,0.1f,-2.0f), 0.4f, Color(0,1,0) );
+    greenSphere.setUpPhong( Color(1,1,1), 0.1f, 0.3f, 0.6f, 10.0f );
+
     Sphere blueSphere( Point(-0.5f,-0.2f,-2.5f), 0.3f, Color(0,0,1) );
+    blueSphere.setUpPhong( Color(1,1,1), 0.2f, 0.4f, 0.4f, 5.0f );
 
     std::vector<Point> vertices;
-    vertices.push_back( Point(-1.5f,-0.6f, 0.0) );
-    vertices.push_back( Point(-1.5f,-0.6f,-6.0) );
-    vertices.push_back( Point( 0.5f,-0.6f,-6.0) );
-    vertices.push_back( Point( 0.5f,-0.6f, 0.0) );
+    vertices.push_back( Point(-1.5f,-0.6f, 0.0f) );
+    vertices.push_back( Point(-1.5f,-0.6f,-6.0f) );
+    vertices.push_back( Point( 0.5f,-0.6f,-6.0f) );
+    vertices.push_back( Point( 0.5f,-0.6f, 0.0f) );
+
     Polygon redFloor( vertices, Vector(0,1,0), Color(1,0,0) );
+    redFloor.setUpPhong( Color(0,0,0), 1.0f, 0.0f, 0.0f, 1.0f );
+
+    // create a light source
+    LightSource light( Point(0.0f, 1.0f, 0.0f), Color(1,1,1) );
 
     // create world, add objects in it
     World world;
     world.addObject(&greenSphere);
     world.addObject(&blueSphere);
     world.addObject(&redFloor);
+
+    // add light and set up phong
+    world.addLight(light);
+    world.setUpPhongIllumination( Color(0.7,1,1) );
 
     // create camera
     Point pos(0,0,0);
