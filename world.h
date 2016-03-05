@@ -76,6 +76,26 @@ public:
         }
 
 
+        // here we will have the closest point by checking vPoint[objHit]
+        // se now we need to check from that point to the light, if we
+        // hit anything else
+/*
+        // first create a ray with origin at vPoint[objHit] and direction -> normalized from point to light source
+        Vector dir(vPoint[objHit], lightList[0].getPos());
+        normalize(dir);
+        Ray fromPointToLight(vPoint[objHit], dir);
+
+        // we will go through the objects in the world and look for intersections
+        i = 0;
+        for(it = objectList.begin() ; it < objectList.end() ; ++it, ++i) {
+            // if intersection is different from ray origin once, means it doesnt hit the light
+            if ( vPoint[objHit] != (*it)->intersect(fromPointToLight) )
+                break;
+        }
+*/
+
+
+
         if( phongIllumination ) 
         {
             if (minDist == -1)
@@ -89,6 +109,27 @@ public:
                 //illuminate( objectList[objHit], view, vPoint[objHit], objectList[objHit].getNormal(vPoint[objHit]), lightList);
             
                 Color amb = ambientComponent( objectList[objHit], backgroundRadiance );
+
+                // ======
+
+                // here we will have the closest point by checking vPoint[objHit]
+                // se now we need to check from that point to the light, if we
+                // hit anything else
+
+                // first create a ray with origin at vPoint[objHit] and direction -> normalized from point to light source
+                Vector dir(vPoint[objHit], lightList[0].getPos());
+                Ray fromPointToLight(vPoint[objHit], dir);
+
+                // we will go through the objects in the world and look for intersections
+                for(it = objectList.begin() ; it < objectList.end() ; ++it) {
+                    // if intersection is different from ray origin once, means it doesnt hit the light
+                    // so return only ambient
+                    if ( fromPointToLight.getOrigin() != (*it)->intersect(fromPointToLight) )
+                        return amb;
+                }
+
+                // ======
+
                 Color diff_spec = illuminate( objectList[objHit], view, vPoint[objHit], objectList[objHit]->getNormal(vPoint[objHit]), lightList);
 
                 return Color(amb.r + diff_spec.r, amb.g + diff_spec.g, amb.b + diff_spec.b);

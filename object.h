@@ -78,19 +78,30 @@ public:
         float C = (o.x - c.x)*(o.x - c.x) + (o.y - c.y)*(o.y - c.y) + (o.z - c.z)*(o.z - c.z) - r*r;
         float w;
 
-        if( B*B - 4.0f*C >= 0.0f ) {
-            float w1 = - (B + sqrt(B*B - 4.0f*C)) / 2;
-            float w2 = - (B - sqrt(B*B - 4.0f*C)) / 2;
+        float BBminus4C = B*B - 4.0f*C;
+
+        if (BBminus4C < 0) 
+        {
+            return o; // will return the point origin if there is no intersection
+        }
+        else if (BBminus4C == 0) 
+        {
+            w = (-B + sqrt(B*B - 4.0f*C)) / 2.0f;
+            return Point(o.x + d.x * w, o.y + d.y * w, o.z + d.z * w);
+        } 
+        else 
+        {
+            float w1 = (-B + sqrt(B*B - 4.0f*C)) / 2.0f;
+            float w2 = (-B - sqrt(B*B - 4.0f*C)) / 2.0f;
 
             if (w1 > 0 && w1 <= w2) // w1 is positive and smaller than or equal to w2
                 w = w1;
             else if (w2 > 0) // w2 is positive and either smaller than w1 or w1 is negative
                 w = w2;      
 
-            return Point(o.x + d.x * w, o.y + d.y * w, o.z + d.z * w);       
-        }
-
-        return o; // will return the point origin if there is no intersection
+            return Point(o.x + d.x * w, o.y + d.y * w, o.z + d.z * w);
+        } 
+        
     } 
 
     Vector getNormal (Point p) {
@@ -125,6 +136,7 @@ public:
     Point intersect (Ray ray) {
         Point o = ray.getOrigin();
         Vector d = ray.getDirection();
+        normalize(d);
 
         // ray-plane intersection
         float w = -(n.x*o.x + n.y*o.y + n.z*o.z + f) / (n.x*d.x + n.y*d.y + n.z*d.z);

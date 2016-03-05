@@ -41,10 +41,10 @@ int main(void) {
     vertices.push_back( Point( 0.5f,-0.6f, 0.0f) );
 
     Polygon redFloor( vertices, Vector(0,1,0), Color(1,0,0) );
-    redFloor.setUpPhong( Color(0,0,0), 1.0f, 0.0f, 0.0f, 1.0f );
+    redFloor.setUpPhong( Color(1,1,1), 0.5f, 0.5f, 0.0f, 1.0f );
 
     // create a light source
-    LightSource light( Point(0.0f, 1.0f, 0.0f), Color(1,1,1) );
+    LightSource light( Point(0.0f, 5.0f, 0.0f), Color(1,1,1) );
 
     // create world, add objects in it
     World world;

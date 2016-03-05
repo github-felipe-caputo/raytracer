@@ -16,6 +16,7 @@ struct Color {
 
     // constructors
     Color ( float r, float g, float b ) : r(r), g(g), b(b) {}
+
 };
 
 /*
@@ -31,6 +32,15 @@ struct Point {
 
     // constructors
     Point ( float x, float y, float z ) : x(x), y(y), z(z) {}
+
+    // overloading operators
+    bool operator==(const Point& rhs) {
+        return (x == rhs.x && y == rhs.y && z == rhs.z);
+    }
+
+    bool operator!=(const Point& rhs) {
+        return !(*this == rhs);
+    }
 };
 
 /*
@@ -95,7 +105,7 @@ float length ( const Vector v ) {
 void normalize ( Vector& v ) {
     float len = length(v);
 
-    if (len != 0) {
+    if (len != 0.0f) {
         v.x = v.x / len;
         v.y = v.y / len;
         v.z = v.z / len;
