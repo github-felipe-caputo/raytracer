@@ -73,8 +73,7 @@ public:
                 dz = focalLength;
                 
                 // vector direction, normalize
-                Vector dir(dx,dy,dz);
-                normalize(dir);
+                Vector dir(dx,dy,dz, true);
 
                 // ray
                 Ray ray(position, dir);

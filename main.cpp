@@ -19,8 +19,8 @@ int imageHeight = 512;
 int imageWidth = 512;
 
 // keeping the aspect ratio of the window pixels
-float viewPlaneHeigth = 0.5;
-float viewPlaneWidth = 0.5;
+float viewPlaneHeigth = 0.5f;
+float viewPlaneWidth = 0.5f;
 
 int main(void) {
     // SFML canvas and window
@@ -41,10 +41,11 @@ int main(void) {
     vertices.push_back( Point( 0.5f,-0.6f, 0.0f) );
 
     Polygon redFloor( vertices, Vector(0,1,0), Color(1,0,0) );
-    redFloor.setUpPhong( Color(1,1,1), 0.5f, 0.5f, 0.0f, 1.0f );
+    redFloor.setUpPhong( Color(1,1,1), 0.3f, 0.5f, 0.0f, 1.0f );
 
     // create a light source
     LightSource light( Point(0.0f, 5.0f, 0.0f), Color(1,1,1) );
+    LightSource light2( Point(-5.0f, 3.0f, 0.0f), Color(1,1,1) );
 
     // create world, add objects in it
     World world;
@@ -54,6 +55,7 @@ int main(void) {
 
     // add light and set up phong
     world.addLight(light);
+    world.addLight(light2);
     world.setUpPhongIllumination( Color(0.7,1,1) );
 
     // create camera

@@ -140,14 +140,13 @@ public:
 
         // ray-plane intersection
         float w = -(n.x*o.x + n.y*o.y + n.z*o.z + f) / (n.x*d.x + n.y*d.y + n.z*d.z);
-        float wx, wy, wz;
 
         // there was a intersection
-        if ( w >  0) {
+        if ( w > 0.0f ) {
             // actual intersection point
-            wx = o.x + d.x * w;
-            wy = o.y + d.y * w;
-            wz = o.z + d.z * w;
+            float wx = o.x + d.x * w;
+            float wy = o.y + d.y * w;
+            float wz = o.z + d.z * w;
 
             unsigned int i, j;
             bool result = false;
@@ -159,7 +158,7 @@ public:
 
             if(result) 
                 return Point(wx, wy, wz);
-        }
+        } 
 
         return o;
     }

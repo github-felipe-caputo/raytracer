@@ -15,8 +15,41 @@ struct Color {
     Color( float s = 0 ) : r(s), g(s), b(s) {}
 
     // constructors
-    Color ( float r, float g, float b ) : r(r), g(g), b(b) {}
+    Color ( float rn, float gn, float bn ) {
+        r = (rn > 1) ? 1 : rn;
+        g = (gn > 1) ? 1 : gn;
+        b = (gn > 1) ? 1 : bn;
+    }
 
+    // Non-modifying arithematic operators
+    Color operator+(const Color& rhs){
+        return Color(r + rhs.r, g + rhs.g, b + rhs.b);
+    } 
+
+    Color operator*(const Color& rhs){
+        return Color(r * rhs.r, g * rhs.g, b * rhs.b);
+    }
+
+    Color operator*(float rhs){
+        return Color(r * rhs, g * rhs, b * rhs);
+    }
+
+    friend Color operator*(float lhs, const Color& rhs){
+        return Color(lhs * rhs.r, lhs * rhs.g, lhs * rhs.b);
+    }
+
+    // Modifying arithematic operators
+    Color& operator+=( const Color& rhs ) { 
+        r += rhs.r;  
+        g += rhs.g;  
+        b += rhs.b;
+
+        if (r > 1) r = 1;
+        if (g > 1) g = 1;
+        if (b > 1) b = 1;
+
+        return *this; 
+    }
 };
 
 /*
@@ -55,13 +88,31 @@ struct Vector {
     Vector ( float s = 0 ) : x(s), y(s), z(s) {}
 
     // constructor, considering a vector from origin -> (x,y,z)
-    Vector ( float x, float y, float z ) : x(x), y(y), z(z) {}
+    Vector ( float x, float y, float z, bool norm = false ) : x(x), y(y), z(z) {
+        if(norm) {
+            float len = sqrt( x*x+y*y+z*z );
+            if (len != 0.0f) {
+                x = x / len;
+                y = y / len;
+                z = z / len;
+            }
+        } 
+    }
 
     // constructor, from origin to destination
-    Vector ( Point o, Point d ) { 
+    Vector ( Point o, Point d, bool norm = false ) { 
         x = d.x - o.x;
         y = d.y - o.y;
         z = d.z - o.z; 
+
+        if(norm) {
+            float len = sqrt( x*x+y*y+z*z );
+            if (len != 0.0f) {
+                x = x / len;
+                y = y / len;
+                z = z / len;
+            }
+        }  
     }
 };
 
@@ -124,11 +175,23 @@ float dot ( const Vector v , const Vector u ) {
 Vector reflect ( Vector incoming, Vector normal ) {
     normalize( incoming );
 
-    float twoMulDotProd = 2 * dot(incoming, normal);
+    float twoMulDotProd = 2.0f * dot(incoming, normal);
 
     return Vector(incoming.x - twoMulDotProd * normal.x, incoming.y - twoMulDotProd * normal.y, incoming.z - twoMulDotProd * normal.z);
 }
 
+int indexMinElement ( std::vector<float> v ) {
+    float minDist = *std::max_element(v.begin(), v.end());
+    int index = -1;
 
+    for(unsigned int i = 0; i < v.size(); ++i) {
+        if (v[i] != 0 && v[i] <= minDist) {
+            minDist = v[i];
+            index = i;
+        }
+    }
+
+    return index;
+}
 
 #endif
