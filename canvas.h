@@ -53,6 +53,11 @@ public:
     }
 
     void setPixel ( int x, int y, float r, float g, float b ) {
+        // Wrap color values if they are over 1
+        if (r > 1) r = 1;
+        if (g > 1) g = 1;
+        if (b > 1) b = 1;
+
         // RGB values
         unsigned int R = (unsigned int)(r * 255);
         unsigned int G = (unsigned int)(g * 255);

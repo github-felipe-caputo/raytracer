@@ -13,10 +13,11 @@ class World {
     std::vector<Object*> objectList;
 
     // List of lights in this world
-    std::vector<LightSource> lightList;
+    std::vector<LightSource*> lightList;
 
     // the world might have a illumination model
     bool phongIllumination;
+    bool phongIlluminationBlinn;
 
     // Attribute for phong illumination
     Color backgroundRadiance;
@@ -33,11 +34,16 @@ public:
         backgroundRadiance = amLight;
     }
 
+    void setUpPhongBlinnIllumination(Color amLight) {
+        phongIlluminationBlinn = true;
+        backgroundRadiance = amLight;
+    }
+
     void addObject(Object *obj) {
         objectList.push_back(obj);
     }
 
-    void addLight(LightSource light) {
+    void addLight(LightSource *light) {
         lightList.push_back(light);
     }
 
@@ -47,7 +53,7 @@ public:
         Point intersection;
 
         std::vector<Object*>::iterator it;
-        std::vector<LightSource>::iterator it2;
+        std::vector<LightSource*>::iterator it2;
         std::vector<Point> vPoint;
         std::vector<float> vDist;
         unsigned int i = 0;
@@ -62,12 +68,12 @@ public:
         // objHit = indexMinElement(vDist)
         int objHit(indexMinElement(vDist));
 
-        if( phongIllumination ) 
+        if( phongIllumination || phongIlluminationBlinn ) 
         {
             if (objHit == -1)
                 return backgroundRadiance;
             else {
-                std::vector<LightSource> lightsHit;
+                std::vector<LightSource*> lightsHit;
                 Vector normal = objectList[objHit]->getNormal(vPoint[objHit]);
                 Color amb = ambientComponent( objectList[objHit], backgroundRadiance );
 
@@ -77,15 +83,18 @@ public:
                                       vPoint[objHit].z + normal.z * 0.1f );
 
                 for(it2 = lightList.begin() ; it2 < lightList.end() ; ++it2) {
-                    Vector dir( originShadowRay, (*it2).getPos(), true );
-                    Ray fromPointToLight(originShadowRay, dir);
+                    // If this ray can actually reach the light
+                    if((*it2)->reaches(originShadowRay)) {
+                        Vector dir( originShadowRay, (*it2)->getPos(), true );
+                        Ray fromPointToLight(originShadowRay, dir);
 
-                    for(it = objectList.begin() ; it < objectList.end() ; ++it) 
-                        if ( originShadowRay != (*it)->intersect(fromPointToLight) ) 
-                            break;
+                        for(it = objectList.begin() ; it < objectList.end() ; ++it) 
+                            if ( originShadowRay != (*it)->intersect(fromPointToLight) ) 
+                                break;
 
-                    if ( it == objectList.end() ) // if it went through the whole loop, then it hits the light!
-                        lightsHit.push_back( *it2 );
+                        if ( it == objectList.end() ) // if it went through the whole loop, then it hits the light!
+                            lightsHit.push_back( *it2 );
+                    }
                 }
 /*
                 // first create a ray with origin at vPoint[objHit] and direction -> normalized from point to light source
@@ -100,7 +109,14 @@ public:
                 }
 */
                 Vector view(vPoint[objHit], originRay, true);
-                Color diff_spec = illuminate( objectList[objHit], view, vPoint[objHit], objectList[objHit]->getNormal(vPoint[objHit]), lightsHit);
+                Color diff_spec;
+                if(phongIllumination) {
+                    diff_spec = illuminatePhong( objectList[objHit], view, vPoint[objHit], 
+                        objectList[objHit]->getNormal(vPoint[objHit]), lightsHit);
+                } else {
+                    diff_spec = illuminatePhongBlinn( objectList[objHit], view, vPoint[objHit], 
+                        objectList[objHit]->getNormal(vPoint[objHit]), lightsHit);
+                }
 
                 return amb + diff_spec;
             }

@@ -1,6 +1,8 @@
 #ifndef _MATHHELPER_H
 #define _MATHHELPER_H
 
+#define PI 3.14159265
+
 #include <cmath>
 
 /*
@@ -15,15 +17,15 @@ struct Color {
     Color( float s = 0 ) : r(s), g(s), b(s) {}
 
     // constructors
-    Color ( float rn, float gn, float bn ) {
-        r = (rn > 1) ? 1 : rn;
-        g = (gn > 1) ? 1 : gn;
-        b = (gn > 1) ? 1 : bn;
-    }
+    Color ( float r, float g, float b ) : r(r), g(g), b(b) {}
 
     // Non-modifying arithematic operators
     Color operator+(const Color& rhs){
         return Color(r + rhs.r, g + rhs.g, b + rhs.b);
+    } 
+
+    Color operator/(float rhs){
+        return Color(r/rhs, g/rhs, b/rhs);
     } 
 
     Color operator*(const Color& rhs){
@@ -43,10 +45,6 @@ struct Color {
         r += rhs.r;  
         g += rhs.g;  
         b += rhs.b;
-
-        if (r > 1) r = 1;
-        if (g > 1) g = 1;
-        if (b > 1) b = 1;
 
         return *this; 
     }
@@ -88,7 +86,7 @@ struct Vector {
     Vector ( float s = 0 ) : x(s), y(s), z(s) {}
 
     // constructor, considering a vector from origin -> (x,y,z)
-    Vector ( float x, float y, float z, bool norm = false ) : x(x), y(y), z(z) {
+    Vector ( float xn, float yn, float zn, bool norm = false ) : x(xn), y(yn), z(zn) {
         if(norm) {
             float len = sqrt( x*x+y*y+z*z );
             if (len != 0.0f) {
@@ -114,6 +112,11 @@ struct Vector {
             }
         }  
     }
+
+    // Non-modifying arithematic operators
+    Vector operator+(const Vector& rhs){
+        return Vector(x + rhs.x, y + rhs.y, z + rhs.z);
+    } 
 };
 
 /*

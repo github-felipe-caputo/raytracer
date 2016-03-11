@@ -1,6 +1,9 @@
 #ifndef _CAMERA_H
 #define _CAMERA_H
 
+#define RAY_CENTER 0
+#define RAY_GRID   1
+
 #include <vector>
 #include "mathHelper.h"
 #include "world.h"
@@ -28,14 +31,17 @@ class Camera {
     // each pixel
     float unitsHigh, unitsWidth;
 
+    // How we are spawing the rays
+    int rayType;
+
 public:
 
     /**
      * NOTE: I'm not using the up vector yet, just assuming it's positive y
      */
 
-    Camera(Point pos, Vector look, Vector up, int imH, int imW, float viewH, float viewW) : 
-        position(pos), lookAt(look), up(up), imageHeight(imH), imageWidth(imW), viewPlaneHeigth(viewH), viewPlaneWidth(viewW) {
+    Camera(Point pos, Vector look, Vector up, int imH, int imW, float viewH, float viewW, int rayType) : 
+        position(pos), lookAt(look), up(up), imageHeight(imH), imageWidth(imW), viewPlaneHeigth(viewH), viewPlaneWidth(viewW), rayType(rayType) {
         
         // each pixel
         unitsHigh = viewH/imH;
@@ -66,20 +72,53 @@ public:
         //    go through the rows in the column
         // then go to next column
 
-        for(int i = 0; i < imageWidth; ++i) {
-            for(int j = 0; j < imageHeight; ++j) {
-                dx = firstPlanex + (unitsWidth/2) + i * unitsWidth;
-                dy = firstPlaney - (unitsHigh/2) - j * unitsHigh;
-                dz = focalLength;
-                
-                // vector direction, normalize
-                Vector dir(dx,dy,dz, true);
+        if(rayType == RAY_CENTER) 
+        {
+            for(int i = 0; i < imageWidth; ++i) {
+                for(int j = 0; j < imageHeight; ++j) {
+                    dx = firstPlanex + (unitsWidth/2.0f) + i * unitsWidth;
+                    dy = firstPlaney - (unitsHigh/2.0f) - j * unitsHigh;
+                    dz = focalLength;
+                    
+                    // vector direction, normalize
+                    Vector dir(dx,dy,dz, true);
 
-                // ray
-                Ray ray(position, dir);
+                    // ray
+                    Ray ray(position, dir);
 
-                // spawn rays into the world to get the color
-                colorMap.push_back( world.spawn( ray ) );
+                    // spawn rays into the world to get the color
+                    colorMap.push_back( world.spawn( ray ) );
+                }
+            }
+        } 
+        else 
+        {
+            for(int i = 0; i < imageWidth; ++i) {
+                for(int j = 0; j < imageHeight; ++j) {
+
+                    Color average;
+                    /// lets make a grid of 9 rays
+                    for (int a = 1; a < 4; ++a) {
+                        for (int b = 1; b < 4; ++b) {
+                            dx = firstPlanex + (unitsWidth/(2.5f * a)) + i * unitsWidth;
+                            dy = firstPlaney - (unitsHigh/(2.5f * b)) - j * unitsHigh;
+                            dz = focalLength;
+
+                            // vector direction, normalize
+                            Vector dir(dx,dy,dz, true);
+
+                            // ray
+                            Ray ray(position, dir);
+
+                            // Color average
+                            average += world.spawn( ray );
+                        }
+                    }
+
+                    // get final color
+                    average = (average / 9.0f);
+                    colorMap.push_back( average );
+                }
             }
         }
 

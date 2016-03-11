@@ -29,7 +29,7 @@ int main(void) {
 
     // first create our objects
     Sphere greenSphere( Point(0.0f,0.1f,-2.0f), 0.4f, Color(0,1,0) );
-    greenSphere.setUpPhong( Color(1,1,1), 0.1f, 0.3f, 0.6f, 10.0f );
+    greenSphere.setUpPhong( Color(1,1,1), 0.2f, 0.6f, 0.6f, 10.0f );
 
     Sphere blueSphere( Point(-0.5f,-0.2f,-2.5f), 0.3f, Color(0,0,1) );
     blueSphere.setUpPhong( Color(1,1,1), 0.2f, 0.4f, 0.4f, 5.0f );
@@ -44,8 +44,10 @@ int main(void) {
     redFloor.setUpPhong( Color(1,1,1), 0.3f, 0.5f, 0.0f, 1.0f );
 
     // create a light source
-    LightSource light( Point(0.0f, 5.0f, 0.0f), Color(1,1,1) );
-    LightSource light2( Point(-5.0f, 3.0f, 0.0f), Color(1,1,1) );
+    //PointLight light( Point(0.0f, 5.0f, 0.0f), Color(1,1,1) );
+    //PointLight light2( Point(-5.0f, 3.0f, 0.0f), Color(1,1,1) );
+
+    SpotLight light( Point(0.0f, 2.0f, -2.0f), Color(1,1,1), Vector(0,-1,0), 20, 10 );
 
     // create world, add objects in it
     World world;
@@ -54,15 +56,16 @@ int main(void) {
     world.addObject(&redFloor);
 
     // add light and set up phong
-    world.addLight(light);
-    world.addLight(light2);
+    world.addLight(&light);
+    //world.addLight(&light2);
+    //world.setUpPhongBlinnIllumination( Color(0.7,1,1) );
     world.setUpPhongIllumination( Color(0.7,1,1) );
 
     // create camera
     Point pos(0,0,0);
     Vector lookAt(0,-0.5f,0); // not being used yet
     Vector up(0,1,0); // not being used yet
-    Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth);
+    Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, RAY_CENTER);
 
     // render our world, get the color map we will put on canvas
     std::vector<Color> colorMap = cam.render(world);
@@ -75,7 +78,6 @@ int main(void) {
         }
     }
     
-
     // run the program as long as the window is open
     while (window.isOpen())
     {
