@@ -26,10 +26,10 @@ class Camera {
     int imageHeight, imageWidth;
 
     // keeping the aspect ratio of the window pixels
-    float viewPlaneHeigth, viewPlaneWidth;
+    double viewPlaneHeigth, viewPlaneWidth;
 
     // each pixel
-    float unitsHigh, unitsWidth;
+    double unitsHigh, unitsWidth;
 
     // How we are spawing the rays
     int rayType;
@@ -40,7 +40,7 @@ public:
      * NOTE: I'm not using the up vector yet, just assuming it's positive y
      */
 
-    Camera(Point pos, Vector look, Vector up, int imH, int imW, float viewH, float viewW, int rayType) : 
+    Camera(Point pos, Vector look, Vector up, int imH, int imW, double viewH, double viewW, int rayType) : 
         position(pos), lookAt(look), up(up), imageHeight(imH), imageWidth(imW), viewPlaneHeigth(viewH), viewPlaneWidth(viewW), rayType(rayType) {
         
         // each pixel
@@ -53,18 +53,18 @@ public:
 
     std::vector<Color> render (World world) {
         // "first pixel is at
-        float firstPlanex = -viewPlaneWidth/2;
-        float firstPlaney = viewPlaneHeigth/2;
+        double firstPlanex = -viewPlaneWidth/2;
+        double firstPlaney = viewPlaneHeigth/2;
 
         // ray direction
-        float dx,dy,dz;
+        double dx,dy,dz;
 
         // Result color of a ray
         std::vector<Color> colorMap;
 
         // creating rays
         // for now I'm assuming position of camera is origin, focalLength = -0.5f (not using lookAt value yet);
-        float focalLength = -0.5f;
+        double focalLength = -0.5f;
 
         // this loop is going like
         // consider origin at top left

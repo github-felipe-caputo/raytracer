@@ -11,20 +11,20 @@
 
 struct Color {
     // RGB
-    float r, g, b;
+    double r, g, b;
 
     //default
-    Color( float s = 0 ) : r(s), g(s), b(s) {}
+    Color( double s = 0 ) : r(s), g(s), b(s) {}
 
     // constructors
-    Color ( float r, float g, float b ) : r(r), g(g), b(b) {}
+    Color ( double r, double g, double b ) : r(r), g(g), b(b) {}
 
     // Non-modifying arithematic operators
     Color operator+(const Color& rhs){
         return Color(r + rhs.r, g + rhs.g, b + rhs.b);
     } 
 
-    Color operator/(float rhs){
+    Color operator/(double rhs){
         return Color(r/rhs, g/rhs, b/rhs);
     } 
 
@@ -32,11 +32,11 @@ struct Color {
         return Color(r * rhs.r, g * rhs.g, b * rhs.b);
     }
 
-    Color operator*(float rhs){
+    Color operator*(double rhs){
         return Color(r * rhs, g * rhs, b * rhs);
     }
 
-    friend Color operator*(float lhs, const Color& rhs){
+    friend Color operator*(double lhs, const Color& rhs){
         return Color(lhs * rhs.r, lhs * rhs.g, lhs * rhs.b);
     }
 
@@ -56,13 +56,13 @@ struct Color {
 
 struct Point {
     // 3D point
-    float x, y, z;
+    double x, y, z;
 
     //default
-    Point ( float s = 0 ) : x(s), y(s), z(s) {}
+    Point ( double s = 0 ) : x(s), y(s), z(s) {}
 
     // constructors
-    Point ( float x, float y, float z ) : x(x), y(y), z(z) {}
+    Point ( double x, double y, double z ) : x(x), y(y), z(z) {}
 
     // overloading operators
     bool operator==(const Point& rhs) {
@@ -80,15 +80,15 @@ struct Point {
 
 struct Vector {
     // 3D vector
-    float x, y, z;
+    double x, y, z;
 
     //default
-    Vector ( float s = 0 ) : x(s), y(s), z(s) {}
+    Vector ( double s = 0 ) : x(s), y(s), z(s) {}
 
     // constructor, considering a vector from origin -> (x,y,z)
-    Vector ( float xn, float yn, float zn, bool norm = false ) : x(xn), y(yn), z(zn) {
+    Vector ( double xn, double yn, double zn, bool norm = false ) : x(xn), y(yn), z(zn) {
         if(norm) {
-            float len = sqrt( x*x+y*y+z*z );
+            double len = sqrt( x*x+y*y+z*z );
             if (len != 0.0f) {
                 x = x / len;
                 y = y / len;
@@ -104,7 +104,7 @@ struct Vector {
         z = d.z - o.z; 
 
         if(norm) {
-            float len = sqrt( x*x+y*y+z*z );
+            double len = sqrt( x*x+y*y+z*z );
             if (len != 0.0f) {
                 x = x / len;
                 y = y / len;
@@ -144,20 +144,20 @@ struct Ray {
  * Non-class functions
  */
 
-float distance ( const Point p, const Point q ) {
-    float a = p.x - q.x;
-    float b = p.y - q.y;
-    float c = p.z - q.z;
+double distance ( const Point p, const Point q ) {
+    double a = p.x - q.x;
+    double b = p.y - q.y;
+    double c = p.z - q.z;
 
     return sqrt(a*a + b*b + c*c);
 }
 
-float length ( const Vector v ) {
+double length ( const Vector v ) {
     return sqrt( v.x*v.x+v.y*v.y+v.z*v.z );
 }
 
 void normalize ( Vector& v ) {
-    float len = length(v);
+    double len = length(v);
 
     if (len != 0.0f) {
         v.x = v.x / len;
@@ -170,7 +170,7 @@ Vector cross ( const Vector v, const Vector u ) {
     return Vector( v.y*u.z - v.z*u.y , v.z*u.x - v.x*u.z , v.x*u.y - v.y*u.x );
 }
 
-float dot ( const Vector v , const Vector u ) {
+double dot ( const Vector v , const Vector u ) {
     return ( v.x*u.x + v.y*u.y + v.z*u.z );
 }
 
@@ -178,13 +178,13 @@ float dot ( const Vector v , const Vector u ) {
 Vector reflect ( Vector incoming, Vector normal ) {
     normalize( incoming );
 
-    float twoMulDotProd = 2.0f * dot(incoming, normal);
+    double twoMulDotProd = 2.0f * dot(incoming, normal);
 
     return Vector(incoming.x - twoMulDotProd * normal.x, incoming.y - twoMulDotProd * normal.y, incoming.z - twoMulDotProd * normal.z);
 }
 
-int indexMinElement ( std::vector<float> v ) {
-    float minDist = *std::max_element(v.begin(), v.end());
+int indexMinElement ( std::vector<double> v ) {
+    double minDist = *std::max_element(v.begin(), v.end());
     int index = -1;
 
     for(unsigned int i = 0; i < v.size(); ++i) {

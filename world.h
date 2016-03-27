@@ -55,7 +55,7 @@ public:
         std::vector<Object*>::iterator it;
         std::vector<LightSource*>::iterator it2;
         std::vector<Point> vPoint;
-        std::vector<float> vDist;
+        std::vector<double> vDist;
         unsigned int i = 0;
 
         // we will go through the objects in the world and look for intersections
@@ -75,7 +75,7 @@ public:
             else {
                 std::vector<LightSource*> lightsHit;
                 Vector normal = objectList[objHit]->getNormal(vPoint[objHit]);
-                Color amb = ambientComponent( objectList[objHit], backgroundRadiance );
+                Color amb = ambientComponent( objectList[objHit], backgroundRadiance, vPoint[objHit] );
 
                 // shadow ray origin should be slightly  different to account for rouding errors
                 Point originShadowRay(vPoint[objHit].x + normal.x * 0.1f, 
@@ -96,21 +96,10 @@ public:
                             lightsHit.push_back( *it2 );
                     }
                 }
-/*
-                // first create a ray with origin at vPoint[objHit] and direction -> normalized from point to light source
-                Vector dir(originShadowRay, lightList[0].getPos());
-                Ray fromPointToLight(originShadowRay, dir);
 
-                // we will go through the objects in the world and look for intersections
-                // if intersection != from origin, it hit something
-                for(it = objectList.begin() ; it < objectList.end() ; ++it) {
-                    if ( originShadowRay != (*it)->intersect(fromPointToLight) ) 
-                        return amb;
-                }
-*/
                 Vector view(vPoint[objHit], originRay, true);
                 Color diff_spec;
-                if(phongIllumination) {
+                if( phongIllumination ) {
                     diff_spec = illuminatePhong( objectList[objHit], view, vPoint[objHit], 
                         objectList[objHit]->getNormal(vPoint[objHit]), lightsHit);
                 } else {
@@ -126,7 +115,7 @@ public:
             if (objHit == -1) 
                 return Color(0,0,0); 
             else 
-                return objectList[objHit]->getColor();
+                return objectList[objHit]->getColor(vPoint[objHit]);
         }
     }
     

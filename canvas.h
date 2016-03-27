@@ -52,7 +52,7 @@ public:
         window.draw( toDraw );
     }
 
-    void setPixel ( int x, int y, float r, float g, float b ) {
+    void setPixel ( int x, int y, double r, double g, double b ) {
         // Wrap color values if they are over 1
         if (r > 1) r = 1;
         if (g > 1) g = 1;

@@ -19,8 +19,8 @@ int imageHeight = 512;
 int imageWidth = 512;
 
 // keeping the aspect ratio of the window pixels
-float viewPlaneHeigth = 0.5f;
-float viewPlaneWidth = 0.5f;
+double viewPlaneHeigth = 0.5;
+double viewPlaneWidth = 0.5;
 
 int main(void) {
     // SFML canvas and window
@@ -28,32 +28,31 @@ int main(void) {
     sf::RenderWindow window(sf::VideoMode(imageWidth, imageHeight), "Ray Tracer");
 
     // first create our objects
-    Sphere greenSphere( Point(0.0f,0.1f,-2.0f), 0.4f, Color(0,1,0) );
-    greenSphere.setUpPhong( Color(1,1,1), 0.2f, 0.6f, 0.6f, 10.0f );
+    Sphere greenSphere( Point(0.0f,0.1,-2.0), 0.4, Color(0,1,0) );
+    greenSphere.setUpPhong( Color(1,1,1), 0.2, 0.6, 0.6, 10.0 );
 
-    Sphere blueSphere( Point(-0.5f,-0.2f,-2.5f), 0.3f, Color(0,0,1) );
-    blueSphere.setUpPhong( Color(1,1,1), 0.2f, 0.4f, 0.4f, 5.0f );
+    Sphere blueSphere( Point(-0.5,-0.2,-2.5), 0.3, Color(0,0,1) );
+    blueSphere.setUpPhong( Color(1,1,1), 0.2, 0.4, 0.4, 5.0 );
 
     std::vector<Point> vertices;
-    vertices.push_back( Point(-1.5f,-0.6f, 0.0f) );
-    vertices.push_back( Point(-1.5f,-0.6f,-6.0f) );
-    vertices.push_back( Point( 0.5f,-0.6f,-6.0f) );
-    vertices.push_back( Point( 0.5f,-0.6f, 0.0f) );
+    vertices.push_back( Point(-1.5,-0.6, 0.0) );
+    vertices.push_back( Point(-1.5,-0.6,-6.0) );
+    vertices.push_back( Point( 0.5,-0.6,-6.0) );
+    vertices.push_back( Point( 0.5,-0.6, 0.0) );
 
-    Polygon redFloor( vertices, Vector(0,1,0), Color(1,0,0) );
-    redFloor.setUpPhong( Color(1,1,1), 0.3f, 0.5f, 0.0f, 1.0f );
+    Polygon checkerFloor( vertices, Vector(0,1,0), Color(1,0,0), true );
+    checkerFloor.setUpPhong( Color(1,1,1), 0.3, 1.0, 0.0, 1.0 );
 
     // create a light source
-    //PointLight light( Point(0.0f, 5.0f, 0.0f), Color(1,1,1) );
+    PointLight light( Point(0.0f, 5.0f, 0.0f), Color(1,1,1) );
     //PointLight light2( Point(-5.0f, 3.0f, 0.0f), Color(1,1,1) );
-
-    SpotLight light( Point(0.0f, 2.0f, -2.0f), Color(1,1,1), Vector(0,-1,0), 20, 10 );
+    //SpotLight light( Point(0.0f, 2.0f, -2.0f), Color(1,1,1), Vector(0,-1,0), 20, 10 );
 
     // create world, add objects in it
     World world;
     world.addObject(&greenSphere);
     world.addObject(&blueSphere);
-    world.addObject(&redFloor);
+    world.addObject(&checkerFloor);
 
     // add light and set up phong
     world.addLight(&light);
@@ -63,7 +62,7 @@ int main(void) {
 
     // create camera
     Point pos(0,0,0);
-    Vector lookAt(0,-0.5f,0); // not being used yet
+    Vector lookAt(0,-0.5,0); // not being used yet
     Vector up(0,1,0); // not being used yet
     Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, RAY_CENTER);
 

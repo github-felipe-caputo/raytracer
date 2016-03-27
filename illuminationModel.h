@@ -7,9 +7,9 @@
 #include "object.h"
 #include "lightSource.h"
 
-Color ambientComponent(Object *obj, Color ambientLight) {
-    Color objColor = obj->getColor();
-    float ka = obj->getKa();
+Color ambientComponent(Object *obj, Color ambientLight, Point point) {
+    Color objColor = obj->getColor(point);
+    double ka = obj->getKa();
 
     return ka * ambientLight * objColor;
 }
@@ -21,31 +21,31 @@ Color illuminatePhong(Object *obj, Vector view, Point point, Vector normal, std:
     Color diffuse;
     Color specular;
 
-    Color objColor = obj->getColor();
+    Color objColor = obj->getColor(point);
     Color objSpecColor = obj->getSpecularColor();
     
-    float kd = obj->getKd();
-    float ks = obj->getKs();
-    float ke = obj->getKe();
+    double kd = obj->getKd();
+    double ks = obj->getKs();
+    double ke = obj->getKe();
 
     normalize(view);
     normalize(normal);
 
     // let's calculate diffuse and specular values for each light
     for(std::vector<LightSource*>::iterator it = lightList.begin() ; it < lightList.end() ; ++it) {
-        float attenuation = (*it)->getAttenuation(point);
+        double attenuation = (*it)->getAttenuation(point);
         Color lightRadiance = (*it)->getColor();
 
         // diffuse
         Vector s(point, (*it)->getPos(), true);
-        float sn = std::max(dot( s, normal ),0.0f);
+        double sn = std::max(dot( s, normal ),0.0);
 
         // spec
         Vector invs((*it)->getPos(), point, true);
         Vector r = reflect( invs, normal );
         normalize(r);
 
-        float rvke = std::pow( std::max(dot( r, view ), 0.0f), ke );
+        double rvke = std::pow( std::max(dot( r, view ), 0.0), ke );
 
         // calculate it
         diffuse += lightRadiance * objColor * sn * attenuation;
@@ -59,30 +59,30 @@ Color illuminatePhongBlinn(Object *obj, Vector view, Point point, Vector normal,
     Color diffuse;
     Color specular;
 
-    Color objColor = obj->getColor();
+    Color objColor = obj->getColor(point);
     Color objSpecColor = obj->getSpecularColor();
     
-    float kd = obj->getKd();
-    float ks = obj->getKs();
-    float ke = obj->getKe();
+    double kd = obj->getKd();
+    double ks = obj->getKs();
+    double ke = obj->getKe();
 
     normalize(view);
     normalize(normal);
 
     // let's calculate diffuse and specular values for each light
     for(std::vector<LightSource*>::iterator it = lightList.begin() ; it < lightList.end() ; ++it) {
-        float attenuation = (*it)->getAttenuation(point);
+        double attenuation = (*it)->getAttenuation(point);
         Color lightRadiance = (*it)->getColor();
 
         // diffuse
         Vector s(point, (*it)->getPos(), true);
-        float sn = std::max(dot( s, normal ),0.0f);
+        double sn = std::max(dot( s, normal ),0.0);
 
         // spec
         Vector h = s + view;
         normalize(h);
 
-        float rvke = std::pow( std::max(dot( normal, h ), 0.0f), ke );
+        double rvke = std::pow( std::max(dot( normal, h ), 0.0), ke );
 
         // calculate it
         diffuse += lightRadiance * objColor * sn * attenuation;
