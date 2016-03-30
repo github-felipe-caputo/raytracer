@@ -16,11 +16,11 @@ protected:
     Color specular;
     double ka, kd, ks, ke;
 
-    // texture set? Always starts as false if nothing is shown
-    bool texture;
-
 public:
-    Object(Color col, bool texture) : col(col), texture(texture) {}
+    // Object without solid color, called when creating textured object
+    Object() {}
+
+    Object(Color col) : col(col) {}
     
     virtual Point intersect (Ray ray) = 0;
 
@@ -28,12 +28,7 @@ public:
     
     // this function is to get a color in a specific point, if this object has
     // a texture
-    Color getColor (Point p) {
-        if (texture == true)
-            return getColorFromTexture(p);
-        else
-            return col;
-    }
+    virtual Color getColor (Point p) = 0;
 
     // kd + ks < 1 YOU PAY ATTENTION JESUS
     void setUpPhong (Color spec, double newka, double newkd, double newks, double newke) { 
@@ -42,11 +37,6 @@ public:
         kd = newkd;
         ks = newks;
         ke = newke; 
-    }
-
-    // for now just set value to true
-    void setUpTexture () {
-        texture = true;
     }
 
     Color getSpecularColor () {
@@ -69,8 +59,6 @@ public:
         return ke;
     }
 
-    virtual Color getColorFromTexture (Point p) = 0;
-
 };
 
 class Sphere : public Object {
@@ -78,11 +66,19 @@ class Sphere : public Object {
     Point c;
     double r;
 
+    // pointer to a possible texture function
+    Color (*colorFromTexture)(Point, double, Point) = NULL;
+
 public:
 
     // creating an object
     // if texture = true when creating, 'col' is ignored (function getColorFromTexture will be used instead)
-    Sphere ( Point c, double r, Color col, bool texture = false) : Object(col,texture), c(c), r(r) {}
+    Sphere ( Point c, double r, Color col) : Object(col), c(c), r(r) {
+    }
+
+    Sphere ( Point c, double r, Color (*function)(Point, double, Point) ) : c(c), r(r) {
+        colorFromTexture = function;
+    }
 
     Point intersect (Ray ray) {
         Point o = ray.getOrigin();
@@ -127,9 +123,11 @@ public:
         return normal;
     }
 
-    // not going to use it yet, just testing for compiling
-    Color getColorFromTexture (Point p) {
-        return col;
+    Color getColor (Point p) {
+        if (*colorFromTexture == NULL)
+            return col;
+        else            
+            return (*colorFromTexture)(c,r,p);
     }
 };
 
@@ -144,18 +142,36 @@ class Polygon : public Object {
     // need shortest distance between origin and polygon for intersection
     double f;
 
+    // this is a function pointer for a possible texture function,
+    // it requires a vector of points (the vertices of the polygon) and a point
+    // in the polygon as parameters, and returns the color of that point
+    Color (*colorFromTexture)(std::vector<Point>, Point) = NULL;
+
 public:
 
     // creating an object
     // if texture = true when creating, 'col' is ignored (function getColorFromTexture will be used instead)
     // normal should be normalized before constructing the polygon
-    Polygon ( std::vector<Point> vert, Vector n, Color col, bool texture = false) : Object(col,texture), vertices(vert), n(n) {
+    Polygon ( std::vector<Point> vert, Vector n, Color col) : Object(col), vertices(vert), n(n) {
 
         // for now I'm assuming all the vertices are on the same plane, and that place
         // has a normal (0,1,0), and all the points are on a plane parallel to the x and z plane
         // so f will always be y of any of the vertices (they are always the same)
         f = std::abs( vert[0].y );
     }
+
+    // creating an object
+    // instead of passing a color, pass a function for texture
+    // normal should be normalized before constructing the polygon
+    Polygon ( std::vector<Point> vert, Vector n, Color (*function)(std::vector<Point>, Point) ) : vertices(vert), n(n) {
+
+        // for now I'm assuming all the vertices are on the same plane, and that place
+        // has a normal (0,1,0), and all the points are on a plane parallel to the x and z plane
+        // so f will always be y of any of the vertices (they are always the same)
+        f = std::abs( vert[0].y );
+
+        colorFromTexture = function;
+    }    
 
     Point intersect (Ray ray) {
         Point o = ray.getOrigin();
@@ -191,53 +207,12 @@ public:
         return n;
     }
 
-    // let's assume for now this will always be used for a floor that always coincides
-    // with the x and z plane (y is constant) 
-    //
-    // this function will work also on the assumption that the points on the vertices list is like so:
-    //
-    //     1-----2
-    //     |     |
-    //     0-----3
-    //
-    // looking down on y
-    Color getColorFromTexture (Point p) {
-        Color finalColor;
-
-        int row, col;
-        double checksize = 0.1f;
-
-        // need to normalize point between -1 and 1
-        double zn = (2 * (p.z - vertices[1].z) / (vertices[0].z - vertices[1].z)) - 1;
-        double xn = (2 * (p.x - vertices[1].x) / (vertices[2].x - vertices[1].x)) - 1;
-
-        double u = (zn + 1.0f) / 2.0f;
-        double v = (xn + 1.0f) / 2.0f;
-
-        // find row and col
-        for (int i = 0; i < (1/checksize); ++i){
-            if (i*checksize < v && v < (i+1)*checksize) {
-                row = i;
-            }
-            if (i*checksize < u && u < (i+1)*checksize) {
-                col = i;
-            }
-        }
-
-        // check even or odds to know the color
-        if (row % 2 && col % 2) {
-            finalColor = Color(1,0,0);
-        } else if (row % 2 && !(col % 2)) {
-            finalColor = Color(1,1,0);
-        } else if (!(row % 2) && col % 2) {
-            finalColor = Color(1,1,0);
-        } else {
-            finalColor = Color(1,0,0);
-        }
-
-        return finalColor;
+    Color getColor (Point p) {
+        if (*colorFromTexture == NULL)
+            return col;
+        else
+            return (*colorFromTexture)(vertices,p);
     }
-
 };
 
 

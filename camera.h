@@ -76,8 +76,8 @@ public:
         {
             for(int i = 0; i < imageWidth; ++i) {
                 for(int j = 0; j < imageHeight; ++j) {
-                    dx = firstPlanex + (unitsWidth/2.0f) + i * unitsWidth;
-                    dy = firstPlaney - (unitsHigh/2.0f) - j * unitsHigh;
+                    dx = firstPlanex + (unitsWidth/2.0) + i * unitsWidth;
+                    dy = firstPlaney - (unitsHigh/2.0) - j * unitsHigh;
                     dz = focalLength;
                     
                     // vector direction, normalize
@@ -98,10 +98,10 @@ public:
 
                     Color average;
                     /// lets make a grid of 9 rays
-                    for (int a = 1; a < 4; ++a) {
-                        for (int b = 1; b < 4; ++b) {
-                            dx = firstPlanex + (unitsWidth/(2.5f * a)) + i * unitsWidth;
-                            dy = firstPlaney - (unitsHigh/(2.5f * b)) - j * unitsHigh;
+                    for (int a = 1; a < 5; ++a) {
+                        for (int b = 1; b < 5; ++b) {
+                            dx = firstPlanex + (unitsWidth/(2.0 * a)) + i * unitsWidth;
+                            dy = firstPlaney - (unitsHigh/(2.0 * b)) - j * unitsHigh;
                             dz = focalLength;
 
                             // vector direction, normalize
@@ -116,7 +116,7 @@ public:
                     }
 
                     // get final color
-                    average = (average / 9.0f);
+                    average = (average / 9.0);
                     colorMap.push_back( average );
                 }
             }

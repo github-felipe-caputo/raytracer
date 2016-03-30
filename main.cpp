@@ -11,6 +11,7 @@
 #include "camera.h"
 #include "lightSource.h"
 #include "illuminationModel.h"
+#include "texture.h"
 
 #define PI 3.14159265
 
@@ -40,7 +41,7 @@ int main(void) {
     vertices.push_back( Point( 0.5,-0.6,-6.0) );
     vertices.push_back( Point( 0.5,-0.6, 0.0) );
 
-    Polygon checkerFloor( vertices, Vector(0,1,0), Color(1,0,0), true );
+    Polygon checkerFloor( vertices, Vector(0,1,0), planarCheckerTexture );
     checkerFloor.setUpPhong( Color(1,1,1), 0.3, 1.0, 0.0, 1.0 );
 
     // create a light source
