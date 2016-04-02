@@ -30,6 +30,10 @@ public:
     // a texture
     virtual Color getColor (Point p) = 0;
 
+    // function mainly used for the ray marching, distance
+    // min distance between a point and the object
+    virtual double distanceToObject (const Point p) = 0;
+
     // kd + ks < 1 YOU PAY ATTENTION JESUS
     void setUpPhong (Color spec, double newka, double newkd, double newks, double newke) { 
         specular = spec;
@@ -99,13 +103,13 @@ public:
         }
         else if (BBminus4C == 0) 
         {
-            w = (-B + sqrt(B*B - 4.0f*C)) / 2.0f;
+            w = (-B + 0) / 2.0f;
             return Point(o.x + d.x * w, o.y + d.y * w, o.z + d.z * w);
         } 
         else 
         {
-            double w1 = (-B + sqrt(B*B - 4.0f*C)) / 2.0f;
-            double w2 = (-B - sqrt(B*B - 4.0f*C)) / 2.0f;
+            double w1 = (-B + sqrt(BBminus4C)) / 2.0f;
+            double w2 = (-B - sqrt(BBminus4C)) / 2.0f;
 
             if (w1 > 0 && w1 <= w2) // w1 is positive and smaller than or equal to w2
                 w = w1;
@@ -128,6 +132,10 @@ public:
             return col;
         else            
             return (*colorFromTexture)(c,r,p);
+    }
+
+    double distanceToObject (const Point p) {
+        return (distance(p, c) - r);
     }
 };
 
@@ -212,6 +220,12 @@ public:
             return col;
         else
             return (*colorFromTexture)(vertices,p);
+    }
+
+    // for now it's a simple point plane distance, I should fix it later to 
+    // actual point polygon distance
+    double distanceToObject (const Point p) {
+        return (n.x * p.x + n.y * p.y + n.z * p.z + f) / (sqrt(n.x*n.x + n.y*n.y + n.z*n.z));
     }
 };
 

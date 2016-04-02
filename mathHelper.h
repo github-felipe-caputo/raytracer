@@ -114,9 +114,86 @@ struct Vector {
     }
 
     // Non-modifying arithematic operators
-    Vector operator+(const Vector& rhs){
+    Vector operator+(const Vector& rhs) {
         return Vector(x + rhs.x, y + rhs.y, z + rhs.z);
     } 
+};
+
+/*
+ * The Matrix class.
+ */
+
+struct Matrix {
+    int row;
+    int col;
+
+    // matrix
+    std::vector<double> matrix;
+
+    // default
+    Matrix ( int row, int col, double s = 0 ) : row(row), col(col) {
+        for (int i = 0; i < row * col; ++i )
+            matrix.push_back(s);
+    }
+
+    // constructor
+    Matrix ( int row, int col, double vals[] ) : row(row), col(col) {
+        for (int i = 0; i < row * col; ++i )
+            matrix.push_back(vals[i]);
+    }
+
+    // Transpose
+    void transpose () {
+        std::vector<double> newMatrix;
+
+        for(int n = 0; n < row * col; n++) {
+            int i = n / row;
+            int j = n % row;
+            newMatrix.push_back( matrix[col * j + i] );
+        }
+
+        std::swap(row,col);
+        matrix = newMatrix;
+    }
+
+
+    // Array subscription
+    double& operator[](const int index) {
+        return matrix[index];
+    }
+
+    // Non-modifying arithematic operators
+    Matrix operator+(const Matrix& rhs) {
+        double vals[row * col];
+
+        for ( int i = 0; i < row * col; ++i )
+            vals[i] = matrix[i] + rhs.matrix[i];
+
+        return Matrix(row, col, vals);
+    } 
+
+    Matrix operator-(const Matrix& rhs) {
+        double vals[row * col];
+
+        for ( int i = 0; i < row * col; ++i )
+            vals[i] = matrix[i] - rhs.matrix[i];
+
+        return Matrix(row, col, vals);
+    } 
+
+    Matrix operator*(const Matrix& rhs){
+        double vals[row * rhs.col];
+
+        for (int x = 0; x < row; x++) {
+            for (int y = 0; y < rhs.col; y++) {
+                vals[rhs.col*x+y] = 0;
+                for (int z = 0; z < rhs.row; z++) 
+                    vals[rhs.col*x+y] += matrix[col*x+z] * rhs.matrix[rhs.col*z+y];
+            }
+        }
+
+        return Matrix(row, rhs.col, vals);
+    }
 };
 
 /*

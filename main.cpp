@@ -23,7 +23,7 @@ int imageWidth = 512;
 double viewPlaneHeigth = 0.5;
 double viewPlaneWidth = 0.5;
 
-int main(void) {
+int main ( void ) {
     // SFML canvas and window
     Canvas canvas( imageWidth, imageHeight );
     sf::RenderWindow window(sf::VideoMode(imageWidth, imageHeight), "Ray Tracer");
@@ -45,10 +45,20 @@ int main(void) {
     checkerFloor.setUpPhong( Color(1,1,1), 0.3, 1.0, 0.0, 1.0 );
 
     // create a light source
-    PointLight light( Point(0.0f, 5.0f, 0.0f), Color(1,1,1) );
+    //PointLight light( Point(0.0f, 5.0f, 0.0f), Color(1,1,1) );
     //PointLight light2( Point(-5.0f, 3.0f, 0.0f), Color(1,1,1) );
-    //SpotLight light( Point(0.0f, 2.0f, -2.0f), Color(1,1,1), Vector(0,-1,0), 20, 10 );
+    SpotLight light( Point(0.0, 2.0, -2.0), Color(1,1,1), Vector(0,-1,0), 20 );
 
+    // TESTING SHIT
+    //Ray ray( Point(0,1,0) , Vector(0,0,-1) );
+    //std::vector<Point> inter = light.intersection(ray);
+
+
+/*
+    for(unsigned int i = 0; i < inter.size(); ++i){
+        std::cout << inter[i].x << " " << inter[i].y << " "<< inter[i].z << " " << std::endl;
+    }
+*/
     // create world, add objects in it
     World world;
     world.addObject(&greenSphere);
