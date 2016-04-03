@@ -49,16 +49,16 @@ int main ( void ) {
     //PointLight light2( Point(-5.0f, 3.0f, 0.0f), Color(1,1,1) );
     SpotLight light( Point(0.0, 2.0, -2.0), Color(1,1,1), Vector(0,-1,0), 20 );
 
-    // TESTING SHIT
-    //Ray ray( Point(0,1,0) , Vector(0,0,-1) );
-    //std::vector<Point> inter = light.intersection(ray);
+    /*
+    // TESTING STUFF
+    Ray ray( Point(0,1,0) , Vector(0,0,-1) );
+    std::vector<Point> inter = light.intersection(ray);
 
-
-/*
     for(unsigned int i = 0; i < inter.size(); ++i){
         std::cout << inter[i].x << " " << inter[i].y << " "<< inter[i].z << " " << std::endl;
     }
-*/
+    */
+
     // create world, add objects in it
     World world;
     world.addObject(&greenSphere);

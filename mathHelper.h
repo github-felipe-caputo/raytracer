@@ -117,10 +117,19 @@ struct Vector {
     Vector operator+(const Vector& rhs) {
         return Vector(x + rhs.x, y + rhs.y, z + rhs.z);
     } 
+
+    Vector operator-(const Vector& rhs) {
+        return Vector(x - rhs.x, y - rhs.y, z - rhs.z);
+    } 
 };
 
 /*
  * The Matrix class.
+ *
+ * Note: arithematic operations for matrixes will just assume the user is correct,
+ * no check is done, e.g., the operations will not check the rows and columns of
+ * two matrices when they are multiplied, it will just try to do it (will return
+ * a runtime error if the user is using wrong parameters).
  */
 
 struct Matrix {
@@ -142,20 +151,13 @@ struct Matrix {
             matrix.push_back(vals[i]);
     }
 
-    // Transpose
-    void transpose () {
-        std::vector<double> newMatrix;
-
-        for(int n = 0; n < row * col; n++) {
-            int i = n / row;
-            int j = n % row;
-            newMatrix.push_back( matrix[col * j + i] );
-        }
-
-        std::swap(row,col);
-        matrix = newMatrix;
+    // create a matrix from a vector, since our vector is of size 3
+    // the rows and columns are known beforehand
+    Matrix ( Vector v ) : row(3), col(1) {
+        matrix.push_back(v.x);
+        matrix.push_back(v.y);
+        matrix.push_back(v.z);
     }
-
 
     // Array subscription
     double& operator[](const int index) {
@@ -163,7 +165,19 @@ struct Matrix {
     }
 
     // Non-modifying arithematic operators
-    Matrix operator+(const Matrix& rhs) {
+    Matrix transpose () {
+        double vals[row * col];
+
+        for( int k = 0; k < row * col; ++k ) {
+            int i = k / row;
+            int j = k % row;
+            vals[k] = matrix[col * j + i];
+        }
+
+        return Matrix(col,row,vals);
+    }
+
+    Matrix operator+ (const Matrix& rhs) {
         double vals[row * col];
 
         for ( int i = 0; i < row * col; ++i )
@@ -172,7 +186,7 @@ struct Matrix {
         return Matrix(row, col, vals);
     } 
 
-    Matrix operator-(const Matrix& rhs) {
+    Matrix operator- (const Matrix& rhs) {
         double vals[row * col];
 
         for ( int i = 0; i < row * col; ++i )
@@ -181,18 +195,36 @@ struct Matrix {
         return Matrix(row, col, vals);
     } 
 
-    Matrix operator*(const Matrix& rhs){
+    Matrix operator* (const Matrix& rhs) {
         double vals[row * rhs.col];
 
-        for (int x = 0; x < row; x++) {
-            for (int y = 0; y < rhs.col; y++) {
-                vals[rhs.col*x+y] = 0;
-                for (int z = 0; z < rhs.row; z++) 
-                    vals[rhs.col*x+y] += matrix[col*x+z] * rhs.matrix[rhs.col*z+y];
+        for (int i = 0; i < row; ++i) {
+            for (int j = 0; j < rhs.col; ++j) {
+                vals[rhs.col*i+j] = 0;
+                for (int k = 0; k < rhs.row; ++k) 
+                    vals[i * rhs.col + j] += matrix[i * col + k] * rhs.matrix[k * rhs.col + j];
             }
         }
 
         return Matrix(row, rhs.col, vals);
+    }
+
+    Matrix operator* (double rhs) {
+        double vals[row * col];
+
+        for ( int i = 0; i < row * col; ++i )
+            vals[i] *= rhs;
+
+        return Matrix(row,col,vals);
+    }
+
+    friend Matrix operator* (double lhs, const Matrix& rhs) {
+        double vals[rhs.row * rhs.col];
+
+        for ( int i = 0; i < rhs.row * rhs.col; ++i )
+            vals[i] = lhs * rhs.matrix[i];
+
+        return Matrix(rhs.row,rhs.col,vals);
     }
 };
 
@@ -272,6 +304,12 @@ int indexMinElement ( std::vector<double> v ) {
     }
 
     return index;
+}
+
+// returns a simple 3x3 identity matrix
+Matrix indentityMatrix () {
+    double aux[] = {1,0,0,0,1,0,0,0,1};
+    return Matrix(3,3,aux);
 }
 
 #endif

@@ -61,47 +61,43 @@ public:
         return std::pow ( dot(vObj, dir), aExp );
     }
 
+    // This intersection will be used for the ray marching,
+    // based on http://www.geometrictools.com/Documentation/IntersectionLineCone.pdf
     std::vector<Point> intersection ( Ray ray ) {
         std::vector<Point> intersections;
-        Point o = ray.getOrigin();
-        Vector d = ray.getDirection();
-        normalize(d);
+        Point origin = ray.getOrigin();
+        Vector direction = ray.getDirection();
+        normalize(direction);
 
-        // 'vector' delta
-        Point delta(o.x - position.x, o.y - position.y, o.z - position.z);
+        // here we will turn some vectors in matrixes for calculations
 
-        // matrix m is a identity matrix with these values
-        Point M(dir.x * dir.x - std::pow(std::cos(angle * PI / 180.0f),2),
-                dir.y * dir.y - std::pow(std::cos(angle * PI / 180.0f),2),
-                dir.z * dir.z - std::pow(std::cos(angle * PI / 180.0f),2));
+        double deltaVals[] = {origin.x-position.x,origin.y-position.y,origin.z-position.z};
+        Matrix delta(3,1,deltaVals);
 
-        Point M1(dir.x * dir.x - std::pow(std::cos(angle * PI / 180.0f),2),dir.x * dir.y, dir.x * dir.z);
-        Point M2(dir.x * dir.y,dir.y * dir.y - std::pow(std::cos(angle * PI / 180.0f),2), dir.y * dir.z);
-        Point M3(dir.x * dir.z,dir.y * dir.z, dir.z * dir.z - std::pow(std::cos(angle * PI / 180.0f),2));
+        Matrix d(dir);
+        Matrix u(direction);
 
-
-        std::cout << d.y * d.y * M.y << std::endl;
-
-
-        double c2 = ( d.x * d.x * M.x + d.y * d.y * M.y + d.z * d.z * M.z );
-        double c1 = ( d.x * delta.x * M.x + d.y * delta.y * M.y + d.z * delta.z * M.z );
-        double c0 = ( delta.x * delta.x * M.x + delta.y * delta.y * M.y + delta.z * delta.z * M.z );
+        Matrix m = d * d.transpose() - std::pow(std::cos(angle * PI / 180.0f),2) * indentityMatrix();
+        Matrix mc2 = u.transpose() * m * u; // matrix with one row and one col
+        Matrix mc1 = u.transpose() * m * delta; // matrix with one row and one col
+        Matrix mc0 = delta.transpose() * m * delta; // matrix with one row and one col
 
         double w1, w2;
+        double c0 = mc0[0];
+        double c1 = mc1[0];
+        double c2 = mc2[0];
 
         double c1c1minusc0c2 = c1 * c1 - c0 * c2;
 
-        std::cout << c2 << std::endl;
-
-        if (c1c1minusc0c2 == 0) {
+        if ( c1c1minusc0c2 == 0 ) {
             w1 = - c1 / c2;
-            intersections.push_back( Point(o.x + d.x * w1, o.y + d.y * w1, o.z + d.z * w1) );
+            intersections.push_back( Point(origin.x + direction.x * w1, origin.y + direction.y * w1, origin.z + direction.z * w1) );
         } else if (c1c1minusc0c2 > 0) {
             w1 = - (c1 + sqrt(c1c1minusc0c2)) / c2;
             w2 = - (c1 - sqrt(c1c1minusc0c2)) / c2;
 
-            intersections.push_back( Point(o.x + d.x * w1, o.y + d.y * w1, o.z + d.z * w1) );
-            intersections.push_back( Point(o.x + d.x * w2, o.y + d.y * w2, o.z + d.z * w2) );
+            intersections.push_back( Point(origin.x + direction.x * w1, origin.y + direction.y * w1, origin.z + direction.z * w1) );
+            intersections.push_back( Point(origin.x + direction.x * w2, origin.y + direction.y * w2, origin.z + direction.z * w2) );
         } 
 
         return intersections;
