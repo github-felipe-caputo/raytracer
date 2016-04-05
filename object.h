@@ -16,6 +16,9 @@ protected:
     Color specular;
     double ka, kd, ks, ke;
 
+    // values for reflection and transmission
+    double kr, kt;
+
 public:
     // Object without solid color, called when creating textured object
     Object() {}
@@ -43,6 +46,11 @@ public:
         ke = newke; 
     }
 
+    void setUpReflectionTransmission(double nkr, double nkt) {
+        kr = nkr;
+        kt = nkt;
+    }
+
     Color getSpecularColor () {
         return specular;
     }
@@ -61,6 +69,14 @@ public:
 
     double getKe() {
         return ke;
+    }
+
+    double getKr() {
+        return kr;
+    }
+
+    double getKt() {
+        return kt;
     }
 
 };

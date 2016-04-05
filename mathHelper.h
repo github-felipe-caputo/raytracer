@@ -1,6 +1,8 @@
 #ifndef _MATHHELPER_H
 #define _MATHHELPER_H
 
+#define VECTOR_INCOMING 0
+#define VECTOR_OUTGOING 1
 #define PI 3.14159265
 
 #include <cmath>
@@ -121,6 +123,14 @@ struct Vector {
     Vector operator-(const Vector& rhs) {
         return Vector(x - rhs.x, y - rhs.y, z - rhs.z);
     } 
+
+    Vector operator* (double rhs) {
+        return Vector(x * rhs, y * rhs, z * rhs);
+    }
+
+    friend Vector operator* (double lhs, const Vector& rhs) {
+        return Vector(lhs * rhs.x, lhs * rhs.y, lhs * rhs.z);
+    }
 };
 
 /*
@@ -268,7 +278,7 @@ double length ( const Vector v ) {
 void normalize ( Vector& v ) {
     double len = length(v);
 
-    if (len != 0.0f) {
+    if (len != 0.0) {
         v.x = v.x / len;
         v.y = v.y / len;
         v.z = v.z / len;
@@ -283,15 +293,20 @@ double dot ( const Vector v , const Vector u ) {
     return ( v.x*u.x + v.y*u.y + v.z*u.z );
 }
 
-// normal should be normalized
-Vector reflect ( Vector incoming, Vector normal ) {
-    normalize( incoming );
+// Reflect a vector v "hitting" a surface with normal N
+// this vector can have two directions
+// incoming -> going to the surface
+// outgoing -> going from the surface
+Vector reflect ( Vector v, Vector N, int direction ) {
+    normalize( v );
 
-    double twoMulDotProd = 2.0f * dot(incoming, normal);
-
-    return Vector(incoming.x - twoMulDotProd * normal.x, incoming.y - twoMulDotProd * normal.y, incoming.z - twoMulDotProd * normal.z);
+    if (direction == VECTOR_INCOMING)
+        return (v - 2.0 * dot(v, N) * N);
+    else 
+        return (2.0 * N * dot(v,N) - v);
 }
 
+// returns the index for the minimum value is a vector of doubles
 int indexMinElement ( std::vector<double> v ) {
     double minDist = *std::max_element(v.begin(), v.end());
     int index = -1;

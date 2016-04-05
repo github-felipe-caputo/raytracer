@@ -31,9 +31,11 @@ int main ( void ) {
     // first create our objects
     Sphere greenSphere( Point(0.0f,0.1,-2.0), 0.4, Color(0,1,0) );
     greenSphere.setUpPhong( Color(1,1,1), 0.2, 0.6, 0.6, 10.0 );
+    greenSphere.setUpReflectionTransmission(0.0 , 0.0);
 
-    Sphere blueSphere( Point(-0.5,-0.2,-2.5), 0.3, Color(0,0,1) );
-    blueSphere.setUpPhong( Color(1,1,1), 0.2, 0.4, 0.4, 5.0 );
+    Sphere blueSphere( Point(-0.65,-0.2,-2.5), 0.3, Color(0.2,0.2,0.2) );
+    blueSphere.setUpPhong( Color(1,1,1), 0.8, 0.8, 0.8, 20.0 );
+    blueSphere.setUpReflectionTransmission(0.8 , 0.0);
 
     std::vector<Point> vertices;
     vertices.push_back( Point(-1.5,-0.6, 0.0) );
@@ -45,9 +47,9 @@ int main ( void ) {
     checkerFloor.setUpPhong( Color(1,1,1), 0.3, 1.0, 0.0, 1.0 );
 
     // create a light source
-    //PointLight light( Point(0.0f, 5.0f, 0.0f), Color(1,1,1) );
+    PointLight light( Point(0.0f, 5.0f, 3.0f), Color(1,1,1) );
     //PointLight light2( Point(-5.0f, 3.0f, 0.0f), Color(1,1,1) );
-    SpotLight light( Point(0.0, 2.0, -2.0), Color(1,1,1), Vector(0,-1,0), 20 );
+    //SpotLight light( Point(0.0, 2.0, -2.0), Color(1,1,1), Vector(0,-1,0), 20 );
 
     /*
     // TESTING STUFF
@@ -69,13 +71,13 @@ int main ( void ) {
     world.addLight(&light);
     //world.addLight(&light2);
     //world.setUpPhongBlinnIllumination( Color(0.7,1,1) );
-    world.setUpPhongIllumination( Color(0.7,1,1) );
+    world.setUpPhongIllumination( Color(0.25,0.61,1.00) );
 
     // create camera
     Point pos(0,0,0);
     Vector lookAt(0,-0.5,0); // not being used yet
     Vector up(0,1,0); // not being used yet
-    Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, RAY_CENTER);
+    Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, 2, RAY_GRID);
 
     // render our world, get the color map we will put on canvas
     std::vector<Color> colorMap = cam.render(world);

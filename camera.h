@@ -31,6 +31,9 @@ class Camera {
     // each pixel
     double unitsHigh, unitsWidth;
 
+    // max depth, the bounces of the ray
+    int MAX_DEPTH;
+
     // How we are spawing the rays
     int rayType;
 
@@ -40,8 +43,8 @@ public:
      * NOTE: I'm not using the up vector yet, just assuming it's positive y
      */
 
-    Camera(Point pos, Vector look, Vector up, int imH, int imW, double viewH, double viewW, int rayType) : 
-        position(pos), lookAt(look), up(up), imageHeight(imH), imageWidth(imW), viewPlaneHeigth(viewH), viewPlaneWidth(viewW), rayType(rayType) {
+    Camera(Point pos, Vector look, Vector up, int imH, int imW, double viewH, double viewW, int MAX_DEPTH, int rayType) : 
+        position(pos), lookAt(look), up(up), imageHeight(imH), imageWidth(imW), viewPlaneHeigth(viewH), viewPlaneWidth(viewW), MAX_DEPTH(MAX_DEPTH), rayType(rayType) {
         
         // each pixel
         unitsHigh = viewH/imH;
@@ -87,7 +90,7 @@ public:
                     Ray ray(position, dir);
 
                     // spawn rays into the world to get the color
-                    colorMap.push_back( world.spawn( ray ) );
+                    colorMap.push_back( world.spawn( ray , MAX_DEPTH ) );
                 }
             }
         } 
@@ -97,11 +100,12 @@ public:
                 for(int j = 0; j < imageHeight; ++j) {
 
                     Color average;
+
                     /// lets make a grid of 9 rays
-                    for (int a = 1; a < 5; ++a) {
-                        for (int b = 1; b < 5; ++b) {
-                            dx = firstPlanex + (unitsWidth/(2.0 * a)) + i * unitsWidth;
-                            dy = firstPlaney - (unitsHigh/(2.0 * b)) - j * unitsHigh;
+                    for (int a = 1; a < 4; ++a) {
+                        for (int b = 1; b < 4; ++b) {
+                            dx = firstPlanex + (unitsWidth * (0.25 * a)) + i * unitsWidth;
+                            dy = firstPlaney - (unitsHigh * (0.25 * b)) - j * unitsHigh;
                             dz = focalLength;
 
                             // vector direction, normalize
@@ -111,7 +115,7 @@ public:
                             Ray ray(position, dir);
 
                             // Color average
-                            average += world.spawn( ray );
+                            average += world.spawn( ray , MAX_DEPTH );
                         }
                     }
 

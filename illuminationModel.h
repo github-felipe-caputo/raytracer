@@ -42,7 +42,7 @@ Color illuminatePhong(Object *obj, Vector view, Point point, Vector normal, std:
 
         // spec
         Vector invs((*it)->getPos(), point, true);
-        Vector r = reflect( invs, normal );
+        Vector r = reflect ( invs, normal, VECTOR_INCOMING );
         normalize(r);
 
         double rvke = std::pow( std::max(dot( r, view ), 0.0), ke );

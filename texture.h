@@ -19,7 +19,7 @@ Color planarCheckerTexture (std::vector<Point> vertices, Point p) {
     Color finalColor;
 
     int row, col;
-    double checksize = 0.1;
+    double checksize = 0.05;
 
     // need to normalize point between -1 and 1
     double zn = (2 * (p.z - vertices[1].z) / (vertices[0].z - vertices[1].z)) - 1;
