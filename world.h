@@ -1,6 +1,8 @@
 #ifndef _WORLD_H
 #define _WORLD_H
 
+#include <iostream>
+
 #include <vector>
 #include <algorithm>
 #include "mathHelper.h"
@@ -17,6 +19,10 @@ class World {
 
     // Attribute for phong illumination
     Color backgroundRadiance;
+
+    // For ray marching we add a participant media, so the world gets a
+    double ks; // media scattering coefficient
+    double ka; // media absorption coefficient
 
     // pointer to a illuminate function (could be phong, phongblinn, etc)
     Color (*illuminate)(Object*, Vector, Point, Vector, std::vector<LightSource*>) = NULL;
@@ -42,6 +48,11 @@ public:
 
     void addLight(LightSource *light) {
         lightList.push_back(light);
+    }
+
+    void addParticipantMedia(double nks, double nka) {
+        ks = nks;
+        ka = nka;
     }
 
     // Spawn will return the color we should use for the pixel in the ray
@@ -89,7 +100,7 @@ public:
                 
                 if ( depth > 1 ) {
                     double kr = objectHit->getKr();
-                    double kt = objectHit->getKt();
+                    // double kt = objectHit->getKt();
 
                     if ( kr > 0 ) {
                         // Direction of incoming ray
@@ -107,9 +118,7 @@ public:
                         finalColor += kt * spawn(reflectionRay, --depth);
                     }
                     */
-                    
                 }
-
                 return finalColor;
             }
         } 
@@ -120,68 +129,60 @@ public:
             else 
                 return objectList[objHit]->getColor(vPoint[objHit]);
         }
+    }
 
-        /*
+    Color spawnRayMarch ( Ray ray, int SAMPLE_NUM ) {
+        Point originRay = ray.getOrigin();
+        Point intersection;
 
-        if( phongIllumination || phongIlluminationBlinn ) 
-        {
-            if (objHit == -1) {
-                return backgroundRadiance;
-            } else {
-                // Local ilumination
-                Color amb = ambientComponent( objectList[objHit], backgroundRadiance, vPoint[objHit] );
+        std::vector<Point> vPoint;
+        std::vector<double> vDist;
+        unsigned int i = 0;
 
-                // shadow ray origin should be slightly  different to account for rounding errors
-                Vector normal = objectList[objHit]->getNormal(vPoint[objHit]);
-                Point originShadowRay(vPoint[objHit].x + normal.x * 0.1f, 
-                                      vPoint[objHit].y + normal.y * 0.1f,  
-                                      vPoint[objHit].z + normal.z * 0.1f );
+        // first just a test with the light
+        // assuming:
+        //  Only a spot light, or it will break
+        //  No objects for now, not even the floor, ignore objHit
 
-                // lights that are reached/hit
-                std::vector<LightSource*> lightsHit = lightsReached(originShadowRay, lightList);
+        // we will go through the objects in the world and look for intersections
+        for(std::vector<Object*>::iterator it = objectList.begin() ; it < objectList.end() ; ++it, ++i) {
+            intersection = (*it)->intersect(ray);
+            vPoint.push_back( intersection );
+            vDist.push_back( distance(originRay, intersection) );
+        }
+        
+        // we find the minimum distance on vDist, which would be closest intersection
+        int objHit( indexMinElement(vDist) );
 
-                Vector view(vPoint[objHit], originRay, true);
-                Color diff_spec;
+        Color inscattering;
+        
+        // For every light source, get intersections
+        for(std::vector<LightSource*>::iterator it = lightList.begin() ; it < lightList.end() ; ++it) {
+            std::vector<Point> lightIntersections = sampleLight(ray, (*it), SAMPLE_NUM);
 
-                if( phongIllumination ) {
-                    diff_spec = illuminatePhong( objectList[objHit], view, vPoint[objHit], 
-                        objectList[objHit]->getNormal(vPoint[objHit]), lightsHit);
-                } else {
-                    diff_spec = illuminatePhongBlinn( objectList[objHit], view, vPoint[objHit], 
-                        objectList[objHit]->getNormal(vPoint[objHit]), lightsHit);
-                }
+            // now for those sample values
+            // lets not use the object yet
+            
+            for(std::vector<Point>::iterator it2 = lightIntersections.begin() ; it2 < lightIntersections.end() ; ++it2 ) {
+                double distLightPoint = distance((*it)->getPos() , (*it2));
+                double distOriginPoint = distance(originRay , (*it2));
 
-                ////// new stuff
-                Color finalColor = amb + diff_spec;
+                //inscattering += ks * (1.0/(4.0*PI)) * ((*it)->getColor() / std::pow(distLightPoint,2)) * std::exp( -1 * (ka+ks) * (distLightPoint + distOriginPoint) );
+            
+                double cosAngle = dot( Vector((*it)->getPos(), (*it2), true) , Vector((*it2), originRay, true) );
+                double g = 0.7;
 
-                if ( depth < 1 ) {
-                    double kr = objectList[objHit]->getKr();
-                    double kt = objectList[objHit]->getKt();
-
-                    if (kr > 0) {
-                        // reflection ray
-                        finalColor += kr * illuminate(reflectionRay, --depth);
-                    }
-
-                    if (kt > 0) {
-                        // reflection ray
-                        finalColor += kt * illuminate(reflectionRay, --depth);
-                    }
-                }
-
-
-                return finalColor;
+                inscattering += ((3.0/(16.0*PI) * (1 - cosAngle*cosAngle) +(1.0/(4.0*PI)) * ((1 - g) / std::pow(1 + g*g - 2*g*cosAngle,3.0/2.0))) / (ka+ks)) * (*it)->getColor() * (1 - std::exp( -1 * (ka+ks) * distOriginPoint ));
             }
-        } 
-        else 
-        {
-            if (objHit == -1) 
-                return Color(0,0,0); 
-            else 
-                return objectList[objHit]->getColor(vPoint[objHit]);
+
+            if(!lightIntersections.empty()) {
+                inscattering = inscattering / lightIntersections.size();
+            }
         }
 
-        */
+        //std::cout << inscattering.r << " " << inscattering.g << " " << inscattering.b << std::endl;
+        
+        return inscattering; 
     }
 
     // This returns a vector of which lights the shadow ray coming from originShadowRay can reach
@@ -208,6 +209,30 @@ public:
         }
 
         return lightsHit;
+    }
+
+    // Given a ray and a light, this function will check the intersection of that
+    // ray and that light. If we get more than 1 intersection, we will uniformly sample
+    // the points between the intersections.
+    std::vector<Point> sampleLight(Ray ray, LightSource *light, int SAMPLE_NUM) {
+        std::vector<Point> samples;
+        std::vector<Point> inters = light->intersect(ray);
+
+        if(inters.size() == 1) { // tangent to the spot light
+            samples.push_back( inters[0] );
+        }
+        else if (inters.size() == 2) { // goes through the spot light
+            Point firstPoint = inters[0];
+            Point secondPoint = inters[1];
+
+            for (int i = 1; i < SAMPLE_NUM; ++i) {
+                double val = i * (1.0/SAMPLE_NUM);
+                samples.push_back( firstPoint + val * (secondPoint - firstPoint) );
+            }
+        } 
+        // if doesn go to the ifs, inter = 0, sample is empty
+
+        return samples;
     }
     
 

@@ -206,7 +206,7 @@ public:
         double w = -(n.x*o.x + n.y*o.y + n.z*o.z + f) / (n.x*d.x + n.y*d.y + n.z*d.z);
 
         // there was a intersection
-        if ( w > 0.0f ) {
+        if ( w > 0.0 ) {
             // actual intersection point
             double wx = o.x + d.x * w;
             double wy = o.y + d.y * w;

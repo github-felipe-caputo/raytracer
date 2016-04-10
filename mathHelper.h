@@ -74,6 +74,23 @@ struct Point {
     bool operator!=(const Point& rhs) {
         return !(*this == rhs);
     }
+
+    // Non-modifying arithematic operators
+    Point operator+(const Point& rhs) {
+        return Point(x + rhs.x, y + rhs.y, z + rhs.z);
+    } 
+
+    Point operator-(const Point& rhs) {
+        return Point(x - rhs.x, y - rhs.y, z - rhs.z);
+    } 
+
+    Point operator* (double rhs) {
+        return Point(x * rhs, y * rhs, z * rhs);
+    }
+
+    friend Point operator* (double lhs, const Point& rhs) {
+        return Point(lhs * rhs.x, lhs * rhs.y, lhs * rhs.z);
+    }
 };
 
 /*

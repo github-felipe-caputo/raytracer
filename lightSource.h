@@ -23,6 +23,9 @@ public:
 
     virtual bool reaches(Point p) = 0;
     virtual double getAttenuation(Point p) = 0;
+
+    // Ray Marching
+    virtual std::vector<Point> intersect ( Ray ray ) = 0;
 };
 
 class PointLight : public LightSource {
@@ -37,6 +40,12 @@ public:
     // Point light attenuation = 1, none
     double getAttenuation (Point p) {
         return 1.0f;
+    }
+
+    std::vector<Point> intersect ( Ray ray ) {
+        // does nothing so far
+        std::vector<Point> intersections;
+        return intersections;
     }
 };
 
@@ -63,7 +72,7 @@ public:
 
     // This intersection will be used for the ray marching,
     // based on http://www.geometrictools.com/Documentation/IntersectionLineCone.pdf
-    std::vector<Point> intersection ( Ray ray ) {
+    std::vector<Point> intersect ( Ray ray ) {
         std::vector<Point> intersections;
         Point origin = ray.getOrigin();
         Vector direction = ray.getDirection();
@@ -91,13 +100,30 @@ public:
 
         if ( c1c1minusc0c2 == 0 ) {
             w1 = - c1 / c2;
-            intersections.push_back( Point(origin.x + direction.x * w1, origin.y + direction.y * w1, origin.z + direction.z * w1) );
+
+            // there was a intersection
+            if (w1 > 0.0) {
+                Point inter(origin.x + direction.x * w1, origin.y + direction.y * w1, origin.z + direction.z * w1); 
+                // if we are hitting the actual cone
+                if (dot( dir , Vector(position, inter, true) ) >= 0)
+                    intersections.push_back( inter );
+            }
+
         } else if (c1c1minusc0c2 > 0) {
             w1 = - (c1 + sqrt(c1c1minusc0c2)) / c2;
             w2 = - (c1 - sqrt(c1c1minusc0c2)) / c2;
 
-            intersections.push_back( Point(origin.x + direction.x * w1, origin.y + direction.y * w1, origin.z + direction.z * w1) );
-            intersections.push_back( Point(origin.x + direction.x * w2, origin.y + direction.y * w2, origin.z + direction.z * w2) );
+            if (w1 > 0.0) { 
+                Point inter1(origin.x + direction.x * w1, origin.y + direction.y * w1, origin.z + direction.z * w1); 
+                if ( dot( dir , Vector(position, inter1, true) ) >= 0 )
+                    intersections.push_back( inter1 );
+            }
+
+            if (w2 > 0.0) { 
+                Point inter2(origin.x + direction.x * w2, origin.y + direction.y * w2, origin.z + direction.z * w2); 
+                if ( dot( dir , Vector(position, inter2, true) ) >= 0 )
+                    intersections.push_back( inter2 ); 
+            }
         } 
 
         return intersections;

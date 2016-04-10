@@ -1,5 +1,5 @@
 /*
- * RAY tracing EXAMPLE
+ * RAY MARCHING EXAMPLE
  */
 
 #include <cmath>
@@ -49,17 +49,18 @@ int main ( void ) {
     checkerFloor.setUpPhong( Color(1,1,1), 0.3, 1.0, 0.0, 1.0 );
 
     // create a light source
-    PointLight light( Point(0.0f, 5.0f, 3.0f), Color(1,1,1) );
+    //PointLight light( Point(0.0f, 5.0f, 3.0f), Color(1,1,1) );
     //PointLight light2( Point(-5.0f, 3.0f, 0.0f), Color(1,1,1) );
-    //SpotLight light( Point(0.0, 2.0, -2.0), Color(1,1,1), Vector(0,-1,0), 20 );
-
-
+    SpotLight light( Point(0.0, 2.0, -2.0), Color(1,1,1), Vector(0,-1,0), 20 );
 
     // create world, add objects in it
     World world;
     world.addObject(&greenSphere);
     world.addObject(&blueSphere);
     world.addObject(&checkerFloor);
+
+    // We are doing ray marching, se need to add values for participant media
+    world.addParticipantMedia(0.01,0.01);
 
     // add light and set up phong
     world.addLight(&light);
@@ -72,7 +73,7 @@ int main ( void ) {
     Vector lookAt(0,-0.5,0); // not being used yet
     Vector up(0,1,0); // not being used yet
     Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, 
-        RAY_TRACER, 3, RAY_GRID);
+        RAY_MARCHING, 10, RAY_CENTER);
 
     // render our world, get the color map we will put on canvas
     std::vector<Color> colorMap = cam.render(world);
