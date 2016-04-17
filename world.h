@@ -88,13 +88,13 @@ public:
                                       pointHit.z + normal.z * 0.1f );
 
                 // lights that are reached/hit
-                std::vector<LightSource*> lightsHit = lightsReached(originShadowRay, lightList);
+                std::vector<LightSource*> lightsHitList = lightsReached(originShadowRay, lightList);
 
                 Vector view(pointHit, originRay, true);
 
                 Color amb = ambientComponent( objectHit, backgroundRadiance, pointHit );
                 Color diff_spec = illuminate( objectHit, view, pointHit, 
-                        objectHit->getNormal(pointHit), lightsHit);
+                        objectHit->getNormal(pointHit), lightsHitList);
 
                 Color finalColor = amb + diff_spec;
                 
@@ -154,35 +154,82 @@ public:
         // we find the minimum distance on vDist, which would be closest intersection
         int objHit( indexMinElement(vDist) );
 
+        // Now for the color of the object, if it was hit or not 
+        Color objectColor;
+
+        if (illuminate != NULL) {
+            if (objHit == -1) {
+                objectColor = Color(0,0,0);
+            } else {
+                Object* objectHit = objectList[objHit];
+                Point pointHit = vPoint[objHit];
+
+                // shadow ray origin should be slightly  different to account for rounding errors
+                Vector normal = objectHit->getNormal(pointHit);
+                Point originShadowRay(pointHit.x + normal.x * 0.1f, 
+                                      pointHit.y + normal.y * 0.1f,  
+                                      pointHit.z + normal.z * 0.1f );
+
+                // lights that are reached/hit
+                std::vector<LightSource*> lightsHitList = lightsReached(originShadowRay, lightList);
+
+                Vector view(pointHit, originRay, true);
+
+                Color amb = ambientComponent( objectHit, backgroundRadiance, pointHit );
+                Color diff_spec = illuminate( objectHit, view, pointHit, 
+                        objectHit->getNormal(pointHit), lightsHitList);
+
+                objectColor = amb + diff_spec;
+            }
+        }
+
+        // Now color through sampling light
         Color inscattering;
         
         // For every light source, get intersections
         for(std::vector<LightSource*>::iterator it = lightList.begin() ; it < lightList.end() ; ++it) {
-            std::vector<Point> lightIntersections = sampleLight(ray, (*it), SAMPLE_NUM);
+            std::vector<Point> lightIntersections;
+            if (objHit == -1) {
+                lightIntersections = sampleLight(ray, (*it), SAMPLE_NUM);
+            } else {
+                lightIntersections = sampleLight(ray, vPoint[objHit], (*it), SAMPLE_NUM);
+            }
 
             // now for those sample values
             // lets not use the object yet
             
             for(std::vector<Point>::iterator it2 = lightIntersections.begin() ; it2 < lightIntersections.end() ; ++it2 ) {
-                double distLightPoint = distance((*it)->getPos() , (*it2));
-                double distOriginPoint = distance(originRay , (*it2));
+                if (reachesLight((*it2), objectList, (*it))) {
+                    double distLightPoint = distance((*it)->getPos() , (*it2));
+                    double distOriginPoint = distance(originRay , (*it2));
 
-                //inscattering += ks * (1.0/(4.0*PI)) * ((*it)->getColor() / std::pow(distLightPoint,2)) * std::exp( -1 * (ka+ks) * (distLightPoint + distOriginPoint) );
-            
-                double cosAngle = dot( Vector((*it)->getPos(), (*it2), true) , Vector((*it2), originRay, true) );
-                double g = 0.7;
+                    double cosAngle = dot( Vector((*it)->getPos(), (*it2), true) , Vector((*it2), originRay, true) );
+                    double g = 0.7;
 
-                inscattering += ((3.0/(16.0*PI) * (1 - cosAngle*cosAngle) +(1.0/(4.0*PI)) * ((1 - g) / std::pow(1 + g*g - 2*g*cosAngle,3.0/2.0))) / (ka+ks)) * (*it)->getColor() * (1 - std::exp( -1 * (ka+ks) * distOriginPoint ));
+                    //double phase = ((3.0/(16.0*PI)) * (1.0 - cosAngle*cosAngle));
+                    double phase = ( (1.0/(4.0*PI)) * ( ((1.0 - g) * (1.0 - g)) / std::pow(1.0 + g*g - 2.0*g*cosAngle,3.0/2.0)) );
+
+                    inscattering += ( phase / std::pow(distLightPoint,2)) * ((*it)->getColor()) * std::exp( -1.0 * (ka+ks) * (distLightPoint + distOriginPoint) );
+                    //inscattering += (( (3.0/(16.0*PI)) * (1.0 - cosAngle*cosAngle) + (1.0/(4.0*PI)) * ( ((1.0 - g) * (1.0 - g)) / std::pow(1.0 + g*g - 2*g*cosAngle,3.0/2.0))) / (ka+ks)) * (*it)->getColor() * (1.0 - std::exp( -1.0 * (ka+ks) * distOriginPoint ));
+                } else {
+                    inscattering += Color(0,0,0);
+                }
             }
 
+            // Not necessary always?
+            /*
             if(!lightIntersections.empty()) {
                 inscattering = inscattering / lightIntersections.size();
             }
+            */
         }
+
+        Color attenuated = objectColor * std::exp(-1 * (ka + ks) * vDist[objHit] );
+
 
         //std::cout << inscattering.r << " " << inscattering.g << " " << inscattering.b << std::endl;
         
-        return inscattering; 
+        return attenuated + inscattering; 
     }
 
     // This returns a vector of which lights the shadow ray coming from originShadowRay can reach
@@ -233,6 +280,53 @@ public:
         // if doesn go to the ifs, inter = 0, sample is empty
 
         return samples;
+    }
+
+    // point p is an intersection that happened between the ray and an object
+    std::vector<Point> sampleLight(Ray ray, Point p, LightSource *light, int SAMPLE_NUM) {
+        std::vector<Point> samples;
+        std::vector<Point> inters = light->intersect(ray);
+
+        if(inters.size() == 1) { // tangent to the spot light
+            samples.push_back( inters[0] );
+        }
+        else if (inters.size() == 2) { // goes through the spot light
+            Point firstPoint = inters[0];
+            Point secondPoint = inters[1];
+
+            for (int i = 1; i < SAMPLE_NUM; ++i) {
+                double val = i * (1.0/SAMPLE_NUM);
+                Point newPoint = firstPoint + val * (secondPoint - firstPoint);
+
+                if( distance(firstPoint,newPoint) < distance(firstPoint,p) )
+                    samples.push_back( newPoint );
+            }
+        } 
+        // if doesn go to the ifs, inter = 0, sample is empty
+
+        return samples;
+    }
+
+    // checks if from point p we can reach light without hitting any other object
+    bool reachesLight(Point p, std::vector<Object*> objectList, LightSource* light){
+        // ray from point to light
+        Ray ray(p, Vector(p,light->getPos(),true));
+        double dist = distance(p,light->getPos()); // distance between point and light source
+
+        // we will go through the objects in the world and look for intersections
+        for(std::vector<Object*>::iterator it = objectList.begin() ; it < objectList.end() ; ++it) {
+            Point intersect = (*it)->intersect(ray);
+
+            // an object was hit
+            if (intersect != p) {
+                if (dist > distance(p, intersect)) {
+                    return false;
+                }
+            }
+                
+        }
+
+        return true;
     }
     
 
