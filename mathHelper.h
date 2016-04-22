@@ -108,7 +108,7 @@ struct Vector {
     Vector ( double xn, double yn, double zn, bool norm = false ) : x(xn), y(yn), z(zn) {
         if(norm) {
             double len = sqrt( x*x+y*y+z*z );
-            if (len != 0.0f) {
+            if (len != 0.0) {
                 x = x / len;
                 y = y / len;
                 z = z / len;
@@ -124,7 +124,7 @@ struct Vector {
 
         if(norm) {
             double len = sqrt( x*x+y*y+z*z );
-            if (len != 0.0f) {
+            if (len != 0.0) {
                 x = x / len;
                 y = y / len;
                 z = z / len;

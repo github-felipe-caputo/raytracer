@@ -24,12 +24,17 @@ class World {
     double ks; // media scattering coefficient
     double ka; // media absorption coefficient
 
+    // Index of refraction
+    double nr;
+
     // pointer to a illuminate function (could be phong, phongblinn, etc)
     Color (*illuminate)(Object*, Vector, Point, Vector, std::vector<LightSource*>) = NULL;
 
 public:
 
-    World () {
+    // All world needs to be created is an index of refraction
+    // which is set as 1 by default if no value is specified
+    World (double nr = 1) : nr(nr) {
     }
 
     void setUpPhongIllumination(Color amLight) {
@@ -50,6 +55,7 @@ public:
         lightList.push_back(light);
     }
 
+    // For ray marching
     void addParticipantMedia(double nks, double nka) {
         ks = nks;
         ka = nka;
@@ -63,6 +69,8 @@ public:
         std::vector<Point> vPoint;
         std::vector<double> vDist;
         unsigned int i = 0;
+
+        //std::cout << ray.getDirection().x << " " << ray.getDirection().y << " " << ray.getDirection().z << std::endl;
 
         // we will go through the objects in the world and look for intersections
         for(std::vector<Object*>::iterator it = objectList.begin() ; it < objectList.end() ; ++it, ++i) {
@@ -100,7 +108,7 @@ public:
                 
                 if ( depth > 1 ) {
                     double kr = objectHit->getKr();
-                    // double kt = objectHit->getKt();
+                    double kt = objectHit->getKt();
 
                     if ( kr > 0 ) {
                         // Direction of incoming ray
@@ -112,13 +120,52 @@ public:
                         // Recursion !
                         finalColor += kr * spawn( Ray(originShadowRay, reflectedDir) , --depth);
                     }
-                    /*
                     if ( kt > 0 ) {
-                        // transmission ray
-                        finalColor += kt * spawn(reflectionRay, --depth);
+                        // Direction of incoming ray
+                        Vector rayDir = ray.getDirection();
+                        Vector objNormal = objectHit->getNormal(pointHit);
+
+                        Vector normal;
+                        double nit;
+
+                        Point transmittedRayOrigin;
+                        
+                        //std::cout << dot(rayDir,objNormal) << std::endl;
+
+                        // inside
+                        if (dot(-1 * rayDir,objNormal) < 0) {
+                            normal = -1.0 * objNormal;
+                            nit = objectHit->getNr() / nr;
+
+                            transmittedRayOrigin = Point(pointHit.x + objNormal.x * 0.1f, 
+                                                         pointHit.y + objNormal.y * 0.1f,  
+                                                         pointHit.z + objNormal.z * 0.1f );
+
+                        } else { // outside
+                            normal = objNormal;
+                            nit = nr / objectHit->getNr();
+
+                            // the ray needs to go out a bit inside the object to be sure
+                            transmittedRayOrigin = Point(pointHit.x + objNormal.x * -0.1f, 
+                                                         pointHit.y + objNormal.y * -0.1f,  
+                                                         pointHit.z + objNormal.z * -0.1f );
+                        }
+
+                        double aux = 1.0 + (pow(nit,2) * (pow( dot(-1.0 * rayDir,normal) , 2) - 1.0));
+
+                        // If Total Internal Reflection
+                        if (aux < 0) {
+                            // Same thing as reflected ray
+                            Vector reflectedDir = reflect(rayDir, objectHit->getNormal(pointHit), VECTOR_INCOMING );
+                            finalColor += kt * spawn( Ray(transmittedRayOrigin, reflectedDir), --depth);
+                        } else {
+                            Vector transmittedDir = nit * rayDir + (nit * dot(-1.0 * rayDir,normal) - sqrt(aux) ) * normal;
+                            finalColor += kt * spawn( Ray(transmittedRayOrigin, transmittedDir), --depth);
+                        }
                     }
-                    */
+                    
                 }
+                
                 return finalColor;
             }
         } 

@@ -31,13 +31,13 @@ int main ( void ) {
     sf::RenderWindow window(sf::VideoMode(imageWidth, imageHeight), "Ray Tracer");
 
     // first create our objects
-    Sphere greenSphere( Point(0.0f,0.1,-2.0), 0.4, Color(0,1,0) );
-    greenSphere.setUpPhong( Color(1,1,1), 0.2, 0.6, 0.6, 10.0 );
-    greenSphere.setUpReflectionTransmission(0.0 , 0.0);
+    Sphere greenSphere( Point(0.0,0.1,-2.0), 0.4, Color(0.2,0.2,0.2) );
+    greenSphere.setUpPhong( Color(1,1,1), 1, 0.8, 0.8, 10.0 );
+    greenSphere.setUpReflectionTransmission(0.0, 0.8, 0.95);
 
     Sphere blueSphere( Point(-0.65,-0.2,-2.5), 0.3, Color(0.2,0.2,0.2) );
     blueSphere.setUpPhong( Color(1,1,1), 0.8, 0.8, 0.8, 20.0 );
-    blueSphere.setUpReflectionTransmission(0.8 , 0.0);
+    blueSphere.setUpReflectionTransmission(0.8, 0.0, 1.0);
 
     std::vector<Point> vertices;
     vertices.push_back( Point(-1.5,-0.6, 0.0) );
@@ -52,8 +52,6 @@ int main ( void ) {
     PointLight light( Point(0.0f, 5.0f, 3.0f), Color(1,1,1) );
     //PointLight light2( Point(-5.0f, 3.0f, 0.0f), Color(1,1,1) );
     //SpotLight light( Point(0.0, 2.0, -2.0), Color(1,1,1), Vector(0,-1,0), 20 );
-
-
 
     // create world, add objects in it
     World world;
@@ -72,7 +70,7 @@ int main ( void ) {
     Vector lookAt(0,-0.5,0); // not being used yet
     Vector up(0,1,0); // not being used yet
     Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, 
-        RAY_TRACER, 3, RAY_GRID);
+        RAY_TRACER, 5, RAY_CENTER);
 
     // render our world, get the color map we will put on canvas
     std::vector<Color> colorMap = cam.render(world);
