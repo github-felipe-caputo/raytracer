@@ -31,13 +31,13 @@ int main ( void ) {
     sf::RenderWindow window(sf::VideoMode(imageWidth, imageHeight), "Ray Tracer");
 
     // first create our objects
-    Sphere greenSphere( Point(0.0,0.1,-2.0), 0.4, Color(0.2,0.2,0.2) );
-    greenSphere.setUpPhong( Color(1,1,1), 1, 0.8, 0.8, 10.0 );
-    greenSphere.setUpReflectionTransmission(0.0, 0.8, 0.95);
+    Sphere frontSphere( Point(0.0,0.1,-1.8), 0.4, Color(1,1,1) );
+    frontSphere.setUpPhong( Color(1,1,1), 0.075, 0.075, 0.2, 20.0 );
+    frontSphere.setUpReflectionTransmission(0.01, 0.8, 0.95);
 
-    Sphere blueSphere( Point(-0.65,-0.2,-2.5), 0.3, Color(0.2,0.2,0.2) );
-    blueSphere.setUpPhong( Color(1,1,1), 0.8, 0.8, 0.8, 20.0 );
-    blueSphere.setUpReflectionTransmission(0.8, 0.0, 1.0);
+    Sphere backSphere( Point(-0.65,-0.2,-2.5), 0.3, Color(0.7,0.7,0.7) );
+    backSphere.setUpPhong( Color(1,1,1), 0.15, 0.25, 1.0, 20.0 );
+    backSphere.setUpReflectionTransmission(0.75, 0.0, 1.0);
 
     std::vector<Point> vertices;
     vertices.push_back( Point(-1.5,-0.6, 0.0) );
@@ -55,8 +55,8 @@ int main ( void ) {
 
     // create world, add objects in it
     World world;
-    world.addObject(&greenSphere);
-    world.addObject(&blueSphere);
+    world.addObject(&frontSphere);
+    world.addObject(&backSphere);
     world.addObject(&checkerFloor);
 
     // add light and set up phong
@@ -70,7 +70,7 @@ int main ( void ) {
     Vector lookAt(0,-0.5,0); // not being used yet
     Vector up(0,1,0); // not being used yet
     Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, 
-        RAY_TRACER, 5, RAY_CENTER);
+        RAY_TRACER, 10, RAY_GRID);
 
     // render our world, get the color map we will put on canvas
     std::vector<Color> colorMap = cam.render(world);
