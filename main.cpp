@@ -17,6 +17,9 @@
 #include "illuminationModel.h"
 #include "texture.h"
 
+
+#include "kdtree.h"
+
 // pixels
 int imageHeight = 512;
 int imageWidth = 512;
@@ -65,12 +68,29 @@ int main ( void ) {
     //world.setUpPhongBlinnIllumination( Color(0.7,1,1) );
     world.setUpPhongIllumination( Color(0.25,0.61,1.00) );
 
+
+    // TESTING KD TREES
+    Voxel v(-2.0,5,-5,5,-5,5);
+    std::vector<Object*> objectList;
+    objectList.push_back(&frontSphere);
+    objectList.push_back(&backSphere);
+
+    Kdtree kd(objectList, v);
+
+    //kd.walk(kd.getRoot());
+
+    //Ray r(Point(0,0,10), Vector(0.1,-0.1,-1,true));
+    //std::cout << std::boolalpha << v.intersect(r,0,10) << std::endl;
+
+
+
+
     // create camera
     Point pos(0,0,0);
     Vector lookAt(0,-0.5,0); // not being used yet
     Vector up(0,1,0); // not being used yet
     Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, 
-        RAY_TRACER, 10, RAY_GRID);
+        RAY_TRACER, 10, RAY_CENTER);
 
     // render our world, get the color map we will put on canvas
     std::vector<Color> colorMap = cam.render(world);

@@ -30,6 +30,8 @@ public:
     
     virtual Point intersect (Ray ray) = 0;
 
+    virtual bool isInside (Voxel v) = 0;
+
     virtual Vector getNormal (Point p) = 0;
     
     // this function is to get a color in a specific point, if this object has
@@ -153,6 +155,38 @@ public:
         //}
     } 
 
+    // checks if this object is inside a voxel
+    // returns true if even part of the object is inside of it
+    bool isInside (Voxel v) {
+        double s, d = 0;
+
+        if (c.x < v.xLeft) {
+            s = c.x - v.xLeft;
+            d += s*s;
+        } else if (c.x > v.xRight) {
+            s = c.x - v.xRight;
+            d += s*s;
+        }
+
+        if (c.y < v.yBottom) {
+            s = c.y - v.yBottom;
+            d += s*s;
+        } else if (c.y > v.yTop) {
+            s = c.y - v.yTop;
+            d += s*s;
+        }
+
+        if (c.z < v.zFar) {
+            s = c.z - v.zFar;
+            d += s*s;
+        } else if (c.z > v.zNear) {
+            s = c.z - v.zNear;
+            d += s*s;
+        }
+
+        return (d <= r*r);
+    }
+
     Vector getNormal (Point p) {
         Vector normal(c, p);
         normalize(normal);
@@ -241,6 +275,16 @@ public:
         } 
 
         return o;
+    }
+
+    //
+    //
+    //  CHANGE THIS
+    //
+    //
+    bool isInside (Voxel v) {
+        
+        return true;
     }
 
     Vector getNormal (Point p) {

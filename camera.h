@@ -103,7 +103,7 @@ public:
 
         // creating rays
         // for now I'm assuming position of camera is origin, focalLength = -0.5f (not using lookAt value yet);
-        double focalLength = -0.5f;
+        double focalLength = -0.5;
 
         // this loop is going like
         // consider origin at top left

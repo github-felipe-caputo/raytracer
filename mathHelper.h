@@ -1,6 +1,11 @@
 #ifndef _MATHHELPER_H
 #define _MATHHELPER_H
 
+// For voxels
+#define SUBDIV_X 0
+#define SUBDIV_Y 1
+#define SUBDIV_Z 2
+
 #define VECTOR_INCOMING 0
 #define VECTOR_OUTGOING 1
 #define PI 3.14159265
@@ -274,6 +279,111 @@ struct Ray {
     Vector getDirection() {
         return d;
     }
+};
+
+
+/*
+ * The Voxel class.
+ */
+
+struct Voxel
+{
+    // follows right handed coord system
+    double xLeft, xRight;
+    double yBottom, yTop;
+    double zFar, zNear;
+
+    Voxel(){}
+
+    Voxel(double xLeft, double xRight, double yBottom, double yTop, double zFar, double zNear) 
+        : xLeft(xLeft), xRight(xRight), yBottom(yBottom), yTop(yTop), zFar(zFar), zNear(zNear) {}
+
+    Voxel splitFront (int subdiv) {
+        if (subdiv == SUBDIV_X)
+            return Voxel((xLeft+xRight)/2.0, xRight, yBottom, yTop, zFar, zNear);
+        else if (subdiv == SUBDIV_Y)
+            return Voxel(xLeft, xRight, (yBottom+yTop)/2.0, yTop, zFar, zNear);
+        else 
+            return Voxel(xLeft, xRight, yBottom, yTop, (zFar+zNear)/2.0, zNear);
+    }
+
+    Voxel splitRear (int subdiv) {
+        if (subdiv == SUBDIV_X)
+            return Voxel(xLeft, (xLeft+xRight)/2.0, yBottom, yTop, zFar, zNear);
+        else if (subdiv == SUBDIV_Y)
+            return Voxel(xLeft, xRight, yBottom, (yBottom+yTop)/2.0, zFar, zNear);
+        else 
+            return Voxel(xLeft, xRight, yBottom, yTop, zFar, (zFar+zNear)/2.0);
+    }
+
+    double splitVal (int subdiv) {
+        if (subdiv == SUBDIV_X)
+            return (xLeft+xRight)/2.0;
+        else if (subdiv == SUBDIV_Y)
+            return (yBottom+yTop)/2.0;
+        else 
+            return (zFar+zNear)/2.0;
+    }
+
+    bool intersect (Ray ray, double t0, double t1, Point &in, Point &out) {
+        Point o = ray.getOrigin();
+        Vector d = ray.getDirection();
+        double tmin, tmax, tymin, tymax, tzmin, tzmax;
+
+        double divx = 1 / d.x;
+        if (divx >= 0) {
+            tmin = (xLeft - o.x) * divx;
+            tmax = (xRight - o.x) * divx;
+        }
+        else {
+            tmin = (xRight - o.x) * divx;
+            tmax = (xLeft - o.x) * divx;
+        }
+
+        double divy = 1 / d.y; 
+        if (divy >= 0) {
+            tymin = (yBottom - o.y) * divy;
+            tymax = (yTop - o.y) * divy;
+        }
+        else {
+            tymin = (yTop - o.y) * divy;
+            tymax = (yBottom - o.y) * divy;
+        }
+
+        if ( (tmin > tymax) || (tymin > tmax) )
+            return false;
+
+        if (tymin > tmin)
+            tmin = tymin;
+
+        if (tymax < tmax)
+            tmax = tymax;
+
+        double divz = 1 / d.z; 
+        if (divz >= 0) {
+            tzmin = (zFar - o.z) * divz;
+            tzmax = (zNear - o.z) * divz;
+        }
+        else {
+            tzmin = (zNear - o.z) * divz;
+            tzmax = (zFar - o.z) * divz;
+        }
+
+        if ( (tmin > tzmax) || (tzmin > tmax) )
+            return false;
+
+        if (tzmin > tmin)
+            tmin = tzmin;
+        if (tzmax < tmax)
+            tmax = tzmax;
+
+        in = Point(o.x + d.x * tmin, o.y + d.y * tmin, o.z + d.z * tmin);
+        out = Point(o.x + d.x * tmax, o.y + d.y * tmax, o.z + d.z * tmax);
+
+        return ( (tmin < t1) && (tmax > t0) );
+
+    }
+
 };
 
 /*
