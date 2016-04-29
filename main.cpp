@@ -70,17 +70,29 @@ int main ( void ) {
 
 
     // TESTING KD TREES
-    Voxel v(-2.0,5,-5,5,-5,5);
+    Voxel v(-5,5,-5,5,-5,5);
     std::vector<Object*> objectList;
-    objectList.push_back(&frontSphere);
-    objectList.push_back(&backSphere);
+
+    Sphere sphere1( Point(0.0,0.0,-4), 0.5, Color(1,1,1) );
+    Sphere sphere2( Point(0.0,0.0,-2), 0.5, Color(0,0,0) );
+
+    objectList.push_back(&sphere1);
+    objectList.push_back(&sphere2);
 
     Kdtree kd(objectList, v);
 
     //kd.walk(kd.getRoot());
 
-    //Ray r(Point(0,0,10), Vector(0.1,-0.1,-1,true));
-    //std::cout << std::boolalpha << v.intersect(r,0,10) << std::endl;
+    Ray r(Point(0,0,10), Vector(0,0,-1,true));
+
+    Object* obj = kd.traverse(r, kd.getRoot());
+
+    Point in, out;
+    std::cout << (obj->getColor()).r << " " << (obj->getColor()).g << " " << (obj->getColor()).b << " " << std::endl;
+
+    //Voxel v2(-5,0,-5,5,-5,5);
+    //std::cout << std::boolalpha << v2.intersect(r,0,10, in, out) << std::endl;
+    
 
 
 

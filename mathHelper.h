@@ -269,7 +269,9 @@ struct Ray {
     Point o;
     Vector d;
 
-    // constructor
+    // constructors
+    Ray () {}
+
     Ray ( Point p, Vector v ) : o(p), d(v) {}
 
     Point getOrigin() {
@@ -435,6 +437,9 @@ Vector reflect ( Vector v, Vector N, int direction ) {
 
 // returns the index for the minimum value is a vector of doubles
 int indexMinElement ( std::vector<double> v ) {
+    if (v.empty())
+        return -1;
+
     double minDist = *std::max_element(v.begin(), v.end());
     int index = -1;
 

@@ -38,6 +38,8 @@ public:
     // a texture
     virtual Color getColor (Point p) = 0;
 
+    Color getColor(){return col;}
+
     // function mainly used for the ray marching, distance
     // min distance between a point and the object
     virtual double distanceToObject (const Point p) = 0;
