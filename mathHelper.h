@@ -295,7 +295,7 @@ struct Voxel
     double yBottom, yTop;
     double zFar, zNear;
 
-    Voxel(){}
+    Voxel () {}
 
     Voxel(double xLeft, double xRight, double yBottom, double yTop, double zFar, double zNear) 
         : xLeft(xLeft), xRight(xRight), yBottom(yBottom), yTop(yTop), zFar(zFar), zNear(zNear) {}

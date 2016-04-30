@@ -65,153 +65,130 @@ public:
         ka = nka;
     }
 
-    // tree stuff
-    void createKdTree() {
-        // should calculate the voxel here using the values
-        // of he objects
-        // DO
-        // THAT
-        // LATER
-        Voxel v(-5,5,-5,5,-5,5);
+    // Creates a KDtree based on the added objects,
+    // uses as the main voxel the values passed for now
+    void createKdTree(double xmin, double xmax, double ymin, double ymax, double zmin, double zmax ) {
+        kd = Kdtree(objectList, Voxel(xmin,xmax,ymin,ymax,zmin,zmax));
+    }
 
-        kd = Kdtree(objectList,v);
+    Color spawn ( Ray ray, int depth ) {
+        if (illuminate == NULL) {
+            std::cerr << "Error: World needs to have illumination setup before rendering." << std::endl;
+            exit(1);
+        }
+
+        if ( kd.exists() )
+            return spawnKdtree(ray, depth);
+        else
+            return spawnIlluminated(ray, depth);
+
     }
 
     // Spawn will return the color we should use for the pixel in the ray
     Color spawnKdtree( Ray ray, int depth ) {
         Point originRay = ray.getOrigin();
-        Point intersection;
 
-        std::vector<Point> vPoint;
-        std::vector<double> vDist;
-        unsigned int i = 0;
+        // walk through the tree, get the object the ray hits
+        Object* objectHit = kd.traverse(ray);
 
-        //std::cout << ray.getDirection().x << " " << ray.getDirection().y << " " << ray.getDirection().z << std::endl;
+        // if nothing was hit
+        if (objectHit == NULL) {
+            return backgroundRadiance; 
+        } else {
+            Point pointHit = objectHit->intersect(ray);
 
-        // walk through the tree
-        
+            // shadow ray origin should be slightly  different to account for rounding errors
+            Vector normal = objectHit->getNormal(pointHit);
+            Point originShadowRay(pointHit.x + normal.x * 0.1f, 
+                                  pointHit.y + normal.y * 0.1f,  
+                                  pointHit.z + normal.z * 0.1f );
 
+            // lights that are reached/hit
+            std::vector<LightSource*> lightsHitList = lightsReached(originShadowRay, lightList);
 
+            Vector view(pointHit, originRay, true);
 
-        // we will go through the objects in the world and look for intersections
-        for(std::vector<Object*>::iterator it = objectList.begin() ; it < objectList.end() ; ++it, ++i) {
-            intersection = (*it)->intersect(ray);
-            vPoint.push_back( intersection );
-            vDist.push_back( distance(originRay, intersection) );
-        }
-        
-        // we find the minimum distance on vDist, which would be closest intersection
-        int objHit( indexMinElement(vDist) );
+            Color amb = ambientComponent( objectHit, backgroundRadiance, pointHit );
+            Color diff_spec = illuminate( objectHit, view, pointHit, 
+                    objectHit->getNormal(pointHit), lightsHitList);
 
-        if (illuminate != NULL) {
-            if (objHit == -1) {
-                return backgroundRadiance;
-            } else {
-                Object* objectHit = objectList[objHit];
-                Point pointHit = vPoint[objHit];
+            Color finalColor = amb + diff_spec;
+            
+            if ( depth > 1 ) {
+                double kr = objectHit->getKr();
+                double kt = objectHit->getKt();
 
-                // shadow ray origin should be slightly  different to account for rounding errors
-                Vector normal = objectHit->getNormal(pointHit);
-                Point originShadowRay(pointHit.x + normal.x * 0.1f, 
-                                      pointHit.y + normal.y * 0.1f,  
-                                      pointHit.z + normal.z * 0.1f );
+                if ( kr > 0 ) {
+                    // Direction of incoming ray
+                    Vector rayDir = ray.getDirection();
 
-                // lights that are reached/hit
-                std::vector<LightSource*> lightsHitList = lightsReached(originShadowRay, lightList);
+                    // Reflection of the ray direction
+                    Vector reflectedDir = reflect(rayDir, objectHit->getNormal(pointHit), VECTOR_INCOMING );
 
-                Vector view(pointHit, originRay, true);
+                    // Recursion !
+                    finalColor += kr * spawnKdtree( Ray(originShadowRay, reflectedDir) , --depth);
+                }
+                if ( kt > 0 ) {
+                    // Direction of incoming ray
+                    Vector rayDir = ray.getDirection();
+                    Vector objNormal = objectHit->getNormal(pointHit);
 
-                Color amb = ambientComponent( objectHit, backgroundRadiance, pointHit );
-                Color diff_spec = illuminate( objectHit, view, pointHit, 
-                        objectHit->getNormal(pointHit), lightsHitList);
+                    Vector normal;
+                    double nit;
 
-                Color finalColor = amb + diff_spec;
-                
-                if ( depth > 1 ) {
-                    double kr = objectHit->getKr();
-                    double kt = objectHit->getKt();
-
-                    if ( kr > 0 ) {
-                        // Direction of incoming ray
-                        Vector rayDir = ray.getDirection();
-
-                        // Reflection of the ray direction
-                        Vector reflectedDir = reflect(rayDir, objectHit->getNormal(pointHit), VECTOR_INCOMING );
-
-                        // Recursion !
-                        finalColor += kr * spawn( Ray(originShadowRay, reflectedDir) , --depth);
-                    }
-                    if ( kt > 0 ) {
-                        // Direction of incoming ray
-                        Vector rayDir = ray.getDirection();
-                        Vector objNormal = objectHit->getNormal(pointHit);
-
-                        Vector normal;
-                        double nit;
-
-                        Point transmittedRayOrigin;
-                        
-                        //std::cout << dot(rayDir,objNormal) << std::endl;
-
-                        // inside
-                        if (dot(-1 * rayDir,objNormal) < 0) {
-                            normal = -1.0 * objNormal;
-                            nit = objectHit->getNr() / nr;
-
-                            transmittedRayOrigin = Point(pointHit.x + objNormal.x * 0.1f, 
-                                                         pointHit.y + objNormal.y * 0.1f,  
-                                                         pointHit.z + objNormal.z * 0.1f );
-
-                        } else { // outside
-                            normal = objNormal;
-                            nit = nr / objectHit->getNr();
-
-                            // the ray needs to go out a bit inside the object to be sure
-                            transmittedRayOrigin = Point(pointHit.x + objNormal.x * -0.1f, 
-                                                         pointHit.y + objNormal.y * -0.1f,  
-                                                         pointHit.z + objNormal.z * -0.1f );
-                        }
-
-                        double aux = 1.0 + (pow(nit,2) * (pow( dot(-1.0 * rayDir,normal) , 2) - 1.0));
-
-                        // If Total Internal Reflection
-                        if (aux < 0) {
-                            // Same thing as reflected ray
-                            Vector reflectedDir = reflect(rayDir, objectHit->getNormal(pointHit), VECTOR_INCOMING );
-                            finalColor += kt * spawn( Ray(transmittedRayOrigin, reflectedDir), --depth);
-                        } else {
-                            Vector transmittedDir = nit * rayDir + (nit * dot(-1.0 * rayDir,normal) - sqrt(aux) ) * normal;
-                            finalColor += kt * spawn( Ray(transmittedRayOrigin, transmittedDir), --depth);
-                        }
-                    }
+                    Point transmittedRayOrigin;
                     
+                    //std::cout << dot(rayDir,objNormal) << std::endl;
+
+                    // inside
+                    if (dot(-1 * rayDir,objNormal) < 0) {
+                        normal = -1.0 * objNormal;
+                        nit = objectHit->getNr() / nr;
+
+                        transmittedRayOrigin = Point(pointHit.x + objNormal.x * 0.1f, 
+                                                     pointHit.y + objNormal.y * 0.1f,  
+                                                     pointHit.z + objNormal.z * 0.1f );
+
+                    } else { // outside
+                        normal = objNormal;
+                        nit = nr / objectHit->getNr();
+
+                        // the ray needs to go out a bit inside the object to be sure
+                        transmittedRayOrigin = Point(pointHit.x + objNormal.x * -0.1f, 
+                                                     pointHit.y + objNormal.y * -0.1f,  
+                                                     pointHit.z + objNormal.z * -0.1f );
+                    }
+
+                    double aux = 1.0 + (pow(nit,2) * (pow( dot(-1.0 * rayDir,normal) , 2) - 1.0));
+
+                    // If Total Internal Reflection
+                    if (aux < 0) {
+                        // Same thing as reflected ray
+                        Vector reflectedDir = reflect(rayDir, objectHit->getNormal(pointHit), VECTOR_INCOMING );
+                        finalColor += kt * spawnKdtree( Ray(transmittedRayOrigin, reflectedDir), --depth);
+                    } else {
+                        Vector transmittedDir = nit * rayDir + (nit * dot(-1.0 * rayDir,normal) - sqrt(aux) ) * normal;
+                        finalColor += kt * spawnKdtree( Ray(transmittedRayOrigin, transmittedDir), --depth);
+                    }
                 }
                 
-                return finalColor;
             }
-        } 
-        else 
-        {
-            if (objHit == -1) 
-                return Color(0,0,0); 
-            else 
-                return objectList[objHit]->getColor(vPoint[objHit]);
+            return finalColor;
         }
     }
 
     // Spawn will return the color we should use for the pixel in the ray
-    Color spawn( Ray ray, int depth ) {
+    Color spawnIlluminated( Ray ray, int depth ) {
         Point originRay = ray.getOrigin();
         Point intersection;
 
         std::vector<Point> vPoint;
         std::vector<double> vDist;
-        unsigned int i = 0;
 
         //std::cout << ray.getDirection().x << " " << ray.getDirection().y << " " << ray.getDirection().z << std::endl;
 
         // we will go through the objects in the world and look for intersections
-        for(std::vector<Object*>::iterator it = objectList.begin() ; it < objectList.end() ; ++it, ++i) {
+        for(std::vector<Object*>::iterator it = objectList.begin() ; it < objectList.end() ; ++it) {
             intersection = (*it)->intersect(ray);
             vPoint.push_back( intersection );
             vDist.push_back( distance(originRay, intersection) );
@@ -220,100 +197,93 @@ public:
         // we find the minimum distance on vDist, which would be closest intersection
         int objHit( indexMinElement(vDist) );
 
-        if (illuminate != NULL) {
-            if (objHit == -1) {
-                return backgroundRadiance;
-            } else {
-                Object* objectHit = objectList[objHit];
-                Point pointHit = vPoint[objHit];
+        // if no object was hit
+        if (objHit == -1) {
+            return backgroundRadiance;
+        } else {
+            Object* objectHit = objectList[objHit];
+            Point pointHit = vPoint[objHit];
 
-                // shadow ray origin should be slightly  different to account for rounding errors
-                Vector normal = objectHit->getNormal(pointHit);
-                Point originShadowRay(pointHit.x + normal.x * 0.1f, 
-                                      pointHit.y + normal.y * 0.1f,  
-                                      pointHit.z + normal.z * 0.1f );
+            // shadow ray origin should be slightly  different to account for rounding errors
+            Vector normal = objectHit->getNormal(pointHit);
+            Point originShadowRay(pointHit.x + normal.x * 0.1f, 
+                                  pointHit.y + normal.y * 0.1f,  
+                                  pointHit.z + normal.z * 0.1f );
 
-                // lights that are reached/hit
-                std::vector<LightSource*> lightsHitList = lightsReached(originShadowRay, lightList);
+            // lights that are reached/hit
+            std::vector<LightSource*> lightsHitList = lightsReached(originShadowRay, lightList);
 
-                Vector view(pointHit, originRay, true);
+            Vector view(pointHit, originRay, true);
 
-                Color amb = ambientComponent( objectHit, backgroundRadiance, pointHit );
-                Color diff_spec = illuminate( objectHit, view, pointHit, 
-                        objectHit->getNormal(pointHit), lightsHitList);
+            Color amb = ambientComponent( objectHit, backgroundRadiance, pointHit );
+            Color diff_spec = illuminate( objectHit, view, pointHit, 
+                    objectHit->getNormal(pointHit), lightsHitList);
 
-                Color finalColor = amb + diff_spec;
-                
-                if ( depth > 1 ) {
-                    double kr = objectHit->getKr();
-                    double kt = objectHit->getKt();
+            Color finalColor = amb + diff_spec;
+            
+            if ( depth > 1 ) {
+                double kr = objectHit->getKr();
+                double kt = objectHit->getKt();
 
-                    if ( kr > 0 ) {
-                        // Direction of incoming ray
-                        Vector rayDir = ray.getDirection();
+                if ( kr > 0 ) {
+                    // Direction of incoming ray
+                    Vector rayDir = ray.getDirection();
 
-                        // Reflection of the ray direction
-                        Vector reflectedDir = reflect(rayDir, objectHit->getNormal(pointHit), VECTOR_INCOMING );
+                    // Reflection of the ray direction
+                    Vector reflectedDir = reflect(rayDir, objectHit->getNormal(pointHit), VECTOR_INCOMING );
 
-                        // Recursion !
-                        finalColor += kr * spawn( Ray(originShadowRay, reflectedDir) , --depth);
-                    }
-                    if ( kt > 0 ) {
-                        // Direction of incoming ray
-                        Vector rayDir = ray.getDirection();
-                        Vector objNormal = objectHit->getNormal(pointHit);
+                    // Recursion !
+                    finalColor += kr * spawnIlluminated( Ray(originShadowRay, reflectedDir) , --depth);
+                }
+                if ( kt > 0 ) {
+                    // Direction of incoming ray
+                    Vector rayDir = ray.getDirection();
+                    Vector objNormal = objectHit->getNormal(pointHit);
 
-                        Vector normal;
-                        double nit;
+                    Vector normal;
+                    double nit;
 
-                        Point transmittedRayOrigin;
-                        
-                        //std::cout << dot(rayDir,objNormal) << std::endl;
-
-                        // inside
-                        if (dot(-1 * rayDir,objNormal) < 0) {
-                            normal = -1.0 * objNormal;
-                            nit = objectHit->getNr() / nr;
-
-                            transmittedRayOrigin = Point(pointHit.x + objNormal.x * 0.1f, 
-                                                         pointHit.y + objNormal.y * 0.1f,  
-                                                         pointHit.z + objNormal.z * 0.1f );
-
-                        } else { // outside
-                            normal = objNormal;
-                            nit = nr / objectHit->getNr();
-
-                            // the ray needs to go out a bit inside the object to be sure
-                            transmittedRayOrigin = Point(pointHit.x + objNormal.x * -0.1f, 
-                                                         pointHit.y + objNormal.y * -0.1f,  
-                                                         pointHit.z + objNormal.z * -0.1f );
-                        }
-
-                        double aux = 1.0 + (pow(nit,2) * (pow( dot(-1.0 * rayDir,normal) , 2) - 1.0));
-
-                        // If Total Internal Reflection
-                        if (aux < 0) {
-                            // Same thing as reflected ray
-                            Vector reflectedDir = reflect(rayDir, objectHit->getNormal(pointHit), VECTOR_INCOMING );
-                            finalColor += kt * spawn( Ray(transmittedRayOrigin, reflectedDir), --depth);
-                        } else {
-                            Vector transmittedDir = nit * rayDir + (nit * dot(-1.0 * rayDir,normal) - sqrt(aux) ) * normal;
-                            finalColor += kt * spawn( Ray(transmittedRayOrigin, transmittedDir), --depth);
-                        }
-                    }
+                    Point transmittedRayOrigin;
                     
+                    //std::cout << dot(rayDir,objNormal) << std::endl;
+
+                    // inside
+                    if (dot(-1 * rayDir,objNormal) < 0) {
+                        normal = -1.0 * objNormal;
+                        nit = objectHit->getNr() / nr;
+
+                        transmittedRayOrigin = Point(pointHit.x + objNormal.x * 0.1f, 
+                                                     pointHit.y + objNormal.y * 0.1f,  
+                                                     pointHit.z + objNormal.z * 0.1f );
+
+                    } else { // outside
+                        normal = objNormal;
+                        nit = nr / objectHit->getNr();
+
+                        // the ray needs to go out a bit inside the object to be sure
+                        transmittedRayOrigin = Point(pointHit.x + objNormal.x * -0.1f, 
+                                                     pointHit.y + objNormal.y * -0.1f,  
+                                                     pointHit.z + objNormal.z * -0.1f );
+                    }
+
+                    double aux = 1.0 + (pow(nit,2) * (pow( dot(-1.0 * rayDir,normal) , 2) - 1.0));
+
+                    // If Total Internal Reflection
+                    if (aux < 0) {
+                        // Same thing as reflected ray
+                        Vector reflectedDir = reflect(rayDir, objectHit->getNormal(pointHit), VECTOR_INCOMING );
+                        finalColor += kt * spawnIlluminated( Ray(transmittedRayOrigin, reflectedDir), --depth);
+                    } else {
+                        Vector transmittedDir = nit * rayDir + (nit * dot(-1.0 * rayDir,normal) - sqrt(aux) ) * normal;
+                        finalColor += kt * spawnIlluminated( Ray(transmittedRayOrigin, transmittedDir), --depth);
+                    }
                 }
                 
-                return finalColor;
             }
-        } 
-        else 
-        {
-            if (objHit == -1) 
-                return Color(0,0,0); 
-            else 
-                return objectList[objHit]->getColor(vPoint[objHit]);
+            
+            return finalColor;
         }
+        
     }
 
     Color spawnRayMarch ( Ray ray, int SAMPLE_NUM ) {
@@ -322,7 +292,6 @@ public:
 
         std::vector<Point> vPoint;
         std::vector<double> vDist;
-        unsigned int i = 0;
 
         // first just a test with the light
         // assuming:
@@ -330,7 +299,7 @@ public:
         //  No objects for now, not even the floor, ignore objHit
 
         // we will go through the objects in the world and look for intersections
-        for(std::vector<Object*>::iterator it = objectList.begin() ; it < objectList.end() ; ++it, ++i) {
+        for(std::vector<Object*>::iterator it = objectList.begin() ; it < objectList.end() ; ++it) {
             intersection = (*it)->intersect(ray);
             vPoint.push_back( intersection );
             vDist.push_back( distance(originRay, intersection) );
@@ -339,35 +308,33 @@ public:
         // we find the minimum distance on vDist, which would be closest intersection
         int objHit( indexMinElement(vDist) );
 
-        // Now for the color of the object, if it was hit or not 
+        // For the color of the object, if it was hit or not 
         Color objectColor;
+        
+        if (objHit == -1) {
+            objectColor = Color(0,0,0);
+        } else {
+            Object* objectHit = objectList[objHit];
+            Point pointHit = vPoint[objHit];
 
-        if (illuminate != NULL) {
-            if (objHit == -1) {
-                objectColor = Color(0,0,0);
-            } else {
-                Object* objectHit = objectList[objHit];
-                Point pointHit = vPoint[objHit];
+            // shadow ray origin should be slightly  different to account for rounding errors
+            Vector normal = objectHit->getNormal(pointHit);
+            Point originShadowRay(pointHit.x + normal.x * 0.1f, 
+                                  pointHit.y + normal.y * 0.1f,  
+                                  pointHit.z + normal.z * 0.1f );
 
-                // shadow ray origin should be slightly  different to account for rounding errors
-                Vector normal = objectHit->getNormal(pointHit);
-                Point originShadowRay(pointHit.x + normal.x * 0.1f, 
-                                      pointHit.y + normal.y * 0.1f,  
-                                      pointHit.z + normal.z * 0.1f );
+            // lights that are reached/hit
+            std::vector<LightSource*> lightsHitList = lightsReached(originShadowRay, lightList);
 
-                // lights that are reached/hit
-                std::vector<LightSource*> lightsHitList = lightsReached(originShadowRay, lightList);
+            Vector view(pointHit, originRay, true);
 
-                Vector view(pointHit, originRay, true);
+            Color amb = ambientComponent( objectHit, backgroundRadiance, pointHit );
+            Color diff_spec = illuminate( objectHit, view, pointHit, 
+                    objectHit->getNormal(pointHit), lightsHitList);
 
-                Color amb = ambientComponent( objectHit, backgroundRadiance, pointHit );
-                Color diff_spec = illuminate( objectHit, view, pointHit, 
-                        objectHit->getNormal(pointHit), lightsHitList);
-
-                objectColor = amb + diff_spec;
-            }
+            objectColor = amb + diff_spec;
         }
-
+        
         // Now color through sampling light
         Color inscattering;
         
@@ -410,8 +377,6 @@ public:
         }
 
         Color attenuated = objectColor * std::exp(-1 * (ka + ks) * vDist[objHit] );
-
-
         //std::cout << inscattering.r << " " << inscattering.g << " " << inscattering.b << std::endl;
         
         return attenuated + inscattering; 

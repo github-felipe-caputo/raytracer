@@ -34,7 +34,7 @@ int main ( void ) {
     sf::RenderWindow window(sf::VideoMode(imageWidth, imageHeight), "Ray Tracer");
 
     // first create our objects
-    Sphere frontSphere( Point(0.0,0.1,-1.8), 0.4, Color(1,1,1) );
+    Sphere frontSphere( Point(0.2,0.1,-1.8), 0.4, Color(1,1,1) );
     frontSphere.setUpPhong( Color(1,1,1), 0.075, 0.075, 0.2, 20.0 );
     frontSphere.setUpReflectionTransmission(0.01, 0.8, 0.95);
 
@@ -60,7 +60,7 @@ int main ( void ) {
     World world;
     world.addObject(&frontSphere);
     world.addObject(&backSphere);
-    world.addObject(&checkerFloor);
+    //world.addObject(&checkerFloor);
 
     // add light and set up phong
     world.addLight(&light);
@@ -68,9 +68,22 @@ int main ( void ) {
     //world.setUpPhongBlinnIllumination( Color(0.7,1,1) );
     world.setUpPhongIllumination( Color(0.25,0.61,1.00) );
 
+    // hube values work, small values dont... why?
+    /*
+     NOTE: if I vhange 
+                if(coordEntry <= n->subdivVal) {
+                    if (coordExit < n->subdivVal) {
+                        return traverse(ray, n->rear);
 
+    to 
+        return traverse(ray, n->front);
+        problems show up
+     */
+    world.createKdTree(-1000,1000,-1000,1000,-1000,1000);
+
+/*
     // TESTING KD TREES
-    Voxel v(-5,5,-5,5,-5,5);
+    Voxel v(-5,5,-5,5,-15,15);
     std::vector<Object*> objectList;
 
     Sphere sphere1( Point(0.0,0.0,-4), 0.5, Color(1,1,1) );
@@ -85,7 +98,7 @@ int main ( void ) {
 
     Ray r(Point(0,0,10), Vector(0,0,-1,true));
 
-    Object* obj = kd.traverse(r, kd.getRoot());
+    Object* obj = kd.traverse(r);
 
     Point in, out;
     std::cout << (obj->getColor()).r << " " << (obj->getColor()).g << " " << (obj->getColor()).b << " " << std::endl;
@@ -93,7 +106,7 @@ int main ( void ) {
     //Voxel v2(-5,0,-5,5,-5,5);
     //std::cout << std::boolalpha << v2.intersect(r,0,10, in, out) << std::endl;
     
-
+*/
 
 
 
@@ -102,7 +115,7 @@ int main ( void ) {
     Vector lookAt(0,-0.5,0); // not being used yet
     Vector up(0,1,0); // not being used yet
     Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, 
-        RAY_TRACER, 10, RAY_CENTER);
+        RAY_TRACER, 15, RAY_CENTER);
 
     // render our world, get the color map we will put on canvas
     std::vector<Color> colorMap = cam.render(world);

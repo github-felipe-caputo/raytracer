@@ -279,13 +279,9 @@ public:
         return o;
     }
 
-    //
-    //
-    //  CHANGE THIS
-    //
-    //
+    // checks if this object is inside a voxel
+    // returns true if even part of the object is inside of it
     bool isInside (Voxel v) {
-        
         return true;
     }
 
