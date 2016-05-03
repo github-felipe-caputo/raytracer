@@ -40,10 +40,6 @@ public:
 
     Color getColor(){return col;}
 
-    // function mainly used for the ray marching, distance
-    // min distance between a point and the object
-    virtual double distanceToObject (const Point p) = 0;
-
     // kd + ks < 1 YOU PAY ATTENTION JESUS
     void setUpPhong (Color spec, double newka, double newkd, double newks, double newke) { 
         specular = spec;
@@ -201,10 +197,6 @@ public:
         else            
             return (*colorFromTexture)(c,r,p);
     }
-
-    double distanceToObject (const Point p) {
-        return (distance(p, c) - r);
-    }
 };
 
 class Polygon : public Object {
@@ -249,6 +241,9 @@ public:
         colorFromTexture = function;
     }    
 
+    // NOTE: this intersection is not taking into account the normal yet,
+    // in other words, it will return an intersection even if the triangle is
+    // "backwards"
     Point intersect (Ray ray) {
         Point o = ray.getOrigin();
         Vector d = ray.getDirection();
@@ -295,11 +290,116 @@ public:
         else
             return (*colorFromTexture)(vertices,p);
     }
+};
 
-    // for now it's a simple point plane distance, I should fix it later to 
-    // actual point polygon distance
-    double distanceToObject (const Point p) {
-        return (n.x * p.x + n.y * p.y + n.z * p.z + f) / (sqrt(n.x*n.x + n.y*n.y + n.z*n.z));
+class Triangle : public Object {
+    // Three vertices
+    std::vector<Point> vertices;
+
+    // Normal, based on vertices or not
+    Vector normal;
+
+    // this is a function pointer for a possible texture function,
+    // it requires a vector of points (the vertices of the polygon) and a point
+    // in the polygon as parameters, and returns the color of that point
+    Color (*colorFromTexture)(std::vector<Point>, Point) = NULL;
+
+public:
+
+    // Gets a vector of vertices, with 3 points, and creates a normal
+    // for the triangle (vertices should be in clockwise order)
+    Triangle (std::vector<Point> vert, Color col) : Object(col), vertices(vert) {
+        normal = cross( Vector(vert[0],vert[1],true), Vector(vert[0],vert[2],true));
+    }
+
+    // Gets a vector of vertices, with 3 points, and the normal
+    Triangle (std::vector<Point> vert, Vector norm, Color col) : Object(col), vertices(vert), normal(norm) {
+    }
+
+    // version with texture
+    Triangle (std::vector<Point> vert, Color (*function)(std::vector<Point>, Point) ) : vertices(vert) {
+        colorFromTexture = function;
+    }
+
+    // version with texture
+    Triangle (std::vector<Point> vert, Vector norm, Color (*function)(std::vector<Point>, Point)) : vertices(vert), normal(norm) {
+        colorFromTexture = function;
+    }
+
+    // NOTE: this intersection is not taking into account the normal yet,
+    // in other words, it will return an intersection even if the triangle is
+    // "backwards"
+    Point intersect (Ray ray) {
+        Point o = ray.getOrigin();
+        Vector d = ray.getDirection();
+        normalize(d);
+
+        double EPSILON = 0.000001;
+        double t, u, v, det, inv_det;
+        Vector pvec, tvec, qvec;
+
+        Vector edge1(vertices[0],vertices[1]);
+        Vector edge2(vertices[0],vertices[2]);
+
+        pvec = cross(d,edge2);
+        det = dot(edge1, pvec);
+
+        tvec = Vector(vertices[0], o);
+        inv_det = 1.0 / det;
+
+        qvec = cross(tvec,edge1);
+
+        if (det > EPSILON) {
+            u = dot(tvec, pvec);
+            if (u < 0.0 || u > det)
+                return o;
+
+            v = dot(d, qvec);
+            if (v < 0.0 || u + v > det)
+                return o;
+        } else if (det < -EPSILON) {
+            u = dot(tvec, pvec);
+            if (u > 0.0 || u < det)
+                return o;
+              
+            v = dot(d, qvec) ;
+            if (v > 0.0 || u + v < det)
+                return o;
+        }
+        else {
+            return o;
+        }
+
+        t = dot(edge2, qvec) * inv_det;
+        u *= inv_det;
+        v *= inv_det;
+
+        if (t < 0)
+            return o;
+
+        double wx = o.x + d.x * t;
+        double wy = o.y + d.y * t;
+        double wz = o.z + d.z * t;
+
+        return Point(wx,wy,wz);
+    } 
+
+    // checks if this object is inside a voxel
+    // returns true if even part of the object is inside of it
+    bool isInside (Voxel v) {
+        return true;
+    }
+
+    // For the triangle the normal is always the same
+    Vector getNormal (Point p) {
+        return normal;
+    }
+
+    Color getColor (Point p) {
+        if (*colorFromTexture == NULL)
+            return col;
+        else            
+            return (*colorFromTexture)(vertices,p);
     }
 };
 

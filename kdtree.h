@@ -138,7 +138,7 @@ public:
             // get entry and exit point of ray box intersection 
             Point in, out;
 
-            if ( (n->v).intersect(ray, 0, 100, in, out) ) {
+            if ( (n->v).intersect(ray, 0, 1000, in, out) ) {
                 double coordEntry, coordExit;
                 Object *a, *b;
 

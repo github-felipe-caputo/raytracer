@@ -34,7 +34,7 @@ int main ( void ) {
     sf::RenderWindow window(sf::VideoMode(imageWidth, imageHeight), "Ray Tracer");
 
     // first create our objects
-    Sphere frontSphere( Point(0.2,0.1,-1.8), 0.4, Color(1,1,1) );
+    Sphere frontSphere( Point(0.0,0.1,-1.8), 0.4, Color(1,1,1) );
     frontSphere.setUpPhong( Color(1,1,1), 0.075, 0.075, 0.2, 20.0 );
     frontSphere.setUpReflectionTransmission(0.01, 0.8, 0.95);
 
@@ -60,7 +60,7 @@ int main ( void ) {
     World world;
     world.addObject(&frontSphere);
     world.addObject(&backSphere);
-    //world.addObject(&checkerFloor);
+    world.addObject(&checkerFloor);
 
     // add light and set up phong
     world.addLight(&light);
@@ -68,7 +68,7 @@ int main ( void ) {
     //world.setUpPhongBlinnIllumination( Color(0.7,1,1) );
     world.setUpPhongIllumination( Color(0.25,0.61,1.00) );
 
-    // hube values work, small values dont... why?
+    // huge values work, small values dont... why?
     /*
      NOTE: if I vhange 
                 if(coordEntry <= n->subdivVal) {
@@ -79,7 +79,7 @@ int main ( void ) {
         return traverse(ray, n->front);
         problems show up
      */
-    world.createKdTree(-1000,1000,-1000,1000,-1000,1000);
+    //world.createKdTree(-1000,1000,-1000,1000,-1000,1000);
 
 /*
     // TESTING KD TREES
@@ -105,10 +105,22 @@ int main ( void ) {
 
     //Voxel v2(-5,0,-5,5,-5,5);
     //std::cout << std::boolalpha << v2.intersect(r,0,10, in, out) << std::endl;
-    
+
 */
+/*
+    // TESTING TRIANGLE RAY INTERSECTION
+    std::vector<Point> verts;
+    verts.push_back( Point(-1.5, 2.0,-1.0) );
+    verts.push_back( Point( 1.5, 2.0,-1.0) );
+    verts.push_back( Point( 0.0,-2.0,-1.0) );
+    Triangle triangle( verts, Color(1,1,1) );
 
+    Ray r(Point(0,0,10), Vector(0,0,-1,true));
 
+    Point p = triangle.intersect(r);
+
+    std::cout << p.x << " " << p.y << " " << p.z << " " << std::endl;
+*/
 
     // create camera
     Point pos(0,0,0);
