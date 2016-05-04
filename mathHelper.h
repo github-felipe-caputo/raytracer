@@ -55,6 +55,11 @@ struct Color {
 
         return *this; 
     }
+
+    // Comparisons
+    bool operator!=(const Color& rhs) { 
+        return (r != rhs.r || g != rhs.g || b != rhs.b);
+    }
 };
 
 /*

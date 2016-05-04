@@ -185,8 +185,6 @@ public:
         std::vector<Point> vPoint;
         std::vector<double> vDist;
 
-        //std::cout << ray.getDirection().x << " " << ray.getDirection().y << " " << ray.getDirection().z << std::endl;
-
         // we will go through the objects in the world and look for intersections
         for(std::vector<Object*>::iterator it = objectList.begin() ; it < objectList.end() ; ++it) {
             intersection = (*it)->intersect(ray);
@@ -220,6 +218,86 @@ public:
                     objectHit->getNormal(pointHit), lightsHitList);
 
             Color finalColor = amb + diff_spec;
+/*
+            // If lights hit is empty, it means the shadow ray might have hit something
+            // before reaching the light, i.e. an object
+            // In this case we should take into account if the object is transmissive
+            if ( lightsHitList.empty() ) {
+                vPoint.clear();
+                vDist.clear();
+                std::vector<Ray> vRays;
+                std::vector<Object*> vObjs;
+
+                // For every light source, let's see if a ray from originShadowRay can reach it
+                for(std::vector<LightSource*>::iterator it2 = lightList.begin() ; it2 < lightList.end() ; ++it2) {
+
+                    // If this ray can actually reach the lights 
+                    // (can always reach a point light, maybe not a spot light)
+                    if( (*it2)->reaches(originShadowRay) ) {
+                        Vector dir( originShadowRay, (*it2)->getPos(), true );
+                        Ray fromPointToLight(originShadowRay, dir);
+
+                        // we will go through the objects in the world and look for intersections
+                        for(std::vector<Object*>::iterator it = objectList.begin() ; it < objectList.end() ; ++it) {
+                            intersection = (*it)->intersect(fromPointToLight);
+                            vPoint.push_back( intersection );
+                            vDist.push_back( distance(originShadowRay, intersection) );
+                            vObjs.push_back((*it));
+                            vRays.push_back( fromPointToLight );
+                        }
+
+                    }
+                }
+
+                // we find the minimum distance on vDist, which would be closest intersection
+                objHit = indexMinElement(vDist);
+
+                // vObjs[objHit] != objectHit is necessary because with spheres the shadow ray
+                // might hit it again considering the 'fix' we apply to it because of rounding
+                // errors above
+                if (objHit != -1 && depth > 1 && vObjs[objHit] != objectHit && vObjs[objHit]->getKt() > 0) {
+                    // Direction of incoming ray
+                    Vector rayDir = vRays[objHit].getDirection();
+                    Vector objNormal = vObjs[objHit]->getNormal(vPoint[objHit]);
+
+                    Vector normal;
+                    double nit;
+
+                    Point transmittedRayOrigin;
+                    
+                    // inside
+                    if (dot(-1 * rayDir,objNormal) < 0) {
+                        normal = -1.0 * objNormal;
+                        nit = vObjs[objHit]->getNr() / nr;
+
+                        transmittedRayOrigin = Point(vPoint[objHit].x + objNormal.x * 0.1f, 
+                                                     vPoint[objHit].y + objNormal.y * 0.1f,  
+                                                     vPoint[objHit].z + objNormal.z * 0.1f );
+
+                    } else { // outside
+                        normal = objNormal;
+                        nit = nr / vObjs[objHit]->getNr();
+
+                        // the ray needs to go out a bit inside the object to be sure
+                        transmittedRayOrigin = Point(vPoint[objHit].x + objNormal.x * -0.1f, 
+                                                     vPoint[objHit].y + objNormal.y * -0.1f,  
+                                                     vPoint[objHit].z + objNormal.z * -0.1f );
+                    }
+
+                    double aux = 1.0 + (pow(nit,2) * (pow( dot(-1.0 * rayDir,normal) , 2) - 1.0));
+
+                    // If Total Internal Reflection
+                    if (aux < 0) {
+                        // Same thing as reflected ray
+                        Vector reflectedDir = reflect(rayDir, normal, VECTOR_INCOMING );
+                        return 5*finalColor + vObjs[objHit]->getKt() * spawnIlluminated( Ray(transmittedRayOrigin, reflectedDir), depth-1);
+                    } else {
+                        Vector transmittedDir = nit * rayDir + (nit * dot(-1.0 * rayDir,normal) - sqrt(aux) ) * normal;
+                        return 5*finalColor + vObjs[objHit]->getKt() * spawnIlluminated( Ray(transmittedRayOrigin, transmittedDir), depth-1);
+                    }
+                }
+            }
+*/
             
             if ( depth > 1 ) {
                 double kr = objectHit->getKr();
@@ -233,7 +311,7 @@ public:
                     Vector reflectedDir = reflect(rayDir, objectHit->getNormal(pointHit), VECTOR_INCOMING );
 
                     // Recursion !
-                    finalColor += kr * spawnIlluminated( Ray(originShadowRay, reflectedDir) , --depth);
+                    finalColor += kr * spawnIlluminated( Ray(originShadowRay, reflectedDir) , depth-1);
                 }
                 if ( kt > 0 ) {
                     // Direction of incoming ray
@@ -271,11 +349,11 @@ public:
                     // If Total Internal Reflection
                     if (aux < 0) {
                         // Same thing as reflected ray
-                        Vector reflectedDir = reflect(rayDir, objectHit->getNormal(pointHit), VECTOR_INCOMING );
-                        finalColor += kt * spawnIlluminated( Ray(transmittedRayOrigin, reflectedDir), --depth);
+                        Vector reflectedDir = reflect(rayDir, normal, VECTOR_INCOMING );
+                        finalColor += kt * spawnIlluminated( Ray(transmittedRayOrigin, reflectedDir), depth-1);
                     } else {
                         Vector transmittedDir = nit * rayDir + (nit * dot(-1.0 * rayDir,normal) - sqrt(aux) ) * normal;
-                        finalColor += kt * spawnIlluminated( Ray(transmittedRayOrigin, transmittedDir), --depth);
+                        finalColor += kt * spawnIlluminated( Ray(transmittedRayOrigin, transmittedDir), depth-1);
                     }
                 }
                 

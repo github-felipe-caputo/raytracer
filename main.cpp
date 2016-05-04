@@ -34,9 +34,9 @@ int main ( void ) {
     sf::RenderWindow window(sf::VideoMode(imageWidth, imageHeight), "Ray Tracer");
 
     // first create our objects
-    Sphere frontSphere( Point(0.0,0.1,-1.8), 0.4, Color(1,1,1) );
+    Sphere frontSphere( Point(0.0,0.1,-1.9), 0.4, Color(1,1,1) );
     frontSphere.setUpPhong( Color(1,1,1), 0.075, 0.075, 0.2, 20.0 );
-    frontSphere.setUpReflectionTransmission(0.01, 0.8, 0.95);
+    frontSphere.setUpReflectionTransmission(0.0, 0.8, 0.95);
 
     Sphere backSphere( Point(-0.65,-0.2,-2.5), 0.3, Color(0.7,0.7,0.7) );
     backSphere.setUpPhong( Color(1,1,1), 0.15, 0.25, 1.0, 20.0 );
@@ -52,7 +52,7 @@ int main ( void ) {
     checkerFloor.setUpPhong( Color(1,1,1), 0.3, 1.0, 0.0, 1.0 );
 
     // create a light source
-    PointLight light( Point(0.0f, 5.0f, 3.0f), Color(1,1,1) );
+    PointLight light( Point(0.0, 5.0, 3.0), Color(1,1,1) );
     //PointLight light2( Point(-5.0f, 3.0f, 0.0f), Color(1,1,1) );
     //SpotLight light( Point(0.0, 2.0, -2.0), Color(1,1,1), Vector(0,-1,0), 20 );
 
@@ -127,7 +127,7 @@ int main ( void ) {
     Vector lookAt(0,-0.5,0); // not being used yet
     Vector up(0,1,0); // not being used yet
     Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, 
-        RAY_TRACER, 15, RAY_CENTER);
+        RAY_TRACER, 10, RAY_CENTER);
 
     // render our world, get the color map we will put on canvas
     std::vector<Color> colorMap = cam.render(world);
