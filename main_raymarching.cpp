@@ -31,36 +31,36 @@ int main ( void ) {
     sf::RenderWindow window(sf::VideoMode(imageWidth, imageHeight), "Ray Tracer");
 
     // first create our objects
-    Sphere greenSphere( Point(0.0f,0.1,-2.0), 0.4, Color(0,1,0) );
+    Sphere greenSphere( Point(0.0,0.5,-2.0), 0.4, Color(0,1,0) );
     greenSphere.setUpPhong( Color(1,1,1), 0.2, 0.6, 0.6, 10.0 );
-    greenSphere.setUpReflectionTransmission(0.0 , 0.0);
+    //greenSphere.setUpReflectionTransmission(0.0 , 0.0, 0.0);
 
-    Sphere blueSphere( Point(-0.65,-0.2,-2.5), 0.3, Color(0.2,0.2,0.2) );
+    Sphere blueSphere( Point(-0.65,0.3,-2.5), 0.3, Color(0.2,0.2,0.2) );
     blueSphere.setUpPhong( Color(1,1,1), 0.5, 0.5, 0.8, 20.0 );
-    blueSphere.setUpReflectionTransmission(0.0 , 0.0);
+    //blueSphere.setUpReflectionTransmission(0.0 , 0.0, 0.0);
 
     std::vector<Point> vertices;
-    vertices.push_back( Point(-1.5,-0.9, 0.0) );
-    vertices.push_back( Point(-1.5,-0.9,-6.0) );
-    vertices.push_back( Point( 0.5,-0.9,-6.0) );
-    vertices.push_back( Point( 0.5,-0.9, 0.0) );
+    vertices.push_back( Point(-1.8,-0.9, 0.0) );
+    vertices.push_back( Point(-1.8,-0.9,-6.0) );
+    vertices.push_back( Point( 1.8,-0.9,-6.0) );
+    vertices.push_back( Point( 1.8,-0.9, 0.0) );
 
-    Polygon checkerFloor( vertices, Vector(0,1,0), planarCheckerTexture );
-    checkerFloor.setUpPhong( Color(1,1,1), 0.3, 1.0, 0.0, 1.0 );
+    Polygon checkerFloor( vertices, Vector(0,1,0), Color(1,1,1) );
+    checkerFloor.setUpPhong( Color(0.5,0.5,0.5), 0.2, 0.3, 0.0, 1.0 );
 
     // create a light source
-    //PointLight light( Point(0.0f, 5.0f, 3.0f), Color(1,1,1) );
+    PointLight light( Point(0.0, 2.0, -2.0), Color(1,1,1) );
     //PointLight light2( Point(-5.0f, 3.0f, 0.0f), Color(1,1,1) );
-    SpotLight light( Point(0.0, 2.0, -2.0), Color(1,1,1), Vector(0,-1,0), 20, 20 );
+    //SpotLight light( Point(0.0, 2.0, -2.0), Color(1,1,1), Vector(0,-1,0), 20, 20 );
 
     // create world, add objects in it
     World world;
     world.addObject(&greenSphere);
     world.addObject(&blueSphere);
-    //world.addObject(&checkerFloor);
+    world.addObject(&checkerFloor);
 
     // We are doing ray marching, se need to add values for participant media
-    world.addParticipantMedia(0.01,0.01);
+    world.addParticipantMedia(0.01,0.01,VARIABLE_DENSITY);
 
     // add light and set up phong
     world.addLight(&light);
@@ -69,7 +69,7 @@ int main ( void ) {
     world.setUpPhongIllumination( Color(0.25,0.61,1.00) );
 
     // create camera
-    Point pos(0,0,1);
+    Point pos(0,0,1.5);
     Vector lookAt(0,-0.5,0); // not being used yet
     Vector up(0,1,0); // not being used yet
     Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, 

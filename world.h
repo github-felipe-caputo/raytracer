@@ -11,6 +11,10 @@
 #include "illuminationModel.h"
 #include "kdtree.h"
 
+// ray marching
+#define CONSTANT_DENSITY 0
+#define VARIABLE_DENSITY 1
+
 class World {
     // List of objects in this world
     std::vector<Object*> objectList;
@@ -24,6 +28,7 @@ class World {
     // For ray marching we add a participant media, so the world gets a
     double ks; // media scattering coefficient
     double ka; // media absorption coefficient
+    int density;
 
     // Index of refraction
     double nr;
@@ -60,9 +65,10 @@ public:
     }
 
     // For ray marching
-    void addParticipantMedia(double nks, double nka) {
+    void addParticipantMedia(double nks, double nka, int ndensity) {
         ks = nks;
         ka = nka;
+        density = ndensity;
     }
 
     // Creates a KDtree based on the added objects,
@@ -233,8 +239,8 @@ public:
 
                     // If this ray can actually reach the lights 
                     // (can always reach a point light, maybe not a spot light)
-                    if( (*it2)->reaches(originShadowRay) ) {
-                        Vector dir( originShadowRay, (*it2)->getPos(), true );
+                    if( (*it2)->reaches(pointHit) ) {
+                        Vector dir( pointHit, (*it2)->getPos(), true );
                         Ray fromPointToLight(originShadowRay, dir);
 
                         // we will go through the objects in the world and look for intersections
@@ -262,11 +268,12 @@ public:
 
                     Vector normal;
                     double nit;
+                    double kt = vObjs[objHit]->getKt();
 
                     Point transmittedRayOrigin;
                     
                     // inside
-                    if (dot(-1 * rayDir,objNormal) < 0) {
+                    if (dot(-1.0 * rayDir,objNormal) < 0) {
                         normal = -1.0 * objNormal;
                         nit = vObjs[objHit]->getNr() / nr;
 
@@ -274,14 +281,20 @@ public:
                                                      vPoint[objHit].y + objNormal.y * 0.1f,  
                                                      vPoint[objHit].z + objNormal.z * 0.1f );
 
+                        // std::cout << "why" << std::endl;
                     } else { // outside
                         normal = objNormal;
                         nit = nr / vObjs[objHit]->getNr();
 
-                        // the ray needs to go out a bit inside the object to be sure
+                        // the ray needs to go a bit inside the object to be sure
                         transmittedRayOrigin = Point(vPoint[objHit].x + objNormal.x * -0.1f, 
                                                      vPoint[objHit].y + objNormal.y * -0.1f,  
                                                      vPoint[objHit].z + objNormal.z * -0.1f );
+
+                        // std::cout << "why2" << std::endl;
+                        // std::cout << "KKK " << vPoint[objHit].x << " " << vPoint[objHit].y << " " << vPoint[objHit].z << std::endl;
+                        // std::cout << transmittedRayOrigin.x << " " << transmittedRayOrigin.y << " " << transmittedRayOrigin.z << std::endl;
+                        // std::cout << lightsReached( transmittedRayOrigin, lightList).size();
                     }
 
                     double aux = 1.0 + (pow(nit,2) * (pow( dot(-1.0 * rayDir,normal) , 2) - 1.0));
@@ -290,10 +303,10 @@ public:
                     if (aux < 0) {
                         // Same thing as reflected ray
                         Vector reflectedDir = reflect(rayDir, normal, VECTOR_INCOMING );
-                        return 5*finalColor + vObjs[objHit]->getKt() * spawnIlluminated( Ray(transmittedRayOrigin, reflectedDir), depth-1);
+                        finalColor += kt * spawnIlluminated( Ray(transmittedRayOrigin, reflectedDir), depth-1);
                     } else {
                         Vector transmittedDir = nit * rayDir + (nit * dot(-1.0 * rayDir,normal) - sqrt(aux) ) * normal;
-                        return 5*finalColor + vObjs[objHit]->getKt() * spawnIlluminated( Ray(transmittedRayOrigin, transmittedDir), depth-1);
+                        finalColor += kt * spawnIlluminated( Ray(transmittedRayOrigin, transmittedDir), depth-1);
                     }
                 }
             }
@@ -412,6 +425,10 @@ public:
 
             objectColor = amb + diff_spec;
         }
+
+        // for one light source
+        //if ( !lightList[0]->reaches(vPoint[objHit]) )
+          // objectColor = Color(0,0,0);
         
         // Now color through sampling light
         Color inscattering;
@@ -420,9 +437,9 @@ public:
         for(std::vector<LightSource*>::iterator it = lightList.begin() ; it < lightList.end() ; ++it) {
             std::vector<Point> lightIntersections;
             if (objHit == -1) {
-                lightIntersections = sampleLight(ray, (*it), SAMPLE_NUM);
+                lightIntersections = samplePointLight(ray, (*it), SAMPLE_NUM);
             } else {
-                lightIntersections = sampleLight(ray, vPoint[objHit], (*it), SAMPLE_NUM);
+                lightIntersections = samplePointLight(ray, vPoint[objHit], (*it), SAMPLE_NUM);
             }
 
             // now for those sample values
@@ -434,27 +451,31 @@ public:
                     double distOriginPoint = distance(originRay , (*it2));
 
                     double cosAngle = dot( Vector((*it)->getPos(), (*it2), true) , Vector((*it2), originRay, true) );
-                    double g = 0.7;
-
-                    //double phase = ((3.0/(16.0*PI)) * (1.0 - cosAngle*cosAngle));
-                    double phase = ( (1.0/(4.0*PI)) * ( ((1.0 - g) * (1.0 - g)) / std::pow(1.0 + g*g - 2.0*g*cosAngle,3.0/2.0)) );
-
-                    inscattering += ( phase / std::pow(distLightPoint,2)) * ((*it)->getColor()) * std::exp( -1.0 * (ka+ks) * (distLightPoint + distOriginPoint) );
-                    //inscattering += (( (3.0/(16.0*PI)) * (1.0 - cosAngle*cosAngle) + (1.0/(4.0*PI)) * ( ((1.0 - g) * (1.0 - g)) / std::pow(1.0 + g*g - 2*g*cosAngle,3.0/2.0))) / (ka+ks)) * (*it)->getColor() * (1.0 - std::exp( -1.0 * (ka+ks) * distOriginPoint ));
-                } else {
-                    inscattering += Color(0,0,0);
-                }
+                    
+                    if ( density == CONSTANT_DENSITY ) {
+                        double g = 0.7;
+                        inscattering += (( (3.0/(16.0*PI)) * (1.0 - cosAngle*cosAngle) + (1.0/(4.0*PI)) * ( ((1.0 - g) * (1.0 - g)) / std::pow(1.0 + g*g - 2*g*cosAngle,1.5))) / (ka+ks)) * (*it)->getColor() * (1.0 - std::exp( -1.0 * (ka+ks) * distOriginPoint ));
+                    } else {
+                        double phase = ((3.0/(16.0*PI)) * (1.0 - cosAngle*cosAngle));
+                        inscattering += ( phase / std::pow(distLightPoint,2)) * ((*it)->getColor()) * std::exp( -1.0 * (ka+ks) * (distLightPoint + distOriginPoint) );
+                    }
+                } 
             }
 
             // Not necessary always?
-            /*
             if(!lightIntersections.empty()) {
-                inscattering = inscattering / lightIntersections.size();
+                if (density == CONSTANT_DENSITY)
+                    inscattering = inscattering / lightIntersections.size();
+                else
+                    inscattering = 50 * inscattering / lightIntersections.size();
             }
-            */
+            
         }
 
-        Color attenuated = objectColor * std::exp(-1 * (ka + ks) * vDist[objHit] );
+        Color attenuated = objectColor;
+        if (objHit != -1) {
+            attenuated = objectColor * std::exp(-1 * (ka + ks) * vDist[objHit] );
+        }
         //std::cout << inscattering.r << " " << inscattering.g << " " << inscattering.b << std::endl;
         
         return attenuated + inscattering; 
@@ -484,6 +505,42 @@ public:
         }
 
         return lightsHit;
+    }
+
+    // Given a ray and a light, this function will check the intersection of that
+    // ray and that light. If we get more than 1 intersection, we will uniformly sample
+    // the points between the intersections.
+    std::vector<Point> samplePointLight(Ray ray, LightSource *light, int SAMPLE_NUM) {
+        std::vector<Point> samples;
+        Point firstPoint = ray.getOrigin();
+        Vector dir = ray.getDirection();
+        Point secondPoint = firstPoint + 5 * Point(dir.x,dir.y,dir.z);
+
+        for (int i = 1; i < SAMPLE_NUM; ++i) {
+            double val = i * (1.0/SAMPLE_NUM);
+            samples.push_back( firstPoint + val * (secondPoint - firstPoint) );
+        }
+
+        return samples;
+    }
+
+    std::vector<Point> samplePointLight(Ray ray, Point p, LightSource *light, int SAMPLE_NUM) {
+        std::vector<Point> samples;
+        Point firstPoint = ray.getOrigin();
+        Vector dir = ray.getDirection();
+        Point secondPoint = firstPoint + 5 * Point(dir.x,dir.y,dir.z);
+
+        for (int i = 1; i < SAMPLE_NUM; ++i) {
+            double val = i * (1.0/SAMPLE_NUM);
+            Point newPoint = firstPoint + val * (secondPoint - firstPoint);
+
+            if( distance(firstPoint,newPoint) > distance(firstPoint,p) )
+                break;
+
+            samples.push_back( newPoint );
+        }
+
+        return samples;
     }
 
     // Given a ray and a light, this function will check the intersection of that
@@ -526,8 +583,9 @@ public:
                 double val = i * (1.0/SAMPLE_NUM);
                 Point newPoint = firstPoint + val * (secondPoint - firstPoint);
 
-                if( distance(firstPoint,newPoint) < distance(firstPoint,p) )
-                    samples.push_back( newPoint );
+                if( distance(firstPoint,newPoint) > distance(firstPoint,p) )
+                    break;
+                samples.push_back( newPoint );
             }
         } 
         // if doesn go to the ifs, inter = 0, sample is empty
