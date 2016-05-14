@@ -16,7 +16,7 @@
 #include "lightSource.h"
 #include "illuminationModel.h"
 #include "texture.h"
-
+#include "toneReproduction.h"
 
 #include "kdtree.h"
 
@@ -127,15 +127,17 @@ int main ( void ) {
     Vector lookAt(0,-0.5,0); // not being used yet
     Vector up(0,1,0); // not being used yet
     Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, 
-        RAY_TRACER, 10, RAY_CENTER);
+        RAY_TRACER, 10, RAY_GRID);
 
     // render our world, get the color map we will put on canvas
     std::vector<Color> colorMap = cam.render(world);
 
+    std::vector<Color> toneReprodColorMap = compressionPerceptual(colorMap , 100);
+
     // set pixel values on the canvas
     for(int i = 0; i < imageWidth; ++i) {
         for(int j = 0; j < imageHeight; ++j) {
-            Color c = colorMap[i * imageWidth + j];
+            Color c = toneReprodColorMap[i * imageWidth + j];
             canvas.setPixel( i, j, c.r, c.g, c.b );
         }
     }

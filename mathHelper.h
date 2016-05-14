@@ -1,6 +1,8 @@
 #ifndef _MATHHELPER_H
 #define _MATHHELPER_H
 
+#include <cmath>
+
 // For voxels
 #define SUBDIV_X 0
 #define SUBDIV_Y 1
@@ -9,8 +11,6 @@
 #define VECTOR_INCOMING 0
 #define VECTOR_OUTGOING 1
 #define PI 3.14159265
-
-#include <cmath>
 
 /*
  * The Color class.

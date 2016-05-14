@@ -73,7 +73,7 @@ int main ( void ) {
     Vector lookAt(0,-0.5,0); // not being used yet
     Vector up(0,1,0); // not being used yet
     Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, 
-        RAY_MARCHING, 200, RAY_CENTER);
+        RAY_MARCHING, 20, RAY_CENTER);
 
     // render our world, get the color map we will put on canvas
     std::vector<Color> colorMap = cam.render(world);

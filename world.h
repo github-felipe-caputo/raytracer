@@ -453,7 +453,7 @@ public:
                     double cosAngle = dot( Vector((*it)->getPos(), (*it2), true) , Vector((*it2), originRay, true) );
                     
                     if ( density == CONSTANT_DENSITY ) {
-                        double g = 0.7;
+                        double g = 0.3;
                         inscattering += (( (3.0/(16.0*PI)) * (1.0 - cosAngle*cosAngle) + (1.0/(4.0*PI)) * ( ((1.0 - g) * (1.0 - g)) / std::pow(1.0 + g*g - 2*g*cosAngle,1.5))) / (ka+ks)) * (*it)->getColor() * (1.0 - std::exp( -1.0 * (ka+ks) * distOriginPoint ));
                     } else {
                         double phase = ((3.0/(16.0*PI)) * (1.0 - cosAngle*cosAngle));
@@ -462,7 +462,6 @@ public:
                 } 
             }
 
-            // Not necessary always?
             if(!lightIntersections.empty()) {
                 if (density == CONSTANT_DENSITY)
                     inscattering = inscattering / lightIntersections.size();
@@ -476,7 +475,6 @@ public:
         if (objHit != -1) {
             attenuated = objectColor * std::exp(-1 * (ka + ks) * vDist[objHit] );
         }
-        //std::cout << inscattering.r << " " << inscattering.g << " " << inscattering.b << std::endl;
         
         return attenuated + inscattering; 
     }
@@ -514,7 +512,7 @@ public:
         std::vector<Point> samples;
         Point firstPoint = ray.getOrigin();
         Vector dir = ray.getDirection();
-        Point secondPoint = firstPoint + 5 * Point(dir.x,dir.y,dir.z);
+        Point secondPoint = firstPoint + 10 * Point(dir.x,dir.y,dir.z);
 
         for (int i = 1; i < SAMPLE_NUM; ++i) {
             double val = i * (1.0/SAMPLE_NUM);
@@ -528,7 +526,7 @@ public:
         std::vector<Point> samples;
         Point firstPoint = ray.getOrigin();
         Vector dir = ray.getDirection();
-        Point secondPoint = firstPoint + 5 * Point(dir.x,dir.y,dir.z);
+        Point secondPoint = firstPoint + 10 * Point(dir.x,dir.y,dir.z);
 
         for (int i = 1; i < SAMPLE_NUM; ++i) {
             double val = i * (1.0/SAMPLE_NUM);

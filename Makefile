@@ -13,7 +13,7 @@ main.o: main.cpp
 
 # Dependencies
 
-main.o: canvas.h mathHelper.h object.h world.h camera.h lightSource.h illuminationModel.h texture.h kdtree.h
+main.o: canvas.h mathHelper.h object.h world.h camera.h lightSource.h illuminationModel.h texture.h kdtree.h toneReproduction.h
 
 # Clean
 

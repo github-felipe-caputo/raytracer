@@ -110,8 +110,8 @@ public:
             }
 
         } else if (c1c1minusc0c2 > 0) {
-            w1 = - (c1 + sqrt(c1c1minusc0c2)) / c2;
-            w2 = - (c1 - sqrt(c1c1minusc0c2)) / c2;
+            w1 = - (c1 - sqrt(c1c1minusc0c2)) / c2;
+            w2 = - (c1 + sqrt(c1c1minusc0c2)) / c2;
 
             if (w1 > 0.0) { 
                 Point inter1(origin.x + direction.x * w1, origin.y + direction.y * w1, origin.z + direction.z * w1); 
