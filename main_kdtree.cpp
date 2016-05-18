@@ -55,7 +55,7 @@ int main ( void ) {
     world.createKdTree(-10,10,-10,10,-10,10);
     clock_t time_b = clock();
 
-    std::cout << "Time to build tree (in milliseconds): " << (unsigned int)(time_b - time_a) << std::endl;
+    std::cout << "Time to build tree (in milisecs): " << 1000 * (time_b - time_a) / CLOCKS_PER_SEC << std::endl;
 
 
     // create camera
@@ -69,7 +69,7 @@ int main ( void ) {
     clock_t time_c = clock();
     std::vector<Color> colorMap = cam.render(world);
     clock_t time_d = clock();
-    std::cout << "Time to render (in milliseconds): " << (unsigned int)(time_d - time_c) << std::endl;
+    std::cout << "Time to render (in milisecs): " << 1000 * (time_d - time_c) / CLOCKS_PER_SEC << std::endl;
 
     // Tonemap
     std::vector<Color> toneReprodColorMap = compressionPerceptual(colorMap , 100);
