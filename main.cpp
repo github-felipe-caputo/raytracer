@@ -1,7 +1,3 @@
-/*
- * RAY tracing EXAMPLE
- */
-
 #include <cmath>
 #include <iostream>
 #include <vector>
@@ -54,7 +50,6 @@ int main ( void ) {
     // create a light source
     PointLight light( Point(0.0, 5.0, 3.0), Color(1,1,1) );
     //PointLight light2( Point(-5.0f, 3.0f, 0.0f), Color(1,1,1) );
-    //SpotLight light( Point(0.0, 2.0, -2.0), Color(1,1,1), Vector(0,-1,0), 20 );
 
     // create world, add objects in it
     World world;
@@ -68,70 +63,17 @@ int main ( void ) {
     //world.setUpPhongBlinnIllumination( Color(0.7,1,1) );
     world.setUpPhongIllumination( Color(0.25,0.61,1.00) );
 
-    // huge values work, small values dont... why?
-    /*
-     NOTE: if I vhange 
-                if(coordEntry <= n->subdivVal) {
-                    if (coordExit < n->subdivVal) {
-                        return traverse(ray, n->rear);
-
-    to 
-        return traverse(ray, n->front);
-        problems show up
-     */
-    //world.createKdTree(-1000,1000,-1000,1000,-1000,1000);
-
-/*
-    // TESTING KD TREES
-    Voxel v(-5,5,-5,5,-15,15);
-    std::vector<Object*> objectList;
-
-    Sphere sphere1( Point(0.0,0.0,-4), 0.5, Color(1,1,1) );
-    Sphere sphere2( Point(0.0,0.0,-2), 0.5, Color(0,0,0) );
-
-    objectList.push_back(&sphere1);
-    objectList.push_back(&sphere2);
-
-    Kdtree kd(objectList, v);
-
-    //kd.walk(kd.getRoot());
-
-    Ray r(Point(0,0,10), Vector(0,0,-1,true));
-
-    Object* obj = kd.traverse(r);
-
-    Point in, out;
-    std::cout << (obj->getColor()).r << " " << (obj->getColor()).g << " " << (obj->getColor()).b << " " << std::endl;
-
-    //Voxel v2(-5,0,-5,5,-5,5);
-    //std::cout << std::boolalpha << v2.intersect(r,0,10, in, out) << std::endl;
-
-*/
-/*
-    // TESTING TRIANGLE RAY INTERSECTION
-    std::vector<Point> verts;
-    verts.push_back( Point(-1.5, 2.0,-1.0) );
-    verts.push_back( Point( 1.5, 2.0,-1.0) );
-    verts.push_back( Point( 0.0,-2.0,-1.0) );
-    Triangle triangle( verts, Color(1,1,1) );
-
-    Ray r(Point(0,0,10), Vector(0,0,-1,true));
-
-    Point p = triangle.intersect(r);
-
-    std::cout << p.x << " " << p.y << " " << p.z << " " << std::endl;
-*/
-
     // create camera
     Point pos(0,0,0);
     Vector lookAt(0,-0.5,0); // not being used yet
     Vector up(0,1,0); // not being used yet
     Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, 
-        RAY_TRACER, 10, RAY_GRID);
+        RAY_TRACER, 8, RAY_GRID);
 
     // render our world, get the color map we will put on canvas
     std::vector<Color> colorMap = cam.render(world);
 
+    // Tone reproduction
     std::vector<Color> toneReprodColorMap = compressionPerceptual(colorMap , 100);
 
     // set pixel values on the canvas

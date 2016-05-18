@@ -388,7 +388,16 @@ struct Voxel
         out = Point(o.x + d.x * tmax, o.y + d.y * tmax, o.z + d.z * tmax);
 
         return ( (tmin < t1) && (tmax > t0) );
+    }
 
+    Point getCenter() {
+        return Point((xLeft + xRight) / 2.0 , (yBottom + yTop) / 2.0, (zFar + zNear) / 2.0);
+    }
+
+    Point getHalfLenghts() {
+        return Point((xRight - xLeft) / 2.0, 
+                     (yTop - yBottom) / 2.0, 
+                     (zNear - zFar) / 2.0  );
     }
 
 };

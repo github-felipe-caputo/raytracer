@@ -69,8 +69,12 @@ public:
     }
 
     node* buildKdTree (std::vector<Object*> objectList, Voxel V, int currentSubdiv) {
-        if (terminate(objectList))
+        if (terminate(objectList)) {
+            //std::cout << V.xLeft << " " << V.xRight << " " << V.yBottom << " " << V.yTop << " " << V.zFar << " " << V.zNear << std::endl;
             return new node(objectList, V);
+        }
+
+        //std::cout << V.xLeft << " " << V.xRight << " " << V.yBottom << " " << V.yTop << " " << V.zFar << " " << V.zNear << std::endl;
 
         // partition plane -> spatial median
         Voxel vFront = V.splitFront(currentSubdiv);
@@ -94,12 +98,12 @@ public:
         else
             newSubDiv = currentSubdiv + 1;
 
-        return new node (currentSubdiv, V.splitVal(currentSubdiv), V,  
+        return new node (currentSubdiv, V.splitVal(currentSubdiv), V,
             buildKdTree(objectListFront, vFront, newSubDiv), buildKdTree(objectListRear, vRear, newSubDiv) );
     }
 
     bool terminate (std::vector<Object*> objectList) {
-        return (objectList.size() <= 1);
+        return (objectList.size() <= 30);
     }
 
     Object* traverse (Ray ray) {
@@ -108,9 +112,12 @@ public:
 
     // Will return the closest object the ray hits, or NULL if it doesn't hit anything
     Object* traverse (Ray ray, node *n) {
-
         // if it's a leaf, try intersectoins
         if (n->leaf) {
+            // If no objects are in the list, don't even need to check further
+            if (n->objectList.empty())
+                return NULL;
+
             Point originRay = ray.getOrigin();
             Point intersection;
 
@@ -122,13 +129,19 @@ public:
                 intersection = (*it)->intersect(ray);
                 vPoint.push_back( intersection );
                 vDist.push_back( distance(originRay, intersection) );
+
+                //std::cout << intersection.x << " " << intersection.y << " " << intersection.z << " " << std::endl;
+                //std::cout << originRay.x << " " << originRay.y << " " << originRay.z << " " << std::endl;
             }
 
             // we find the minimum distance on vDist, which would be closest intersection
             int objHit( indexMinElement(vDist) );
 
-            if (objHit == -1)
+            if (objHit == -1) {
+                //std::cout << n->objectList.size() << " " << "NULL" << std::endl;
                 return NULL;
+            }
+            //std::cout << n->objectList.size() << " " << (n->objectList[objHit])->getNormal(Point(1,1,1)).x << std::endl;
 
             // obj hit
             return n->objectList[objHit];

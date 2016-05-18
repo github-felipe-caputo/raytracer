@@ -5,6 +5,8 @@
 #include <cmath>
 #include "mathHelper.h"
 
+#include "triBoxOverlap.h"
+
 class Object {
 protected:
     // material?
@@ -318,6 +320,7 @@ public:
 
     // version with texture
     Triangle (std::vector<Point> vert, Color (*function)(std::vector<Point>, Point) ) : vertices(vert) {
+        normal = cross( Vector(vert[0],vert[1],true), Vector(vert[0],vert[2],true));
         colorFromTexture = function;
     }
 
@@ -326,9 +329,45 @@ public:
         colorFromTexture = function;
     }
 
+    // Below, versions where you give the points not in a vector
+
+    Triangle (Point p1, Point p2, Point p3, Color col) : Object(col) {
+        vertices.push_back(p1);
+        vertices.push_back(p2);
+        vertices.push_back(p3);
+        normal = cross( Vector(vertices[0],vertices[1],true), Vector(vertices[0],vertices[2],true));
+    }
+
+    // Gets a vector of vertices, with 3 points, and the normal
+    Triangle (Point p1, Point p2, Point p3, Vector norm, Color col) : Object(col), normal(norm) {
+        vertices.push_back(p1);
+        vertices.push_back(p2);
+        vertices.push_back(p3);
+    }
+
+    Triangle (Point p1, Point p2, Point p3, Color (*function)(std::vector<Point>, Point)) {
+        vertices.push_back(p1);
+        vertices.push_back(p2);
+        vertices.push_back(p3);
+        normal = cross( Vector(vertices[0],vertices[1],true), Vector(vertices[0],vertices[2],true));
+        colorFromTexture = function;
+    }
+
+    // Gets a vector of vertices, with 3 points, and the normal
+    Triangle (Point p1, Point p2, Point p3, Vector norm, Color (*function)(std::vector<Point>, Point)) : normal(norm) {
+        vertices.push_back(p1);
+        vertices.push_back(p2);
+        vertices.push_back(p3);
+        colorFromTexture = function;
+    }
+
     // NOTE: this intersection is not taking into account the normal yet,
     // in other words, it will return an intersection even if the triangle is
     // "backwards"
+    //
+    // Code based on Tomas Akenine-Möller code at 
+    // http://fileadmin.cs.lth.se/cs/Personal/Tomas_Akenine-Moller/code/
+    //
     Point intersect (Ray ray) {
         Point o = ray.getOrigin();
         Vector d = ray.getDirection();
@@ -374,7 +413,7 @@ public:
         u *= inv_det;
         v *= inv_det;
 
-        if (t < 0)
+        if (t <= 0)
             return o;
 
         double wx = o.x + d.x * t;
@@ -384,10 +423,25 @@ public:
         return Point(wx,wy,wz);
     } 
 
+    std::vector<Point> getPoints () {
+        return vertices;
+    }
+
     // checks if this object is inside a voxel
     // returns true if even part of the object is inside of it
     bool isInside (Voxel v) {
-        return true;
+        // Turn the data into something the function can understand
+        Point center = v.getCenter();
+        float boxcenter[] = {(float)center.x,(float)center.y,(float)center.z};
+
+        Point halfSizes = v.getHalfLenghts();
+        float boxhalfsize[] = {(float)halfSizes.x,(float)halfSizes.y,(float)halfSizes.z};
+
+        float triverts[][3] = {{(float)vertices[0].x, (float)vertices[0].y, (float)vertices[0].z},
+                               {(float)vertices[1].x, (float)vertices[1].y, (float)vertices[1].z},
+                               {(float)vertices[2].x, (float)vertices[2].y, (float)vertices[2].z}};
+
+        return (triBoxOverlap(boxcenter,boxhalfsize,triverts) == 1);
     }
 
     // For the triangle the normal is always the same
@@ -402,6 +456,5 @@ public:
             return (*colorFromTexture)(vertices,p);
     }
 };
-
 
 #endif
