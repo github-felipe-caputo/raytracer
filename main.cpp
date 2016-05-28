@@ -17,18 +17,14 @@
 #include "kdtree.h"
 
 // pixels
-int imageHeight = 512;
-int imageWidth = 512;
+int imageHeight = 1024;
+int imageWidth = 1024;
 
 // keeping the aspect ratio of the window pixels
 double viewPlaneHeigth = 0.5;
 double viewPlaneWidth = 0.5;
 
 int main ( void ) {
-    // SFML canvas and window
-    Canvas canvas( imageWidth, imageHeight );
-    sf::RenderWindow window(sf::VideoMode(imageWidth, imageHeight), "Ray Tracer");
-
     // first create our objects
     Sphere frontSphere( Point(0.0,0.1,-1.9), 0.4, Color(1,1,1) );
     frontSphere.setUpPhong( Color(1,1,1), 0.075, 0.075, 0.2, 20.0 );
@@ -75,6 +71,11 @@ int main ( void ) {
 
     // Tone reproduction
     std::vector<Color> toneReprodColorMap = compressionPerceptual(colorMap , 100);
+    
+    
+    // SFML canvas and window
+    Canvas canvas( imageWidth, imageHeight );
+    sf::RenderWindow window(sf::VideoMode(imageWidth, imageHeight), "Ray Tracer");
 
     // set pixel values on the canvas
     for(int i = 0; i < imageWidth; ++i) {
