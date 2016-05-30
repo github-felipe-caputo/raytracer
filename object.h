@@ -122,7 +122,7 @@ public:
             //double A = 1;
             double B = 2.0 * (d.x * (o.x - c.x) + d.y * (o.y - c.y) + d.z * (o.z - c.z));
             double C = (o.x - c.x)*(o.x - c.x) + (o.y - c.y)*(o.y - c.y) + (o.z - c.z)*(o.z - c.z) - r*r;
-            double w;
+            double w = 0;
 
             double BBminus4C = B*B - 4.0*C;
 

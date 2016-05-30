@@ -64,14 +64,13 @@ int main ( void ) {
     Vector lookAt(0,-0.5,0); // not being used yet
     Vector up(0,1,0); // not being used yet
     Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, 
-        RAY_TRACER, 8, RAY_GRID);
+        RAY_TRACER, 8, RAY_CENTER);
 
     // render our world, get the color map we will put on canvas
     std::vector<Color> colorMap = cam.render(world);
 
     // Tone reproduction
     std::vector<Color> toneReprodColorMap = compressionPerceptual(colorMap , 100);
-    
     
     // SFML canvas and window
     Canvas canvas( imageWidth, imageHeight );
