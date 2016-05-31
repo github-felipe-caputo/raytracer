@@ -114,45 +114,38 @@ public:
         Point o = ray.getOrigin();
         Vector d = ray.getDirection();
         normalize(d);
+        
+        // a = 1 because direction of a ray is normalized
+        //double A = 1;
+        double B = 2.0 * (d.x * (o.x - c.x) + d.y * (o.y - c.y) + d.z * (o.z - c.z));
+        double C = (o.x - c.x)*(o.x - c.x) + (o.y - c.y)*(o.y - c.y) + (o.z - c.z)*(o.z - c.z) - r*r;
+        double w = 0;
+        
+        double BBminus4C = B*B - 4.0*C;
 
-        // if distance between center and ray origin is greater than
-        // the radius, the point is outside the sphere
-        //if( distance(c,o) > r ) {
-            // a = 1 because direction of a ray is normalized
-            //double A = 1;
-            double B = 2.0 * (d.x * (o.x - c.x) + d.y * (o.y - c.y) + d.z * (o.z - c.z));
-            double C = (o.x - c.x)*(o.x - c.x) + (o.y - c.y)*(o.y - c.y) + (o.z - c.z)*(o.z - c.z) - r*r;
-            double w = 0;
+        if (BBminus4C < 0)
+        {
+            return o; // will return the point origin if there is no intersection
+        }
+        else if (BBminus4C == 0)
+        {
+            w = (-B + 0) / 2.0;
+            return Point(o.x + d.x * w, o.y + d.y * w, o.z + d.z * w);
+        }
+        else
+        {
+            double w1 = (-B + sqrt(BBminus4C)) / 2.0;
+            double w2 = (-B - sqrt(BBminus4C)) / 2.0;
+            
+            if (w1 > 0 && w1 <= w2) // w1 is positive and smaller than or equal to w2
+                w = w1;
+            else if (w2 > 0) // w2 is positive and either smaller than w1 or w1 is negative
+                w = w2;
+            else if (w1 > 0)
+                w = w1;
 
-            double BBminus4C = B*B - 4.0*C;
-
-            if (BBminus4C < 0) 
-            {
-                return o; // will return the point origin if there is no intersection
-            }
-            else if (BBminus4C == 0) 
-            {
-                w = (-B + 0) / 2.0;
-                return Point(o.x + d.x * w, o.y + d.y * w, o.z + d.z * w);
-            } 
-            else 
-            {
-                double w1 = (-B + sqrt(BBminus4C)) / 2.0;
-                double w2 = (-B - sqrt(BBminus4C)) / 2.0;
-
-                if (w1 > 0 && w1 <= w2) // w1 is positive and smaller than or equal to w2
-                    w = w1;
-                else if (w2 > 0) // w2 is positive and either smaller than w1 or w1 is negative
-                    w = w2;
-                else if (w1 > 0)
-                    w = w1;
-
-                return Point(o.x + d.x * w, o.y + d.y * w, o.z + d.z * w);
-            } 
-        //} else { // if point is inside the sphere there will be ONE intersection
-
-            //return Point(10,10,10);
-        //}
+            return Point(o.x + d.x * w, o.y + d.y * w, o.z + d.z * w);
+        }
     } 
 
     // checks if this object is inside a voxel
