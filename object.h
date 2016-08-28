@@ -97,13 +97,13 @@ class Sphere : public Object {
     double r;
 
     // pointer to a possible texture function
-    Color (*colorFromTexture)(Point, double, Point) = NULL;
-
+    Color (*colorFromTexture)(Point, double, Point);// = NULL; initialization warning 
 public:
 
     // creating an object
     // if texture = true when creating, 'col' is ignored (function getColorFromTexture will be used instead)
     Sphere ( Point c, double r, Color col) : Object(col), c(c), r(r) {
+        colorFromTexture = NULL;
     }
 
     Sphere ( Point c, double r, Color (*function)(Point, double, Point) ) : c(c), r(r) {
@@ -208,7 +208,7 @@ class Polygon : public Object {
     // this is a function pointer for a possible texture function,
     // it requires a vector of points (the vertices of the polygon) and a point
     // in the polygon as parameters, and returns the color of that point
-    Color (*colorFromTexture)(std::vector<Point>, Point) = NULL;
+    Color (*colorFromTexture)(std::vector<Point>, Point); // = NULL;
 
 public:
 
@@ -221,6 +221,8 @@ public:
         // has a normal (0,1,0), and all the points are on a plane parallel to the x and z plane
         // so f will always be y of any of the vertices (they are always the same)
         f = std::abs( vert[0].y );
+
+        colorFromTexture = NULL;
     }
 
     // creating an object
@@ -297,7 +299,7 @@ class Triangle : public Object {
     // this is a function pointer for a possible texture function,
     // it requires a vector of points (the vertices of the polygon) and a point
     // in the polygon as parameters, and returns the color of that point
-    Color (*colorFromTexture)(std::vector<Point>, Point) = NULL;
+    Color (*colorFromTexture)(std::vector<Point>, Point); // = NULL;
 
 public:
 
@@ -305,10 +307,12 @@ public:
     // for the triangle (vertices should be in clockwise order)
     Triangle (std::vector<Point> vert, Color col) : Object(col), vertices(vert) {
         normal = cross( Vector(vert[0],vert[1],true), Vector(vert[0],vert[2],true));
+        colorFromTexture = NULL;
     }
 
     // Gets a vector of vertices, with 3 points, and the normal
     Triangle (std::vector<Point> vert, Vector norm, Color col) : Object(col), vertices(vert), normal(norm) {
+        colorFromTexture = NULL;
     }
 
     // version with texture

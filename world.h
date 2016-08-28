@@ -34,7 +34,7 @@ class World {
     double nr;
 
     // pointer to a illuminate function (could be phong, phongblinn, etc)
-    Color (*illuminate)(Object*, Vector, Point, Vector, std::vector<LightSource*>) = NULL;
+    Color (*illuminate)(Object*, Vector, Point, Vector, std::vector<LightSource*>);// = NULL;
 
     // tree
     Kdtree kd;
@@ -44,6 +44,7 @@ public:
     // All world needs to be created is an index of refraction
     // which is set as 1 by default if no value is specified
     World (double nr = 1) : nr(nr) {
+        illuminate = NULL;
     }
 
     void setUpPhongIllumination(Color amLight) {
