@@ -1,0 +1,6 @@
+TODO:
+
+- Problem with shadow ray hitting transmissive object, check world.h comments around line
+  260.
+
+- Fix Kd-tree traversal, when trying with the full stanford bunny it breaks

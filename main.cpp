@@ -58,13 +58,14 @@ int main ( void ) {
     //world.addLight(&light2);
     //world.setUpPhongBlinnIllumination( Color(0.7,1,1) );
     world.setUpPhongIllumination( Color(0.25,0.61,1.00) );
+    //world.setUpPhongIllumination( Color(0.8,0.2,0.2) ); RED
 
     // create camera
     Point pos(0,0,0);
     Vector lookAt(0,-0.5,0); // not being used yet
     Vector up(0,1,0); // not being used yet
     Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, 
-        RAY_TRACER, 8, RAY_GRID);
+        RAY_TRACER, 8, RAY_CENTER);
 
     // render our world, get the color map we will put on canvas
     std::vector<Color> colorMap = cam.render(world);

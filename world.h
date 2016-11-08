@@ -225,7 +225,9 @@ public:
                     objectHit->getNormal(pointHit), lightsHitList);
 
             Color finalColor = amb + diff_spec;
+
 /*
+
             // If lights hit is empty, it means the shadow ray might have hit something
             // before reaching the light, i.e. an object
             // In this case we should take into account if the object is transmissive
@@ -256,6 +258,18 @@ public:
                     }
                 }
 
+                // TODO 
+
+                // 
+                //  FOUND THE PROBLEM!
+                //  Turns out when the ray is leaving the sphere it'll have a shadow ray to hit the light (or it should)
+                //  plus a ray that will go to oblivion, thus returning the world 'ambient color'
+                //  to check, on main, just uncomment setUpPhongIllumination RED
+                //
+
+                // WE DIDNT HIT THE LIGHT SO WE PROBABLY HIT AN OBJECT
+                // (MAYBE THIS TEST IS NOT EVEN NEESSARY BECAUSE IF WE DIDNT HIT THE LIGHT THEN FOR SURE WE HIT SOMETHING ON THE WAY)
+
                 // we find the minimum distance on vDist, which would be closest intersection
                 objHit = indexMinElement(vDist);
 
@@ -263,6 +277,8 @@ public:
                 // might hit it again considering the 'fix' we apply to it because of rounding
                 // errors above
                 if (objHit != -1 && depth > 1 && vObjs[objHit] != objectHit && vObjs[objHit]->getKt() > 0) {
+                    //finalColor = Color(0,1,0); // green because why not 
+
                     // Direction of incoming ray
                     Vector rayDir = vRays[objHit].getDirection();
                     Vector objNormal = vObjs[objHit]->getNormal(vPoint[objHit]);
@@ -272,31 +288,15 @@ public:
                     double kt = vObjs[objHit]->getKt();
 
                     Point transmittedRayOrigin;
-                    
-                    // inside
-                    if (dot(-1.0 * rayDir,objNormal) < 0) {
-                        normal = -1.0 * objNormal;
-                        nit = vObjs[objHit]->getNr() / nr;
 
-                        transmittedRayOrigin = Point(vPoint[objHit].x + objNormal.x * 0.1f, 
-                                                     vPoint[objHit].y + objNormal.y * 0.1f,  
-                                                     vPoint[objHit].z + objNormal.z * 0.1f );
 
-                        // std::cout << "why" << std::endl;
-                    } else { // outside
-                        normal = objNormal;
-                        nit = nr / vObjs[objHit]->getNr();
+                    normal = objNormal;
+                    nit = nr / vObjs[objHit]->getNr();
 
-                        // the ray needs to go a bit inside the object to be sure
-                        transmittedRayOrigin = Point(vPoint[objHit].x + objNormal.x * -0.1f, 
-                                                     vPoint[objHit].y + objNormal.y * -0.1f,  
-                                                     vPoint[objHit].z + objNormal.z * -0.1f );
-
-                        // std::cout << "why2" << std::endl;
-                        // std::cout << "KKK " << vPoint[objHit].x << " " << vPoint[objHit].y << " " << vPoint[objHit].z << std::endl;
-                        // std::cout << transmittedRayOrigin.x << " " << transmittedRayOrigin.y << " " << transmittedRayOrigin.z << std::endl;
-                        // std::cout << lightsReached( transmittedRayOrigin, lightList).size();
-                    }
+                    // the ray needs to go a bit inside the object to be sure
+                    transmittedRayOrigin = Point(vPoint[objHit].x + objNormal.x * -0.1f, 
+                                                 vPoint[objHit].y + objNormal.y * -0.1f,  
+                                                 vPoint[objHit].z + objNormal.z * -0.1f );
 
                     double aux = 1.0 + (pow(nit,2) * (pow( dot(-1.0 * rayDir,normal) , 2) - 1.0));
 
@@ -309,8 +309,12 @@ public:
                         Vector transmittedDir = nit * rayDir + (nit * dot(-1.0 * rayDir,normal) - sqrt(aux) ) * normal;
                         finalColor += kt * spawnIlluminated( Ray(transmittedRayOrigin, transmittedDir), depth-1);
                     }
+                    
+
                 }
+
             }
+
 */
             
             if ( depth > 1 ) {
