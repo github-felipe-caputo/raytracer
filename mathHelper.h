@@ -31,6 +31,10 @@ struct Color {
         return Color(r + rhs.r, g + rhs.g, b + rhs.b);
     } 
 
+    Color operator-(const Color& rhs){
+        return Color(r - rhs.r, g - rhs.g, b - rhs.b);
+    } 
+
     Color operator/(double rhs){
         return Color(r/rhs, g/rhs, b/rhs);
     } 

@@ -263,7 +263,7 @@ public:
                 // 
                 //  FOUND THE PROBLEM!
                 //  Turns out when the ray is leaving the sphere it'll have a shadow ray to hit the light (or it should)
-                //  plus a ray that will go to oblivion, thus returning the world 'ambient color'
+                //  plus a ray that will go to oblivion, thus returning the world 'backgroundRadiance'
                 //  to check, on main, just uncomment setUpPhongIllumination RED
                 //
 
@@ -304,10 +304,10 @@ public:
                     if (aux < 0) {
                         // Same thing as reflected ray
                         Vector reflectedDir = reflect(rayDir, normal, VECTOR_INCOMING );
-                        finalColor += kt * spawnIlluminated( Ray(transmittedRayOrigin, reflectedDir), depth-1);
+                        finalColor += kt * spawnIlluminated( Ray(transmittedRayOrigin, reflectedDir), depth-1); // need to do something about radiantbackground
                     } else {
                         Vector transmittedDir = nit * rayDir + (nit * dot(-1.0 * rayDir,normal) - sqrt(aux) ) * normal;
-                        finalColor += kt * spawnIlluminated( Ray(transmittedRayOrigin, transmittedDir), depth-1);
+                        finalColor += kt * spawnIlluminated( Ray(transmittedRayOrigin, transmittedDir), depth-1); // need to do something about radiantbackground
                     }
                     
 
