@@ -26,7 +26,7 @@ Color illuminatePhong(Object *obj, Vector view, Point point, Vector normal, std:
 
     Color objColor = obj->getColor(point);
     Color objSpecColor = obj->getSpecularColor();
-    
+
     double kd = obj->getKd();
     double ks = obj->getKs();
     double ke = obj->getKe();
@@ -67,7 +67,7 @@ Color illuminatePhongBlinn(Object *obj, Vector view, Point point, Vector normal,
 
     Color objColor = obj->getColor(point);
     Color objSpecColor = obj->getSpecularColor();
-    
+
     double kd = obj->getKd();
     double ks = obj->getKs();
     double ke = obj->getKe();

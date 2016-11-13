@@ -1,6 +1,19 @@
 TODO:
 
-- Problem with shadow ray hitting transmissive object, check world.h comments around line
-  260.
+- Fix shadow ray through transparent object.
+|-> For now it’s working. The idea is, if the shadow ray does not reach any lights
+|   it would normally mean it’s necessary to cast a shadow. Now, if that happens 
+|   I proceed to check if the objects in the way are transparent. If they are,
+|   then I still calculate the diffusive and specular components of the light
+|   but they are attenuated by a certain amount.
+|-> For now the solution is not so good regarding code, both the functions
+|   lightsReached and lightsReachedThroughTransparency are essentially the same.
+|   Needs a better way to deal with that.
+|-> For the the value of attenuation is a hard coded 0.8. Maybe a better value to
+|   use would be the Kt value of the object in the light’s way (in this case what
+|   happens if here are more than one? who knows, consider that).
 
-- Fix Kd-tree traversal, when trying with the full stanford bunny it breaks
+- Fix Kd-tree traversal, when trying with the full stanford bunny it breaks.
+
+- Maybe change the ray marching stuff, like spawnRayMarch, which is mainly on
+  world.h to a new file just for that. Possibly a new ‘project’ altogether.
