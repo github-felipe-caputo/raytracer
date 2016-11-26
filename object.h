@@ -29,13 +29,13 @@ public:
     Object() {}
 
     Object(Color col) : col(col) {}
-    
+
     virtual Point intersect (Ray ray) = 0;
 
     virtual bool isInside (Voxel v) = 0;
 
     virtual Vector getNormal (Point p) = 0;
-    
+
     // this function is to get a color in a specific point, if this object has
     // a texture
     virtual Color getColor (Point p) = 0;
@@ -43,12 +43,12 @@ public:
     Color getColor(){return col;}
 
     // kd + ks < 1 YOU PAY ATTENTION JESUS
-    void setUpPhong (Color spec, double newka, double newkd, double newks, double newke) { 
+    void setUpPhong (Color spec, double newka, double newkd, double newks, double newke) {
         specular = spec;
         ka = newka;
         kd = newkd;
         ks = newks;
-        ke = newke; 
+        ke = newke;
     }
 
     void setUpReflectionTransmission(double nkr, double nkt, double nnr) {
@@ -97,7 +97,7 @@ class Sphere : public Object {
     double r;
 
     // pointer to a possible texture function
-    Color (*colorFromTexture)(Point, double, Point);// = NULL; initialization warning 
+    Color (*colorFromTexture)(Point, double, Point);// = NULL; initialization warning
 public:
 
     // creating an object
@@ -114,13 +114,13 @@ public:
         Point o = ray.getOrigin();
         Vector d = ray.getDirection();
         normalize(d);
-        
+
         // a = 1 because direction of a ray is normalized
         //double A = 1;
         double B = 2.0 * (d.x * (o.x - c.x) + d.y * (o.y - c.y) + d.z * (o.z - c.z));
         double C = (o.x - c.x)*(o.x - c.x) + (o.y - c.y)*(o.y - c.y) + (o.z - c.z)*(o.z - c.z) - r*r;
         double w = 0;
-        
+
         double BBminus4C = B*B - 4.0*C;
 
         if (BBminus4C < 0)
@@ -136,7 +136,7 @@ public:
         {
             double w1 = (-B + sqrt(BBminus4C)) / 2.0;
             double w2 = (-B - sqrt(BBminus4C)) / 2.0;
-            
+
             if (w1 > 0 && w1 <= w2) // w1 is positive and smaller than or equal to w2
                 w = w1;
             else if (w2 > 0) // w2 is positive and either smaller than w1 or w1 is negative
@@ -146,7 +146,7 @@ public:
 
             return Point(o.x + d.x * w, o.y + d.y * w, o.z + d.z * w);
         }
-    } 
+    }
 
     // checks if this object is inside a voxel
     // returns true if even part of the object is inside of it
@@ -189,7 +189,7 @@ public:
     Color getColor (Point p) {
         if (*colorFromTexture == NULL)
             return col;
-        else            
+        else
             return (*colorFromTexture)(c,r,p);
     }
 };
@@ -236,7 +236,7 @@ public:
         f = std::abs( vert[0].y );
 
         colorFromTexture = function;
-    }    
+    }
 
     // NOTE: this intersection is not taking into account the normal yet,
     // in other words, it will return an intersection even if the triangle is
@@ -259,14 +259,14 @@ public:
             unsigned int i, j;
             bool result = false;
             for (i = 0, j = vertices.size() - 1; i < vertices.size(); j = i++) {
-                if ( ((vertices[i].z > wz) != (vertices[j].z > wz)) && 
+                if ( ((vertices[i].z > wz) != (vertices[j].z > wz)) &&
                     (wx < (vertices[j].x-vertices[i].x) * (wz-vertices[i].z) / (vertices[j].z-vertices[i].z) + vertices[i].x) )
                     result = !result;
             }
 
-            if(result) 
+            if(result)
                 return Point(wx, wy, wz);
-        } 
+        }
 
         return o;
     }
@@ -327,7 +327,6 @@ public:
     }
 
     // Below, versions where you give the points not in a vector
-
     Triangle (Point p1, Point p2, Point p3, Color col) : Object(col) {
         vertices.push_back(p1);
         vertices.push_back(p2);
@@ -358,11 +357,7 @@ public:
         colorFromTexture = function;
     }
 
-    // NOTE: this intersection is not taking into account the normal yet,
-    // in other words, it will return an intersection even if the triangle is
-    // "backwards"
-    //
-    // Code based on Tomas Akenine-Möller code at 
+    // Code based on Tomas Akenine-Möller code at
     // http://fileadmin.cs.lth.se/cs/Personal/Tomas_Akenine-Moller/code/
     //
     Point intersect (Ray ray) {
@@ -385,26 +380,16 @@ public:
 
         qvec = cross(tvec,edge1);
 
-        if (det > EPSILON) {
-            u = dot(tvec, pvec);
-            if (u < 0.0 || u > det)
-                return o;
-
-            v = dot(d, qvec);
-            if (v < 0.0 || u + v > det)
-                return o;
-        } else if (det < -EPSILON) {
-            u = dot(tvec, pvec);
-            if (u > 0.0 || u < det)
-                return o;
-              
-            v = dot(d, qvec) ;
-            if (v > 0.0 || u + v < det)
-                return o;
-        }
-        else {
+        if (det < EPSILON)
             return o;
-        }
+
+        u = dot(tvec, pvec);
+        if (u < 0.0 || u > det)
+            return o;
+
+        v = dot(d, qvec);
+        if (v < 0.0 || u + v > det)
+            return o;
 
         t = dot(edge2, qvec) * inv_det;
         u *= inv_det;
@@ -418,7 +403,7 @@ public:
         double wz = o.z + d.z * t;
 
         return Point(wx,wy,wz);
-    } 
+    }
 
     std::vector<Point> getPoints () {
         return vertices;
@@ -449,7 +434,7 @@ public:
     Color getColor (Point p) {
         if (*colorFromTexture == NULL)
             return col;
-        else            
+        else
             return (*colorFromTexture)(vertices,p);
     }
 };

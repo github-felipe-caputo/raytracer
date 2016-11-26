@@ -145,8 +145,6 @@ public:
 
                     Point transmittedRayOrigin;
 
-                    //std::cout << dot(rayDir,objNormal) << std::endl;
-
                     // inside
                     if (dot(-1 * rayDir,objNormal) < 0) {
                         normal = -1.0 * objNormal;

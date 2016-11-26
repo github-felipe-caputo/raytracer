@@ -18,8 +18,8 @@
 #include "kdtree.h"
 
 // pixels
-int imageHeight = 512;
-int imageWidth = 512;
+int imageHeight = 1024;
+int imageWidth = 1024;
 
 // keeping the aspect ratio of the window pixels
 double viewPlaneHeigth = 0.5;
@@ -31,7 +31,7 @@ int main ( void ) {
     sf::RenderWindow window(sf::VideoMode(imageWidth, imageHeight), "Ray Tracer");
 
     // Get the triangles from the bunny fily
-    std::vector<Triangle> bunny = readPlyFile("plyFiles/bun_zipper", Color(1,0.2,0.2));
+    std::vector<Triangle> bunny = readPlyFile("plyFiles/bun_zipper_res2", Color(1,0.2,0.2));
 
     // create a light source
     PointLight light( Point(0.0, 5.0, 3.0), Color(1,1,1) );
@@ -41,9 +41,8 @@ int main ( void ) {
 
     // Add the triangles from the bunny in the world
     for (unsigned int i = 0; i < bunny.size() ; ++i) {
-        Triangle *t = new Triangle( bunny[i].getPoints(), Color(1,0.2,0.2) );
-        (*t).setUpPhong( Color(1,1,1), 0.6, 0.35, 0.2, 20.0 );
-        world.addObject(t);
+        bunny[i].setUpPhong( Color(1,1,1), 0.6, 0.35, 0.2, 20.0 );
+        world.addObject(&bunny[i]);
     }
 
     // add light and set up phong
@@ -57,12 +56,11 @@ int main ( void ) {
 
     std::cout << "Time to build tree (in milisecs): " << 1000 * (time_b - time_a) / CLOCKS_PER_SEC << std::endl;
 
-
     // create camera
-    Point pos(0,0.1,0.4);
+    Point pos(0,0.1,0.3);
     Vector lookAt(0,-0.5,0); // not being used yet
     Vector up(0,1,0); // not being used yet
-    Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, 
+    Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth,
         RAY_TRACER, 1, RAY_CENTER);
 
     // render our world, get the color map we will put on canvas
@@ -81,7 +79,7 @@ int main ( void ) {
             canvas.setPixel( i, j, c.r, c.g, c.b );
         }
     }
-    
+
     // run the program as long as the window is open
     while (window.isOpen())
     {
