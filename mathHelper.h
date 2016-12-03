@@ -29,15 +29,15 @@ struct Color {
     // Non-modifying arithematic operators
     Color operator+(const Color& rhs){
         return Color(r + rhs.r, g + rhs.g, b + rhs.b);
-    } 
+    }
 
     Color operator-(const Color& rhs){
         return Color(r - rhs.r, g - rhs.g, b - rhs.b);
-    } 
+    }
 
     Color operator/(double rhs){
         return Color(r/rhs, g/rhs, b/rhs);
-    } 
+    }
 
     Color operator*(const Color& rhs){
         return Color(r * rhs.r, g * rhs.g, b * rhs.b);
@@ -52,16 +52,16 @@ struct Color {
     }
 
     // Modifying arithematic operators
-    Color& operator+=( const Color& rhs ) { 
-        r += rhs.r;  
-        g += rhs.g;  
+    Color& operator+=( const Color& rhs ) {
+        r += rhs.r;
+        g += rhs.g;
         b += rhs.b;
 
-        return *this; 
+        return *this;
     }
 
     // Comparisons
-    bool operator!=(const Color& rhs) { 
+    bool operator!=(const Color& rhs) {
         return (r != rhs.r || g != rhs.g || b != rhs.b);
     }
 };
@@ -92,11 +92,11 @@ struct Point {
     // Non-modifying arithematic operators
     Point operator+(const Point& rhs) {
         return Point(x + rhs.x, y + rhs.y, z + rhs.z);
-    } 
+    }
 
     Point operator-(const Point& rhs) {
         return Point(x - rhs.x, y - rhs.y, z - rhs.z);
-    } 
+    }
 
     Point operator* (double rhs) {
         return Point(x * rhs, y * rhs, z * rhs);
@@ -127,14 +127,14 @@ struct Vector {
                 y = y / len;
                 z = z / len;
             }
-        } 
+        }
     }
 
     // constructor, from origin to destination
-    Vector ( Point o, Point d, bool norm = false ) { 
+    Vector ( Point o, Point d, bool norm = false ) {
         x = d.x - o.x;
         y = d.y - o.y;
-        z = d.z - o.z; 
+        z = d.z - o.z;
 
         if(norm) {
             double len = sqrt( x*x+y*y+z*z );
@@ -143,17 +143,17 @@ struct Vector {
                 y = y / len;
                 z = z / len;
             }
-        }  
+        }
     }
 
     // Non-modifying arithematic operators
     Vector operator+(const Vector& rhs) {
         return Vector(x + rhs.x, y + rhs.y, z + rhs.z);
-    } 
+    }
 
     Vector operator-(const Vector& rhs) {
         return Vector(x - rhs.x, y - rhs.y, z - rhs.z);
-    } 
+    }
 
     Vector operator* (double rhs) {
         return Vector(x * rhs, y * rhs, z * rhs);
@@ -225,7 +225,7 @@ struct Matrix {
             vals[i] = matrix[i] + rhs.matrix[i];
 
         return Matrix(row, col, vals);
-    } 
+    }
 
     Matrix operator- (const Matrix& rhs) {
         double vals[row * col];
@@ -234,7 +234,7 @@ struct Matrix {
             vals[i] = matrix[i] - rhs.matrix[i];
 
         return Matrix(row, col, vals);
-    } 
+    }
 
     Matrix operator* (const Matrix& rhs) {
         double vals[row * rhs.col];
@@ -242,7 +242,7 @@ struct Matrix {
         for (int i = 0; i < row; ++i) {
             for (int j = 0; j < rhs.col; ++j) {
                 vals[rhs.col*i+j] = 0;
-                for (int k = 0; k < rhs.row; ++k) 
+                for (int k = 0; k < rhs.row; ++k)
                     vals[i * rhs.col + j] += matrix[i * col + k] * rhs.matrix[k * rhs.col + j];
             }
         }
@@ -306,7 +306,7 @@ struct Voxel
 
     Voxel () {}
 
-    Voxel(double xLeft, double xRight, double yBottom, double yTop, double zFar, double zNear) 
+    Voxel(double xLeft, double xRight, double yBottom, double yTop, double zFar, double zNear)
         : xLeft(xLeft), xRight(xRight), yBottom(yBottom), yTop(yTop), zFar(zFar), zNear(zNear) {}
 
     Voxel splitFront (int subdiv) {
@@ -314,7 +314,7 @@ struct Voxel
             return Voxel((xLeft+xRight)/2.0, xRight, yBottom, yTop, zFar, zNear);
         else if (subdiv == SUBDIV_Y)
             return Voxel(xLeft, xRight, (yBottom+yTop)/2.0, yTop, zFar, zNear);
-        else 
+        else
             return Voxel(xLeft, xRight, yBottom, yTop, (zFar+zNear)/2.0, zNear);
     }
 
@@ -323,7 +323,7 @@ struct Voxel
             return Voxel(xLeft, (xLeft+xRight)/2.0, yBottom, yTop, zFar, zNear);
         else if (subdiv == SUBDIV_Y)
             return Voxel(xLeft, xRight, yBottom, (yBottom+yTop)/2.0, zFar, zNear);
-        else 
+        else
             return Voxel(xLeft, xRight, yBottom, yTop, zFar, (zFar+zNear)/2.0);
     }
 
@@ -332,7 +332,7 @@ struct Voxel
             return (xLeft+xRight)/2.0;
         else if (subdiv == SUBDIV_Y)
             return (yBottom+yTop)/2.0;
-        else 
+        else
             return (zFar+zNear)/2.0;
     }
 
@@ -351,7 +351,7 @@ struct Voxel
             tmax = (xLeft - o.x) * divx;
         }
 
-        double divy = 1 / d.y; 
+        double divy = 1 / d.y;
         if (divy >= 0) {
             tymin = (yBottom - o.y) * divy;
             tymax = (yTop - o.y) * divy;
@@ -370,7 +370,7 @@ struct Voxel
         if (tymax < tmax)
             tmax = tymax;
 
-        double divz = 1 / d.z; 
+        double divz = 1 / d.z;
         if (divz >= 0) {
             tzmin = (zFar - o.z) * divz;
             tzmax = (zNear - o.z) * divz;
@@ -399,8 +399,8 @@ struct Voxel
     }
 
     Point getHalfLenghts() {
-        return Point((xRight - xLeft) / 2.0, 
-                     (yTop - yBottom) / 2.0, 
+        return Point((xRight - xLeft) / 2.0,
+                     (yTop - yBottom) / 2.0,
                      (zNear - zFar) / 2.0  );
     }
 
@@ -410,7 +410,7 @@ struct Voxel
  * Non-class functions
  */
 
-double distance ( const Point p, const Point q ) {
+double distance ( const Point &p, const Point &q ) {
     double a = p.x - q.x;
     double b = p.y - q.y;
     double c = p.z - q.z;
@@ -418,7 +418,7 @@ double distance ( const Point p, const Point q ) {
     return sqrt(a*a + b*b + c*c);
 }
 
-double length ( const Vector v ) {
+double length ( const Vector &v ) {
     return sqrt( v.x*v.x+v.y*v.y+v.z*v.z );
 }
 
@@ -432,11 +432,11 @@ void normalize ( Vector& v ) {
     }
 }
 
-Vector cross ( const Vector v, const Vector u ) {
+Vector cross ( const Vector &v, const Vector &u ) {
     return Vector( v.y*u.z - v.z*u.y , v.z*u.x - v.x*u.z , v.x*u.y - v.y*u.x );
 }
 
-double dot ( const Vector v , const Vector u ) {
+double dot ( const Vector &v , const Vector &u ) {
     return ( v.x*u.x + v.y*u.y + v.z*u.z );
 }
 
@@ -444,17 +444,17 @@ double dot ( const Vector v , const Vector u ) {
 // this vector can have two directions
 // incoming -> going to the surface
 // outgoing -> going from the surface
-Vector reflect ( Vector v, Vector N, int direction ) {
+Vector reflect ( Vector v, const Vector &N, const int &direction ) {
     normalize( v );
 
     if (direction == VECTOR_INCOMING)
         return (v - 2.0 * dot(v, N) * N);
-    else 
+    else
         return (2.0 * N * dot(v,N) - v);
 }
 
 // returns the index for the minimum value is a vector of doubles
-int indexMinElement ( std::vector<double> v ) {
+int indexMinElement ( const std::vector<double> &v ) {
     if (v.empty())
         return -1;
 

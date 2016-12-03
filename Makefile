@@ -6,14 +6,14 @@ CXXFLAGS = 		-Wall \
 LDFLAGS =		-L/usr/local/lib
 LDLIBS =		-lsfml-graphics -lsfml-window -lsfml-system
 
-CPP_FILES = main.cpp 
+CPP_FILES = main.cpp
 OBJFILES = main.o plyfile.o
 
 main: $(OBJFILES)
 	$(CXX) -o main $(OBJFILES) $(CXXFLAGS) $(LDFLAGS) $(LDLIBS)
 
 main.o: main.cpp
-	$(CXX) -c main.cpp $(CXXFLAGS) 
+	$(CXX) -c main.cpp $(CXXFLAGS)
 
 # ply.h is a a file in c, the code here is different
 # no warning here because the library is full of small
