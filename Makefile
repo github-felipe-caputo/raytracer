@@ -2,9 +2,11 @@ CC =		    gcc
 CCFLAGS = 		#-Wall
 CXX = 			g++
 CXXFLAGS = 		-Wall \
-			-I/usr/local/include
+				-std=c++11 \
+				-I/usr/local/include
 LDFLAGS =		-L/usr/local/lib
 LDLIBS =		-lsfml-graphics -lsfml-window -lsfml-system
+
 
 CPP_FILES = main.cpp
 OBJFILES = main.o plyfile.o

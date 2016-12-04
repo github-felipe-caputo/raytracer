@@ -13,10 +13,23 @@ TODO:
 |   use would be the Kt value of the object in the light’s way (in this case what
 |   happens if here are more than one? who knows, consider that).
 
+- Maybe change the ray marching stuff, like spawnRayMarch, which is mainly on
+| world.h to a new file just for that. Possibly a new ‘project’ altogether.
+|-> Refactor the code just like I refactored getColorInPixel.
+
+- Kdtrees, make sure the intersection is working by rendering the full bunny
+in different angles.
+
+- Threads for pixel rendering.
+|-> https://medium.com/@phostershop/solving-multithreaded-raytracing-issues-with-c-11-7f018ecd76fa#.d4scno8uk
+
+
+FIXED:
+
 - Fix Kd-tree traversal, when trying with the full stanford bunny it breaks.
 |-> Also breaking with res4
 |-> After running the bunny without the kd-tree I get the same feedback, maybe
     the error is reading the triangles and not the kd-tree…
-
-- Maybe change the ray marching stuff, like spawnRayMarch, which is mainly on
-  world.h to a new file just for that. Possibly a new ‘project’ altogether.
+——————
+Problem was actually the intersection between rays and triangles. Seems to be working
+fully now.
