@@ -2,7 +2,7 @@ TODO:
 
 - Fix shadow ray through transparent object.
 |-> For now it’s working. The idea is, if the shadow ray does not reach any lights
-|   it would normally mean it’s necessary to cast a shadow. Now, if that happens 
+|   it would normally mean it’s necessary to cast a shadow. Now, if that happens
 |   I proceed to check if the objects in the way are transparent. If they are,
 |   then I still calculate the diffusive and specular components of the light
 |   but they are attenuated by a certain amount.
@@ -20,10 +20,6 @@ TODO:
 - Kdtrees, make sure the intersection is working by rendering the full bunny
 in different angles.
 
-- Threads for pixel rendering.
-|-> https://medium.com/@phostershop/solving-multithreaded-raytracing-issues-with-c-11-7f018ecd76fa#.d4scno8uk
-
-
 FIXED:
 
 - Fix Kd-tree traversal, when trying with the full stanford bunny it breaks.
@@ -33,3 +29,8 @@ FIXED:
 ——————
 Problem was actually the intersection between rays and triangles. Seems to be working
 fully now.
+
+- Threads for pixel rendering.
+|-> https://medium.com/@phostershop/solving-multithreaded-raytracing-issues-with-c-11-7f018ecd76fa#.d4scno8uk
+——————
+Done!
