@@ -18,8 +18,8 @@
 #include "kdtree.h"
 
 // pixels
-int imageHeight = 512;
-int imageWidth = 512;
+int imageHeight = 1024;
+int imageWidth = 1024;
 
 // keeping the aspect ratio of the window pixels
 double viewPlaneHeigth = 0.5;
@@ -69,12 +69,7 @@ int main ( void ) {
         RAY_TRACER, 8, RAY_GRID);
 
     // render our world, get the color map we will put on canvas
-    clock_t time_a = clock();
     std::vector<Color> colorMap = cam.render(world);
-    clock_t time_b = clock();
-
-    std::cout << "Time to render (in milisecs): " << 1000 * (time_b - time_a) / CLOCKS_PER_SEC << std::endl;
-
 
     // Tone reproduction
     std::vector<Color> toneReprodColorMap = compressionPerceptual(colorMap , 100);

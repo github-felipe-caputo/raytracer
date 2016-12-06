@@ -14,8 +14,6 @@
 #include <future>
 #include <thread>
 
-using namespace std;
-
 class Camera {
     // camera'ss position
     Point position;
@@ -143,9 +141,31 @@ public:
 
 
     std::vector<Color> renderRayTracer (World world) {
-        // Result color of a ray
-        std::vector<Color> colorMap;
+        // Size of canvas
+        int pixelNum = imageWidth * imageHeight;
 
+        // Result color of a ray
+        std::vector<Color> colorMap(pixelNum);
+
+        int cores = std::thread::hardware_concurrency();
+        volatile std::atomic<int> count(0);
+        std::vector<std::future<void> > futureVector;
+
+        while (cores--) {
+            futureVector.push_back(
+                std::async([=, &colorMap, &world, &count]()
+                {
+                    while (true) {
+                        int index = count++;
+                        if (index >= pixelNum)
+                            break;
+                        int i = index / imageWidth;
+                        int j = index % imageWidth;
+                        colorMap[index] = getColorInPixel(world,i,j);
+                    }
+                }));
+        }
+/*
         // this loop is going like
         // consider origin at top left
         // fixate column
@@ -157,7 +177,7 @@ public:
                 colorMap.push_back( getColorInPixel(world,i,j) );
             }
         }
-
+*/
         // will return a vector with imageWidth * imageHeight values, use it to paint the canvas
         return colorMap;
     }
