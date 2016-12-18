@@ -12,7 +12,7 @@
 #include "camera.h"
 #include "lightSource.h"
 #include "illuminationModel.h"
-#include "texture.h"
+#include "proceduralTexture.h"
 #include "toneReproduction.h"
 
 #include "kdtree.h"

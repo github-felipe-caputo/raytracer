@@ -4,12 +4,14 @@
 #include <vector>
 #include <cmath>
 #include "mathHelper.h"
+#include "texture.h"
 
 #include "triBoxOverlap.h"
 
 class Object {
 protected:
     // material?
+    Texture texture;
 
     // color, also ambient/diffuse for phong
     Color col;
