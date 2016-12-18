@@ -32,6 +32,8 @@ public:
 
     Object(Color col) : col(col) {}
 
+    Object(Texture texture) : texture(texture) {}
+
     virtual Point intersect (Ray ray) = 0;
 
     virtual bool isInside (Voxel v) = 0;
@@ -112,6 +114,9 @@ public:
         colorFromTexture = function;
     }
 
+    Sphere ( Point c, double r, Texture texture ) : Object(texture), c(c), r(r) {
+    }
+
     Point intersect (Ray ray) {
         Point o = ray.getOrigin();
         Vector d = ray.getDirection();
@@ -189,10 +194,12 @@ public:
     }
 
     Color getColor (Point p) {
-        if (*colorFromTexture == NULL)
-            return col;
-        else
+        if (texture.isInitialized())
+            return texture.getColorSphericalMapping(c,r,p);
+        else if (*colorFromTexture != NULL)
             return (*colorFromTexture)(c,r,p);
+        else
+            return col;
     }
 };
 

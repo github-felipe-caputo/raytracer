@@ -27,9 +27,13 @@ double viewPlaneWidth = 0.5;
 
 int main ( void ) {
     // first create our objects
-    Sphere frontSphere( Point(0.0,0.1,-1.9), 0.4, Color(1,1,1) );
-    frontSphere.setUpPhong( Color(1,1,1), 0.075, 0.075, 0.2, 20.0 );
-    frontSphere.setUpReflectionTransmission(0.0, 0.8, 0.95);
+    //Sphere frontSphere( Point(0.0,0.1,-1.9), 0.4, Color(1,1,1) );
+    //frontSphere.setUpPhong( Color(1,1,1), 0.075, 0.075, 0.2, 20.0 );
+    //frontSphere.setUpReflectionTransmission(0.0, 0.8, 0.95);
+
+    Sphere frontSphere( Point(0.0,0.1,-1.9), 0.4, Texture("textures/earth.jpg") );
+    frontSphere.setUpPhong( Color(1,1,1), 1.0, 1.0, 0.0, 1.0 );
+    //frontSphere.setUpReflectionTransmission(0.0, 0.0, 0.0);
 
     Sphere backSphere( Point(-0.65,-0.2,-2.5), 0.3, Color(0.7,0.7,0.7) );
     backSphere.setUpPhong( Color(1,1,1), 0.15, 0.25, 1.0, 20.0 );

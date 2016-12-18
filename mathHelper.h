@@ -13,7 +13,7 @@
 #define PI 3.14159265
 
 /*
- * The Color class.
+ * The Color class, RGB should be between 0 and 1
  */
 struct Color {
     // RGB
