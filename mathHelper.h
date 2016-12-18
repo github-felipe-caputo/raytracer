@@ -15,7 +15,6 @@
 /*
  * The Color class.
  */
-
 struct Color {
     // RGB
     double r, g, b;

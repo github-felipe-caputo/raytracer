@@ -5,8 +5,37 @@
 #include <cmath>
 #include "mathHelper.h"
 
+#include <SFML/Graphics.hpp>
+#include <SFML/Graphics/Image.hpp>
+
+// This function will read an image and create a matrix (vector of vectors)
+// with the pixel (Color) data of the image
+std::vector<std::vector<Color> > loadImageFromFile(std::string filename){
+    sf::Image image;
+    if (!image.loadFromFile(filename)) {
+        std::cerr << "Error: When loading file '" << filename << std::endl;
+        exit(1);
+    }
+
+    sf::Vector2u size = image.getSize();
+    int width = size.x;
+    int height = size.y;
+
+    std::vector<std::vector<Color> > texture(height, std::vector<Color>(width));
+
+    for (int i = 0; i < height; ++i) {
+        for (int j = 0; j < width; ++j) {
+            sf::Color c = image.getPixel(10,10);
+            texture[i][j] = Color(c.r,c.g,c.b);
+        }
+    }
+
+    return texture;
+}
+
+
 // let's assume for now this will always be used for a floor that always coincides
-// with the x and z plane (y is constant) 
+// with the x and z plane (y is constant)
 //
 // this function will work also on the assumption that the points on the vertices list is like so:
 //
@@ -50,6 +79,22 @@ Color planarCheckerTexture (std::vector<Point> vertices, Point p) {
     }
 
     return finalColor;
+}
+
+// TODO still working on spherical texturing
+Color sphericalCheckerTexture (Point center, double radius, Point p) {
+    double phi = atan2(p.x, p.z);
+    double theta = acos(p.y);
+    if (phi < 0.0)
+        phi += 2.0 * PI;
+
+    double u = phi / (2.0 * PI);
+    double v = 1.0 - theta / PI;
+
+
+
+
+    return Color(0,0,0);
 }
 
 #endif
