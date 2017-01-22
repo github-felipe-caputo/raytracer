@@ -104,6 +104,11 @@ public:
         } else {
             Point pointHit = objectHit->intersect(ray);
 
+            // if object is emissive, return emissive color and end
+            if (objectHit->isEmissive()) {
+                return objectHit->getEmissiveColor();
+            }
+
             // shadow ray origin should be slightly  different to account for rounding errors
             Vector normal = objectHit->getNormal(pointHit);
             Point originShadowRay(pointHit.x + normal.x * 0.1f,
@@ -206,6 +211,11 @@ public:
         } else {
             Object* objectHit = objectList[objHit];
             Point pointHit = vPoint[objHit];
+
+            // if object is emissive, return emissive color and end
+            if (objectHit->isEmissive()) {
+                return objectHit->getEmissiveColor();
+            }
 
             // shadow ray origin should be slightly  different to account for rounding errors
             Vector normal = objectHit->getNormal(pointHit);

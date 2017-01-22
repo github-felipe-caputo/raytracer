@@ -10,7 +10,7 @@
 
 class Object {
 protected:
-    // material?
+    // material
     Texture texture;
 
     // color, also ambient/diffuse for phong
@@ -19,6 +19,11 @@ protected:
     // other phong values
     Color specular;
     double ka, kd, ks, ke;
+
+    // emmisive 'material' for area lights
+    // if object is emissive, no need for any other color or value
+    bool emissive = false;
+    Color emissiveColor;
 
     // values for reflection and transmission
     double kr, kt;
@@ -44,7 +49,22 @@ public:
     // a texture
     virtual Color getColor (Point p) = 0;
 
-    Color getColor(){return col;}
+    Color getColor() {
+        return col;
+    }
+
+    void setUpEmissionColor(Color ems) {
+        emissive = true;
+        emissiveColor = ems;
+    }
+
+    Color getEmissiveColor() {
+        return emissive;
+    }
+
+    bool isEmissive() {
+        return emissive;
+    }
 
     // kd + ks < 1 YOU PAY ATTENTION JESUS
     void setUpPhong (Color spec, double newka, double newkd, double newks, double newke) {

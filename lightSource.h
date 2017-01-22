@@ -10,16 +10,17 @@ protected:
     Color color;
 
 public:
+    LightSource () {};
 
     LightSource ( Point position, Color color ) : position(position), color(color) {}
 
     Point getPos () {
         return position;
-    } 
+    }
 
     Color getColor () {
         return color;
-    } 
+    }
 
     virtual bool reaches(Point p) = 0;
     virtual double getAttenuation(Point p) = 0;
@@ -30,7 +31,7 @@ public:
 
 class PointLight : public LightSource {
 public:
-    PointLight( Point position, Color color ) : LightSource(position, color) {} 
+    PointLight( Point position, Color color ) : LightSource(position, color) {}
 
     // Point light can always be reached
     bool reaches (Point p) {
@@ -55,7 +56,7 @@ class SpotLight : public LightSource {
     double aExp; // attenuation exponent;
 
 public:
-    SpotLight( Point position, Color color, Vector dir, double angle, double aExp = 0 ) : LightSource(position, color), dir(dir), angle(angle), aExp(aExp) {} 
+    SpotLight( Point position, Color color, Vector dir, double angle, double aExp = 0 ) : LightSource(position, color), dir(dir), angle(angle), aExp(aExp) {}
 
     // SpotLight might not be reached depending on the angle and direction
     bool reaches (Point p) {
@@ -103,7 +104,7 @@ public:
 
             // there was a intersection
             if (w1 > 0.0) {
-                Point inter(origin.x + direction.x * w1, origin.y + direction.y * w1, origin.z + direction.z * w1); 
+                Point inter(origin.x + direction.x * w1, origin.y + direction.y * w1, origin.z + direction.z * w1);
                 // if we are hitting the actual cone
                 if (dot( dir , Vector(position, inter, true) ) >= 0)
                     intersections.push_back( inter );
@@ -113,19 +114,59 @@ public:
             w1 = - (c1 - sqrt(c1c1minusc0c2)) / c2;
             w2 = - (c1 + sqrt(c1c1minusc0c2)) / c2;
 
-            if (w1 > 0.0) { 
-                Point inter1(origin.x + direction.x * w1, origin.y + direction.y * w1, origin.z + direction.z * w1); 
+            if (w1 > 0.0) {
+                Point inter1(origin.x + direction.x * w1, origin.y + direction.y * w1, origin.z + direction.z * w1);
                 if ( dot( dir , Vector(position, inter1, true) ) >= 0 )
                     intersections.push_back( inter1 );
             }
 
-            if (w2 > 0.0) { 
-                Point inter2(origin.x + direction.x * w2, origin.y + direction.y * w2, origin.z + direction.z * w2); 
+            if (w2 > 0.0) {
+                Point inter2(origin.x + direction.x * w2, origin.y + direction.y * w2, origin.z + direction.z * w2);
                 if ( dot( dir , Vector(position, inter2, true) ) >= 0 )
-                    intersections.push_back( inter2 ); 
+                    intersections.push_back( inter2 );
             }
-        } 
+        }
 
+        return intersections;
+    }
+};
+
+class AreaLight : public LightSource {
+    // This will be the object our light source will be based on
+    Object* object;
+
+public:
+    // TODO: will an area light have a position?
+    AreaLight( Object *object ) {
+        this->object = object;
+    }
+
+    // TODO This will need to return samples of points on the object position?
+    // maybe every object will need a center, BRDF will use it to sample
+    // http://mathworld.wolfram.com/SpherePointPicking.html
+    Point getPos () {
+        return Point(0,0,0);
+    }
+
+    // can always be reached / function to remove in factor of class?
+    bool reaches (Point p) {
+        return true;
+    }
+
+    // Point light attenuation = 1, none
+    double getAttenuation (Point p) {
+        return 1.0f;
+    }
+
+    // does the Ray ray intersect with this light (in this case, an area light, the object?)
+    std::vector<Point> intersect ( Ray ray ) {
+
+        // TODO: this function might need to change, should it only return one value?
+        // the the calls to it for a spot light will change
+        //object->intersect(ray);
+
+        // does nothing so far
+        std::vector<Point> intersections;
         return intersections;
     }
 };
