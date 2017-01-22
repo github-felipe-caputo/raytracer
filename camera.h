@@ -19,10 +19,16 @@ class Camera {
     Point position;
 
     // camera's lookat
-    Vector lookAt;
+    Point lookAt;
 
     // camera's up vector
     Vector up;
+
+    // the view-plane distance, fixed at 0.5
+    double focalLength = 0.5;
+
+    // view corrdinate system
+    Vector u,v,w;
 
     //
     // values to render the world
@@ -36,6 +42,9 @@ class Camera {
 
     // each pixel
     double unitsHigh, unitsWidth;
+
+    // 'first pixels' where the view will stay
+    double firstPixelx, firstPixely;
 
     // max depth, the bounces of the ray
     int MAX_DEPTH;
@@ -53,16 +62,8 @@ class Camera {
     // of that pixel. In other words i ranges from [0,imageWidth] and
     // j ranges from [0,imageHeight]
     Color getColorInPixel(World world, int i, int j){
-        // first pixel is at
-        double firstPlanex = -viewPlaneWidth/2.0;
-        double firstPlaney = viewPlaneHeigth/2.0;
-
         // ray direction
         double dx,dy,dz;
-
-        // creating rays
-        // for now I'm assuming position of camera is origin, focalLength = -0.5f (not using lookAt value yet);
-        double focalLength = -0.5;
 
         // Color average
         Color average;
@@ -74,18 +75,21 @@ class Camera {
 
         for (int a = 1; a < gridSize; ++a) {
             for (int b = 1; b < gridSize; ++b) {
-                dx = firstPlanex + (unitsWidth * (range * a)) + i * unitsWidth;
-                dy = firstPlaney - (unitsHigh * (range * b)) - j * unitsHigh;
+                dx = firstPixelx + (unitsWidth * (range * a)) + i * unitsWidth;
+                dy = firstPixely - (unitsHigh * (range * b)) - j * unitsHigh;
                 dz = focalLength;
 
-                // vector direction, normalize
-                Vector dir(dx,dy,dz, true);
+                Vector dir = dx*u + dy*v - dz*w;
+                normalize(dir);
 
                 // ray
                 Ray ray(position, dir);
 
                 // Color average
-                average += world.spawn( ray , MAX_DEPTH );
+                if (rayType == RAY_TRACER)
+                    average += world.spawn( ray , MAX_DEPTH );
+                else
+                    average += world.spawnRayMarch( ray , SAMPLE_NUM );
             }
         }
 
@@ -105,15 +109,24 @@ public:
     // rayType = if we are doing ray tracing or ray marching
     // ray marching here was implemented so far only for volumetric lighthing,
     // so some other values will need to be set up before using it (ka and ks for instance)
-    Camera(Point pos, Vector look, Vector up, int imH, int imW, double viewH, double viewW, int rayType, int depthOrSamples, int gridOrCenter) :
+    Camera(Point pos, Point look, Vector up, int imH, int imW, double viewH, double viewW, int rayType, int depthOrSamples, int gridOrCenter) :
         position(pos), lookAt(look), up(up), imageHeight(imH), imageWidth(imW), viewPlaneHeigth(viewH), viewPlaneWidth(viewW), rayType(rayType), gridOrCenter(gridOrCenter) {
 
         // each pixel
         unitsHigh = viewH/imH;
         unitsWidth = viewW/imW;
 
-        //normalize lookat
-        normalize(lookAt);
+        // first pixel of our view// first pixel is at
+        firstPixelx = -viewPlaneWidth*0.5;
+        firstPixely = viewPlaneHeigth*0.5;
+
+        // defining the viewing coordinates
+        // oposite direction to help calculations
+        w = Vector(lookAt,position,true);
+        normalize(w);
+        u = cross(up,w);
+        normalize(u);
+        v = cross(w,u);
 
         if (rayType == RAY_TRACER) {
             MAX_DEPTH = depthOrSamples;
@@ -133,14 +146,6 @@ public:
     }
 
     std::vector<Color> render (World world) {
-        if (rayType == RAY_TRACER)
-            return renderRayTracer (world);
-        else
-            return renderRayMarch (world);
-    }
-
-
-    std::vector<Color> renderRayTracer (World world) {
         // Size of canvas
         int pixelNum = imageWidth * imageHeight;
 
@@ -181,84 +186,6 @@ public:
         // will return a vector with imageWidth * imageHeight values, use it to paint the canvas
         return colorMap;
     }
-
-
-    std::vector<Color> renderRayMarch (World world) {
-        // "first pixel is at
-        double firstPlanex = -viewPlaneWidth/2.0;
-        double firstPlaney = viewPlaneHeigth/2.0;
-
-        // ray direction
-        double dx,dy,dz;
-
-        // Result color of a ray
-        std::vector<Color> colorMap;
-
-        // creating rays
-        // for now I'm assuming position of camera is origin, focalLength = -0.5f (not using lookAt value yet);
-        double focalLength = -0.5;
-
-        // this loop is going like
-        // consider origin at top left
-        // fix column
-        //    go through the rows in the column
-        // then go to next column
-
-        if(gridOrCenter == RAY_CENTER)
-        {
-            for(int i = 0; i < imageWidth; ++i) {
-                for(int j = 0; j < imageHeight; ++j) {
-                    dx = firstPlanex + (unitsWidth/2.0) + i * unitsWidth;
-                    dy = firstPlaney - (unitsHigh/2.0) - j * unitsHigh;
-                    dz = focalLength;
-
-                    // vector direction, normalize
-                    Vector dir(dx,dy,dz, true);
-
-                    // ray
-                    Ray ray(position, dir);
-
-                    // spawn rays into the world to get the color
-                    colorMap.push_back( world.spawnRayMarch( ray , SAMPLE_NUM ) );
-                }
-            }
-        }
-        else
-        {
-            for(int i = 0; i < imageWidth; ++i) {
-                for(int j = 0; j < imageHeight; ++j) {
-
-                    Color average;
-
-                    /// lets make a grid of 9 rays
-                    for (int a = 1; a < 4; ++a) {
-                        for (int b = 1; b < 4; ++b) {
-                            dx = firstPlanex + (unitsWidth * (0.25 * a)) + i * unitsWidth;
-                            dy = firstPlaney - (unitsHigh * (0.25 * b)) - j * unitsHigh;
-                            dz = focalLength;
-
-                            // vector direction, normalize
-                            Vector dir(dx,dy,dz, true);
-
-                            // ray
-                            Ray ray(position, dir);
-
-                            // Color average
-                            average += world.spawnRayMarch( ray , SAMPLE_NUM );
-                        }
-                    }
-
-                    // get final color
-                    average = (average / 9.0);
-                    colorMap.push_back( average );
-                }
-            }
-        }
-
-        // will return a vector with imageWidth * imageHeight values, use it to paint the canvas
-        return colorMap;
-    }
-
 };
 
 #endif
