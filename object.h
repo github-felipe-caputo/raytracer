@@ -3,10 +3,14 @@
 
 #include <vector>
 #include <cmath>
+#include <ctime>
+#include <cstdlib>
 #include "mathHelper.h"
 #include "texture.h"
 
 #include "triBoxOverlap.h"
+
+#define NUM_POINT_SAMPLES 20
 
 class Object {
 protected:
@@ -30,7 +34,6 @@ protected:
 
     // value for refraction
     double nr;
-
 public:
     // Object without solid color, called when creating textured object
     Object() {}
@@ -40,6 +43,8 @@ public:
     Object(Texture texture) : texture(texture) {}
 
     virtual Point intersect (Ray ray) = 0;
+
+    virtual std::vector<Point> samplePoints() = 0;
 
     virtual bool isInside (Voxel v) = 0;
 
@@ -207,6 +212,25 @@ public:
         return (d <= r*r);
     }
 
+    // returns a number of sample points on the surface of the object
+    std::vector<Point> samplePoints() {
+        std::vector<Point> samples;
+        double n1, n2, n3;
+
+        for (int i = 0; i < NUM_POINT_SAMPLES; ++i) {
+            // numbers between -1 and 1
+            n1 = static_cast <double> (rand()) / (static_cast <double> (RAND_MAX/2)) - 1.0 ;
+            n2 = static_cast <double> (rand()) / (static_cast <double> (RAND_MAX/2)) - 1.0 ;
+            n3 = static_cast <double> (rand()) / (static_cast <double> (RAND_MAX/2)) - 1.0 ;
+
+            Vector n(n1,n2,n3,true);
+
+            samples.push_back( intersect( Ray(c,n) ) );
+        }
+
+        return samples;
+    }
+
     Vector getNormal (Point p) {
         Vector normal(c, p);
         normalize(normal);
@@ -238,7 +262,6 @@ class Polygon : public Object {
     // it requires a vector of points (the vertices of the polygon) and a point
     // in the polygon as parameters, and returns the color of that point
     Color (*colorFromTexture)(std::vector<Point>, Point); // = NULL;
-
 public:
 
     // creating an object
@@ -300,6 +323,13 @@ public:
         return o;
     }
 
+    // returns a number of sample points on the surface of the object
+    // TODO
+    std::vector<Point> samplePoints() {
+        std::vector<Point> samples;
+        return samples;
+    }
+
     // checks if this object is inside a voxel
     // returns true if even part of the object is inside of it
     bool isInside (Voxel v) {
@@ -329,7 +359,6 @@ class Triangle : public Object {
     // it requires a vector of points (the vertices of the polygon) and a point
     // in the polygon as parameters, and returns the color of that point
     Color (*colorFromTexture)(std::vector<Point>, Point); // = NULL;
-
 public:
 
     // Gets a vector of vertices, with 3 points, and creates a normal
@@ -432,6 +461,13 @@ public:
         double wz = o.z + d.z * t;
 
         return Point(wx,wy,wz);
+    }
+
+    // returns a number of sample points on the surface of the object
+    // TODO
+    std::vector<Point> samplePoints() {
+        std::vector<Point> samples;
+        return samples;
     }
 
     std::vector<Point> getPoints () {

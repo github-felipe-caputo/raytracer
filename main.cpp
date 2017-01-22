@@ -2,6 +2,7 @@
 #include <ctime>
 #include <iostream>
 #include <vector>
+#include <cstdlib>
 
 #include <SFML/Graphics.hpp>
 
@@ -71,6 +72,9 @@ int main ( void ) {
     Point lookAt(0,0,-1);
     Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth,
         RAY_TRACER, 8, RAY_CENTER);
+
+    // set up random number seed
+    srand (static_cast <unsigned> (time(0)));
 
     // render our world, get the color map we will put on canvas
     std::vector<Color> colorMap = cam.render(world);

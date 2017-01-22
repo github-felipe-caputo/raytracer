@@ -133,18 +133,17 @@ public:
 
 class AreaLight : public LightSource {
     // This will be the object our light source will be based on
-    Object* object;
+    Object *object;
 
 public:
     // TODO: will an area light have a position?
-    AreaLight( Object *object ) {
-        this->object = object;
+    AreaLight( Object *object ) : object(object) {
     }
 
     // TODO This will need to return samples of points on the object position?
-    // maybe every object will need a center, BRDF will use it to sample
-    // http://mathworld.wolfram.com/SpherePointPicking.html
+    // this will require some design changes
     Point getPos () {
+        // return object->samplePoints();
         return Point(0,0,0);
     }
 
