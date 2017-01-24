@@ -142,9 +142,14 @@ public:
 
     // TODO This will need to return samples of points on the object position?
     // this will require some design changes
+    // maybe add check of lightsReached inside olluminationModel.h
     Point getPos () {
         // return object->samplePoints();
         return Point(0,0,0);
+    }
+
+    Color getColor () {
+        return object->getEmissiveColor();
     }
 
     // can always be reached / function to remove in factor of class?

@@ -15,7 +15,7 @@ Color ambientComponent(Object *obj, Color ambientLight, Point point) {
 }
 
 // needs the object because we will use diffuse and specular color,
-// here we will not calculate the amcient component
+// here we will not calculate the ambient component
 // the light list is the lights that the shadow array definetly hit
 Color illuminatePhong(Object *obj, Vector view, Point point, Vector normal, std::vector<LightSource*> lightList) {
     if (lightList.empty())
