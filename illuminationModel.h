@@ -35,7 +35,6 @@ Color illuminatePhong(Object *obj, Vector view, Point point, Vector normal,
     normalize(view);
     normalize(normal);
 
-
     // For each light, for each point reached on the light
     for (std::map<LightSource*, std::vector<Point> >::iterator it=lightsAndPointsReachedMap.begin(); it!=lightsAndPointsReachedMap.end(); ++it) {
         LightSource *lightHit = (it->first);

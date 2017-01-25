@@ -49,7 +49,7 @@ int main ( void ) {
     vertices.push_back( Point( 0.5,-0.6,-6.0) );
     vertices.push_back( Point( 0.5,-0.6, 0.0) );
 
-    Polygon checkerFloor( vertices, Vector(0,1,0), planarCheckerTexture );
+    Rectangle checkerFloor( vertices, Vector(0,1,0), planarCheckerTexture );
     checkerFloor.setUpPhong( Color(1,1,1), 0.3, 1.0, 0.0, 1.0 );
 
     // create a light source
@@ -80,7 +80,7 @@ int main ( void ) {
     Vector up(0,1,0);
     Point lookAt(0,0,-1);
     Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth,
-        RAY_TRACER, 1, 3);
+        RAY_TRACER, 1, 16);
 
 
     // render our world, get the color map we will put on canvas

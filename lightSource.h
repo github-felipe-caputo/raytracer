@@ -147,19 +147,13 @@ public:
 class AreaLight : public LightSource {
     // This will be the object our light source will be based on
     Object *object;
-    std::vector<Point> samplePointsOnSurface;
 
 public:
-    // TODO: will an area light have a position?
     AreaLight( Object *object ) : object(object) {
-        samplePointsOnSurface = object->samplePoints();
     }
 
-    // TODO This will need to return samples of points on the object position?
-    // this will require some design changes
-    // maybe add check of lightsReached inside olluminationModel.h
     std::vector<Point> getPos () {
-        return samplePointsOnSurface; //object->samplePoints();
+        return object->samplePoints();
     }
 
     Color getColor () {

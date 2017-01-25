@@ -10,7 +10,7 @@
 
 #include "triBoxOverlap.h"
 
-#define NUM_POINT_SAMPLES_ON_LIGHT 20
+#define NUM_POINT_SAMPLES_ON_LIGHT 5
 
 class Object {
 protected:
@@ -224,8 +224,7 @@ public:
             n3 = static_cast <double> (rand()) / (static_cast <double> (RAND_MAX/2.0)) - 1.0 ;
 
             Vector n(n1,n2,n3,true);
-
-            samples.push_back( intersect( Ray(c,n) ) );
+            samples.push_back( c + (r * Point(n.x,n.y,n.z)) );
         }
 
         return samples;
@@ -247,7 +246,7 @@ public:
     }
 };
 
-class Polygon : public Object {
+class Rectangle : public Object {
     // Polygon can have three or more vertices
     // here I assume they are definetly on the same plane
     std::vector<Point> vertices;
@@ -267,7 +266,7 @@ public:
     // creating an object
     // if texture = true when creating, 'col' is ignored (function getColorFromTexture will be used instead)
     // normal should be normalized before constructing the polygon
-    Polygon ( std::vector<Point> vert, Vector n, Color col) : Object(col), vertices(vert), n(n) {
+    Rectangle ( std::vector<Point> vert, Vector n, Color col) : Object(col), vertices(vert), n(n) {
 
         // for now I'm assuming all the vertices are on the same plane, and that place
         // has a normal (0,1,0), and all the points are on a plane parallel to the x and z plane
@@ -280,7 +279,7 @@ public:
     // creating an object
     // instead of passing a color, pass a function for texture
     // normal should be normalized before constructing the polygon
-    Polygon ( std::vector<Point> vert, Vector n, Color (*function)(std::vector<Point>, Point) ) : vertices(vert), n(n) {
+    Rectangle ( std::vector<Point> vert, Vector n, Color (*function)(std::vector<Point>, Point) ) : vertices(vert), n(n) {
 
         // for now I'm assuming all the vertices are on the same plane, and that place
         // has a normal (0,1,0), and all the points are on a plane parallel to the x and z plane
@@ -332,6 +331,7 @@ public:
 
     // checks if this object is inside a voxel
     // returns true if even part of the object is inside of it
+    // TODO
     bool isInside (Voxel v) {
         return true;
     }
