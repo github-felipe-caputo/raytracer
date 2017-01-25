@@ -147,7 +147,7 @@ public:
 class AreaLight : public LightSource {
     // This will be the object our light source will be based on
     Object *object;
-
+    
 public:
     // TODO: will an area light have a position?
     AreaLight( Object *object ) : object(object) {

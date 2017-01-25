@@ -10,7 +10,7 @@
 
 #include "triBoxOverlap.h"
 
-#define NUM_POINT_SAMPLES 20
+#define NUM_POINT_SAMPLES 5
 
 class Object {
 protected:
@@ -219,9 +219,9 @@ public:
 
         for (int i = 0; i < NUM_POINT_SAMPLES; ++i) {
             // numbers between -1 and 1
-            n1 = static_cast <double> (rand()) / (static_cast <double> (RAND_MAX/2)) - 1.0 ;
-            n2 = static_cast <double> (rand()) / (static_cast <double> (RAND_MAX/2)) - 1.0 ;
-            n3 = static_cast <double> (rand()) / (static_cast <double> (RAND_MAX/2)) - 1.0 ;
+            n1 = static_cast <double> (rand()) / (static_cast <double> (RAND_MAX/2.0)) - 1.0 ;
+            n2 = static_cast <double> (rand()) / (static_cast <double> (RAND_MAX/2.0)) - 1.0 ;
+            n3 = static_cast <double> (rand()) / (static_cast <double> (RAND_MAX/2.0)) - 1.0 ;
 
             Vector n(n1,n2,n3,true);
 

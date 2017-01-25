@@ -27,6 +27,9 @@ double viewPlaneHeigth = 0.5;
 double viewPlaneWidth = 0.5;
 
 int main ( void ) {
+    // set up random number seed
+    srand (static_cast <unsigned> (time(0)));
+
     // first create our objects
     Sphere frontSphere( Point(0.0,0.1,-1.9), 0.4, Color(1,1,1) );
     frontSphere.setUpPhong( Color(1,1,1), 0.075, 0.075, 0.2, 20.0 );
@@ -53,15 +56,16 @@ int main ( void ) {
     PointLight light( Point(0.0, 5.0, 3.0), Color(1,1,1) );
     PointLight light2( Point(-5.0f, 3.0f, 0.0f), Color(1,1,1) );
 
-    Sphere sphereLightObj( Point(0.0, 5.0, 3.0), 0.4, Color(1,1,1) );
+    Sphere sphereLightObj( Point(0.0, 4.0, -1.0), 2.0, Color(1,1,1) );
     sphereLightObj.setUpEmissionColor( Color(1,1,1) );
     AreaLight sphereLight( &sphereLightObj );
 
     // create world, add objects in it
     World world;
     world.addObject(&frontSphere);
-    world.addObject(&backSphere);
+    //world.addObject(&backSphere);
     world.addObject(&checkerFloor);
+    //world.addObject(&sphereLightObj); // full white
 
     // add light and set up phong
     //world.addLight(&light);
@@ -76,10 +80,8 @@ int main ( void ) {
     Vector up(0,1,0);
     Point lookAt(0,0,-1);
     Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth,
-        RAY_TRACER, 8, RAY_CENTER);
+        RAY_TRACER, 1, 16);
 
-    // set up random number seed
-    srand (static_cast <unsigned> (time(0)));
 
     // render our world, get the color map we will put on canvas
     std::vector<Color> colorMap = cam.render(world);

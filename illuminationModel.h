@@ -61,8 +61,8 @@ Color illuminatePhong(Object *obj, Vector view, Point point, Vector normal,
             specular += lightRadiance * objSpecColor * rvke * attenuation;
         }
 
-        diffuseFinal += diffuse / pointsHit.size();
-        specularFinal += specular / pointsHit.size();
+        diffuseFinal += diffuse / 5.0;
+        specularFinal += specular / 5.0;
     }
 
     return kd * diffuseFinal + ks * specularFinal;

@@ -1,9 +1,6 @@
 #ifndef _CAMERA_H
 #define _CAMERA_H
 
-#define RAY_CENTER 0
-#define RAY_GRID   1
-
 #define RAY_TRACER   2
 #define RAY_MARCHING 3
 
@@ -52,8 +49,8 @@ class Camera {
     // If we are going ray tracking or ray marching
     int rayType;
 
-    // if the ray is going on the center of the pixel, or in a grid
-    int gridOrCenter;
+    // number of rays we will use per pixel, total is raysPerPixel * raysPerPixel
+    int raysPerPixel;
 
     // for ray marching
     int SAMPLE_NUM;
@@ -69,9 +66,8 @@ class Camera {
         Color average;
 
         // size of ray grid in the pixel
-        int gridSize = (gridOrCenter == RAY_CENTER) ? 2 : 4; // from 1 to 4 both dimentions, i.e, 3 x 3 = 9 rays
-        double range = (gridOrCenter == RAY_CENTER) ? 0.5 : 0.25; // if center ray goes from center (0.5)
-                                                                  // else ray will go from (0.25 * val), val = [1,3]
+        int gridSize = raysPerPixel + 1; // i.e.: raysPerPixel = 3 -> gridSize = 4 -> from 1 to 4 both dimentions, i.e., 3 x 3 = 9 rays
+        double range = static_cast <double> (1.0 / gridSize);
 
         for (int a = 1; a < gridSize; ++a) {
             for (int b = 1; b < gridSize; ++b) {
@@ -94,8 +90,7 @@ class Camera {
         }
 
         // get final color, if grid need to average
-        if (gridOrCenter == RAY_GRID)
-            average = (average / 9.0);
+        average = (average / raysPerPixel * raysPerPixel);
 
         return average;
     }
@@ -109,8 +104,8 @@ public:
     // rayType = if we are doing ray tracing or ray marching
     // ray marching here was implemented so far only for volumetric lighthing,
     // so some other values will need to be set up before using it (ka and ks for instance)
-    Camera(Point pos, Point look, Vector up, int imH, int imW, double viewH, double viewW, int rayType, int depthOrSamples, int gridOrCenter) :
-        position(pos), lookAt(look), up(up), imageHeight(imH), imageWidth(imW), viewPlaneHeigth(viewH), viewPlaneWidth(viewW), rayType(rayType), gridOrCenter(gridOrCenter) {
+    Camera(Point pos, Point look, Vector up, int imH, int imW, double viewH, double viewW, int rayType, int depthOrSamples, int raysPerPixel) :
+        position(pos), lookAt(look), up(up), imageHeight(imH), imageWidth(imW), viewPlaneHeigth(viewH), viewPlaneWidth(viewW), rayType(rayType), raysPerPixel(raysPerPixel) {
 
         // each pixel
         unitsHigh = viewH/imH;
@@ -136,11 +131,6 @@ public:
         }
         else {
             std::cerr << "Error: When creating a camera object '" << rayType << "' is an invalid value for 'rayType', use RAY_TRACER or RAY_MARCHING." << std::endl;
-            exit(1);
-        }
-
-        if ( gridOrCenter != RAY_CENTER && gridOrCenter != RAY_GRID ) {
-            std::cerr << "Error: When creating a camera object '" << gridOrCenter << "' is an invalid value for 'gridOrCenter', use RAY_CENTER or RAY_GRID." << std::endl;
             exit(1);
         }
     }
