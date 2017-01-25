@@ -14,15 +14,12 @@ public:
 
     LightSource ( Point position, Color color ) : position(position), color(color) {}
 
-    std::vector<Point> getPos () {
-        return std::vector<Point>(1,position);
-    }
+    virtual std::vector<Point> getPos () = 0;
 
-    Color getColor () {
-        return color;
-    }
+    virtual Color getColor () = 0;
 
     virtual bool reaches(Point p) = 0;
+
     virtual double getAttenuation(Point p) = 0;
 
     // Ray Marching
@@ -32,6 +29,14 @@ public:
 class PointLight : public LightSource {
 public:
     PointLight( Point position, Color color ) : LightSource(position, color) {}
+
+    std::vector<Point> getPos () {
+        return std::vector<Point>(1,position);
+    }
+
+    Color getColor () {
+        return color;
+    }
 
     // Point light can always be reached
     bool reaches (Point p) {
@@ -57,6 +62,14 @@ class SpotLight : public LightSource {
 
 public:
     SpotLight( Point position, Color color, Vector dir, double angle, double aExp = 0 ) : LightSource(position, color), dir(dir), angle(angle), aExp(aExp) {}
+
+    std::vector<Point> getPos () {
+        return std::vector<Point>(1,position);
+    }
+
+    Color getColor () {
+        return color;
+    }
 
     // SpotLight might not be reached depending on the angle and direction
     bool reaches (Point p) {
@@ -161,7 +174,7 @@ public:
         return 1.0f;
     }
 
-    // does the Ray ray intersect with this light (in this case, an area light, the object?)
+    // does the Ray ray intersect with this light (for ray marching only, here not usable?)
     std::vector<Point> intersect ( Ray ray ) {
 
         // TODO: this function might need to change, should it only return one value?

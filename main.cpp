@@ -30,7 +30,7 @@ int main ( void ) {
     // first create our objects
     Sphere frontSphere( Point(0.0,0.1,-1.9), 0.4, Color(1,1,1) );
     frontSphere.setUpPhong( Color(1,1,1), 0.075, 0.075, 0.2, 20.0 );
-    frontSphere.setUpReflectionTransmission(0.0, 0.8, 0.95);
+    //frontSphere.setUpReflectionTransmission(0.0, 0.8, 0.95);
 
     //Sphere frontSphere( Point(0.0,0.1,-1.9), 0.4, Texture("textures/earth.jpg") );
     //frontSphere.setUpPhong( Color(1,1,1), 1.0, 1.0, 0.0, 1.0 );
@@ -38,7 +38,7 @@ int main ( void ) {
 
     Sphere backSphere( Point(-0.65,-0.2,-2.5), 0.3, Color(0.7,0.7,0.7) );
     backSphere.setUpPhong( Color(1,1,1), 0.15, 0.25, 1.0, 20.0 );
-    backSphere.setUpReflectionTransmission(0.75, 0.0, 1.0);
+    //backSphere.setUpReflectionTransmission(0.75, 0.0, 1.0);
 
     std::vector<Point> vertices;
     vertices.push_back( Point(-1.5,-0.6, 0.0) );
@@ -51,7 +51,11 @@ int main ( void ) {
 
     // create a light source
     PointLight light( Point(0.0, 5.0, 3.0), Color(1,1,1) );
-    //PointLight light2( Point(-5.0f, 3.0f, 0.0f), Color(1,1,1) );
+    PointLight light2( Point(-5.0f, 3.0f, 0.0f), Color(1,1,1) );
+
+    Sphere sphereLightObj( Point(0.0, 5.0, 3.0), 0.4, Color(1,1,1) );
+    sphereLightObj.setUpEmissionColor( Color(1,1,1) );
+    AreaLight sphereLight( &sphereLightObj );
 
     // create world, add objects in it
     World world;
@@ -60,8 +64,9 @@ int main ( void ) {
     world.addObject(&checkerFloor);
 
     // add light and set up phong
-    world.addLight(&light);
+    //world.addLight(&light);
     //world.addLight(&light2);
+    world.addLight(&sphereLight);
     //world.setUpPhongBlinnIllumination( Color(0.7,1,1) );
     world.setUpPhongIllumination( Color(0.25,0.61,1.00) );
     //world.setUpPhongIllumination( Color(0.8,0.2,0.2) ); RED

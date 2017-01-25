@@ -224,12 +224,21 @@ public:
                                   pointHit.y + normal.y * 0.1f,
                                   pointHit.z + normal.z * 0.1f );
 
-            // lights that are reached/hit
-            // std::vector<LightSource*> lightsHitList = lightsReached(originShadowRay, lightList);
+
+
+            //std::cout << " START: " << lightList[0]->getColor().r << " " << lightList[0]->getColor().g << " " << lightList[0]->getColor().b << std::endl;
+
 
             // the new function we will use
-            std::map<LightSource*, std::vector<Point> > lightsAndPointsReachedMap = lightsReached2(originShadowRay, lightList);
-
+            std::map<LightSource*, std::vector<Point> > lightsAndPointsReachedMap = lightsReached(originShadowRay, lightList);
+/*
+            if (!lightsAndPointsReachedMap.empty()) {
+            std::cout << "ONE" << std::endl;
+            for (std::map<LightSource*, std::vector<Point> >::iterator it=lightsAndPointsReachedMap.begin(); it!=lightsAndPointsReachedMap.end(); ++it)
+                std::cout << " START: " << (it->first)->getColor().r << " "  << (it->first)->getColor().g << " "  << (it->first)->getColor().b << " => " << it->second[0].x << " " << it->second[0].y << " " << it->second[0].z << std::endl;
+            std::cout << "TWO" << std::endl;
+            }
+*/
             Vector view(pointHit, originRay, true);
 
             Color amb = ambientComponent( objectHit, backgroundRadiance, pointHit );
@@ -238,10 +247,12 @@ public:
 
             Color finalColor = amb + diff_spec;
 
+            //std::cout << "Color: " << amb.r << " " << amb.g << " " <<  amb.b << " - " << diff_spec.r << " " << diff_spec.g  << " " <<  diff_spec.b << std::endl;
 
             // If lights hit is empty, it means the shadow ray might have hit something
             // before reaching the light, i.e. an object
             // In this case we should take into account if the object is transparent
+            /*
             if ( lightsAndPointsReachedMap.empty() ) {
               std::map<LightSource*, std::vector<Point> > lightsAndPointsReachedMapTransp = lightsReachedThroughTransparency(originShadowRay, lightList);
 
@@ -252,6 +263,7 @@ public:
 
               finalColor += 0.8 * diff_spec;
             }
+            */
 
             if ( depth > 1 ) {
                 double kr = objectHit->getKr();
@@ -450,7 +462,7 @@ public:
 */
     // This returns a map of which lights the shadow ray coming from originShadowRay can reach
     // and which points it actually hit on the light (necessary for area lights)
-    std::map<LightSource*, std::vector<Point> > lightsReached2(Point originShadowRay, std::vector<LightSource*> lightList){
+    std::map<LightSource*, std::vector<Point> > lightsReached(Point originShadowRay, std::vector<LightSource*> lightList){
         std::vector<LightSource*> lightsHit;
         std::vector<Object*>::iterator itObj;
 
@@ -479,6 +491,7 @@ public:
                     }
                 }
                 if ( !pointsHitOnLight.empty() ) {
+                    //std::cout << " START: " << (*it)->getColor().r << " "  << (*it)->getColor().g << " "  << (*it)->getColor().b << " => " << pointsHitOnLight[0].x << " " << pointsHitOnLight[0].y << " " << pointsHitOnLight[0].z << std::endl;
                     result.insert(std::pair<LightSource*, std::vector<Point> >(*it, pointsHitOnLight));
                 }
             }
