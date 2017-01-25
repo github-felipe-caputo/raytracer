@@ -224,21 +224,9 @@ public:
                                   pointHit.y + normal.y * 0.1f,
                                   pointHit.z + normal.z * 0.1f );
 
-
-
-            //std::cout << " START: " << lightList[0]->getColor().r << " " << lightList[0]->getColor().g << " " << lightList[0]->getColor().b << std::endl;
-
-
             // the new function we will use
             std::map<LightSource*, std::vector<Point> > lightsAndPointsReachedMap = lightsReached(originShadowRay, lightList);
-/*
-            if (!lightsAndPointsReachedMap.empty()) {
-            std::cout << "ONE" << std::endl;
-            for (std::map<LightSource*, std::vector<Point> >::iterator it=lightsAndPointsReachedMap.begin(); it!=lightsAndPointsReachedMap.end(); ++it)
-                std::cout << " START: " << (it->first)->getColor().r << " "  << (it->first)->getColor().g << " "  << (it->first)->getColor().b << " => " << it->second[0].x << " " << it->second[0].y << " " << it->second[0].z << std::endl;
-            std::cout << "TWO" << std::endl;
-            }
-*/
+
             Vector view(pointHit, originRay, true);
 
             Color amb = ambientComponent( objectHit, backgroundRadiance, pointHit );
@@ -483,7 +471,7 @@ public:
                     Ray fromPointToLight(originShadowRay, dir);
 
                     for(itObj = objectList.begin() ; itObj < objectList.end() ; ++itObj)
-                        if ( originShadowRay != (*itObj)->intersect(fromPointToLight) )
+                        if ( !(*itObj)->isEmissive() && originShadowRay != (*itObj)->intersect(fromPointToLight) ) // emissive object should not block, it's light
                             break;
 
                     if ( itObj == objectList.end() ) { // if it went through the whole loop, then it hits the light!
@@ -524,7 +512,7 @@ public:
                     Ray fromPointToLight(originShadowRay, dir);
 
                     for(itObj = objectList.begin() ; itObj < objectList.end() ; ++itObj)
-                        if ( (*itObj)->getKt() == 0 && originShadowRay != (*itObj)->intersect(fromPointToLight) )
+                        if ( !(*itObj)->isEmissive() && (*itObj)->getKt() == 0 && originShadowRay != (*itObj)->intersect(fromPointToLight) )
                             break;
 
                     if ( itObj == objectList.end() ) { // if it went through the whole loop, then it hits the light!

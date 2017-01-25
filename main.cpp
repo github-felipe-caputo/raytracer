@@ -56,7 +56,7 @@ int main ( void ) {
     PointLight light( Point(0.0, 5.0, 3.0), Color(1,1,1) );
     PointLight light2( Point(-5.0f, 3.0f, 0.0f), Color(1,1,1) );
 
-    Sphere sphereLightObj( Point(0.0, 4.0, -1.0), 2.0, Color(1,1,1) );
+    Sphere sphereLightObj( Point(0.0, 0.8, -1.7), 0.1, Color(1,1,1) );
     sphereLightObj.setUpEmissionColor( Color(1,1,1) );
     AreaLight sphereLight( &sphereLightObj );
 
@@ -65,7 +65,7 @@ int main ( void ) {
     world.addObject(&frontSphere);
     //world.addObject(&backSphere);
     world.addObject(&checkerFloor);
-    //world.addObject(&sphereLightObj); // full white
+    world.addObject(&sphereLightObj); // full white
 
     // add light and set up phong
     //world.addLight(&light);
@@ -80,7 +80,7 @@ int main ( void ) {
     Vector up(0,1,0);
     Point lookAt(0,0,-1);
     Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth,
-        RAY_TRACER, 1, 16);
+        RAY_TRACER, 1, 3);
 
 
     // render our world, get the color map we will put on canvas

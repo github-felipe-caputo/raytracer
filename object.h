@@ -10,7 +10,7 @@
 
 #include "triBoxOverlap.h"
 
-#define NUM_POINT_SAMPLES 5
+#define NUM_POINT_SAMPLES_ON_LIGHT 20
 
 class Object {
 protected:
@@ -217,7 +217,7 @@ public:
         std::vector<Point> samples;
         double n1, n2, n3;
 
-        for (int i = 0; i < NUM_POINT_SAMPLES; ++i) {
+        for (int i = 0; i < NUM_POINT_SAMPLES_ON_LIGHT; ++i) {
             // numbers between -1 and 1
             n1 = static_cast <double> (rand()) / (static_cast <double> (RAND_MAX/2.0)) - 1.0 ;
             n2 = static_cast <double> (rand()) / (static_cast <double> (RAND_MAX/2.0)) - 1.0 ;

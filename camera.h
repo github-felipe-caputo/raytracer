@@ -50,7 +50,7 @@ class Camera {
     int rayType;
 
     // number of rays we will use per pixel, total is raysPerPixel * raysPerPixel
-    int raysPerPixel;
+    int totalRays;
 
     // for ray marching
     int SAMPLE_NUM;
@@ -58,39 +58,39 @@ class Camera {
     // This function is given the world and the pixel, it will return the color
     // of that pixel. In other words i ranges from [0,imageWidth] and
     // j ranges from [0,imageHeight]
-    Color getColorInPixel(World world, int i, int j){
+    Color getColorInPixel(World world, int i, int j) {
         // ray direction
         double dx,dy,dz;
 
         // Color average
         Color average;
 
-        // size of ray grid in the pixel
-        int gridSize = raysPerPixel + 1; // i.e.: raysPerPixel = 3 -> gridSize = 4 -> from 1 to 4 both dimentions, i.e., 3 x 3 = 9 rays
-        double range = static_cast <double> (1.0 / gridSize);
+        double startx = (firstPixelx + i * unitsWidth);
+        double starty = (firstPixely - j * unitsHigh);
 
-        for (int a = 1; a < gridSize; ++a) {
-            for (int b = 1; b < gridSize; ++b) {
-                dx = firstPixelx + (unitsWidth * (range * a)) + i * unitsWidth;
-                dy = firstPixely - (unitsHigh * (range * b)) - j * unitsHigh;
-                dz = focalLength;
+        for(int a = 0; a < totalRays; ++a) {
+            double randx = static_cast <double> (rand()) / (static_cast <double> (RAND_MAX/unitsWidth));
+            double randy = static_cast <double> (rand()) / (static_cast <double> (RAND_MAX/unitsHigh));
 
-                Vector dir = dx*u + dy*v - dz*w;
-                normalize(dir);
+            dx = startx + randx ;
+            dy = starty - randy ;
+            dz = focalLength;
 
-                // ray
-                Ray ray(position, dir);
+            Vector dir = dx*u + dy*v - dz*w;
+            normalize(dir);
 
-                // Color average
-                //if (rayType == RAY_TRACER)
-                    average += world.spawn( ray , MAX_DEPTH );
-                //else
-                //    average += world.spawnRayMarch( ray , SAMPLE_NUM );
-            }
+            // ray
+            Ray ray(position, dir);
+
+            // Color average
+            //if (rayType == RAY_TRACER)
+                average += world.spawn( ray , MAX_DEPTH );
+            //else
+            //    average += world.spawnRayMarch( ray , SAMPLE_NUM );
         }
 
         // get final color, if grid need to average
-        average = (average / raysPerPixel * raysPerPixel);
+        average = (average / totalRays);
 
         return average;
     }
@@ -105,7 +105,7 @@ public:
     // ray marching here was implemented so far only for volumetric lighthing,
     // so some other values will need to be set up before using it (ka and ks for instance)
     Camera(Point pos, Point look, Vector up, int imH, int imW, double viewH, double viewW, int rayType, int depthOrSamples, int raysPerPixel) :
-        position(pos), lookAt(look), up(up), imageHeight(imH), imageWidth(imW), viewPlaneHeigth(viewH), viewPlaneWidth(viewW), rayType(rayType), raysPerPixel(raysPerPixel) {
+        position(pos), lookAt(look), up(up), imageHeight(imH), imageWidth(imW), viewPlaneHeigth(viewH), viewPlaneWidth(viewW), rayType(rayType) {
 
         // each pixel
         unitsHigh = viewH/imH;
@@ -122,6 +122,9 @@ public:
         u = cross(up,w);
         normalize(u);
         v = cross(w,u);
+
+        // total rays to be shot
+        totalRays = raysPerPixel * raysPerPixel;
 
         if (rayType == RAY_TRACER) {
             MAX_DEPTH = depthOrSamples;
@@ -161,6 +164,7 @@ public:
                 }));
         }
 /*
+
         // this loop is going like
         // consider origin at top left
         // fixate column
