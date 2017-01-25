@@ -242,18 +242,16 @@ public:
             // If lights hit is empty, it means the shadow ray might have hit something
             // before reaching the light, i.e. an object
             // In this case we should take into account if the object is transparent
-            /*
-            if ( lightsHitList.empty() ) {
-              std::vector<LightSource*> lightsHitList = lightsReachedThroughTransparency(originShadowRay, lightList);
+            if ( lightsAndPointsReachedMap.empty() ) {
+              std::map<LightSource*, std::vector<Point> > lightsAndPointsReachedMapTransp = lightsReachedThroughTransparency(originShadowRay, lightList);
 
               Vector view(pointHit, originRay, true);
 
               Color diff_spec = illuminate( objectHit, view, pointHit,
-                      objectHit->getNormal(pointHit), lightsHitList);
+                      objectHit->getNormal(pointHit), lightsAndPointsReachedMapTransp);
 
               finalColor += 0.8 * diff_spec;
             }
-            */
 
             if ( depth > 1 ) {
                 double kr = objectHit->getKr();
@@ -488,35 +486,47 @@ public:
 
         return result;
     }
-/*
+
     // This returns a vector of which lights the shadow ray coming from originShadowRay can reach
     // But in this case, if there is a transparent object in the way, we consider that the
     // light is still reachable
-    std::vector<LightSource*> lightsReachedThroughTransparency(Point originShadowRay, std::vector<LightSource*> lightList){
+    std::map<LightSource*, std::vector<Point> > lightsReachedThroughTransparency(Point originShadowRay, std::vector<LightSource*> lightList){
         std::vector<LightSource*> lightsHit;
-        std::vector<Object*>::iterator it;
+        std::vector<Object*>::iterator itObj;
+
+        std::map<LightSource*, std::vector<Point>> result;
+        std::vector<Point> pointsHitOnLight;
 
         // For every light source, let's see if a ray from originShadowRay can reach it
-        for(std::vector<LightSource*>::iterator it2 = lightList.begin() ; it2 < lightList.end() ; ++it2) {
+        for(std::vector<LightSource*>::iterator it = lightList.begin() ; it < lightList.end() ; ++it) {
 
             // If this ray can actually reach the lights
             // (can always reach a point light, maybe not a spot light)
-            if( (*it2)->reaches(originShadowRay) ) {
-                Vector dir( originShadowRay, (*it2)->getPos(), true );
-                Ray fromPointToLight(originShadowRay, dir);
+            if( (*it)->reaches(originShadowRay) ) {
+                // could be an area light
+                std::vector<Point> pointsOnLightSurface = (*it)->getPos();
+                pointsHitOnLight.clear();
+                for(std::vector<Point>::iterator it2 = pointsOnLightSurface.begin() ; it2 < pointsOnLightSurface.end() ; ++it2) {
+                    Vector dir( originShadowRay, (*it2), true );
+                    Ray fromPointToLight(originShadowRay, dir);
 
-                for(it = objectList.begin() ; it < objectList.end() ; ++it)
-                    if ( (*it)->getKt() == 0 && originShadowRay != (*it)->intersect(fromPointToLight) )
-                        break;
+                    for(itObj = objectList.begin() ; itObj < objectList.end() ; ++itObj)
+                        if ( (*itObj)->getKt() == 0 && originShadowRay != (*itObj)->intersect(fromPointToLight) )
+                            break;
 
-                if ( it == objectList.end() ) // if it went through the whole loop, then it hits the light!
-                    lightsHit.push_back( *it2 );
+                    if ( itObj == objectList.end() ) { // if it went through the whole loop, then it hits the light!
+                        pointsHitOnLight.push_back( *it2 );
+                    }
+                }
+                if ( !pointsHitOnLight.empty() ) {
+                    result.insert(std::pair<LightSource*, std::vector<Point> >(*it, pointsHitOnLight));
+                }
             }
         }
 
-        return lightsHit;
+        return result;
     }
-
+/*
     // Given a ray and a light, this function will check the intersection of that
     // ray and that light. If we get more than 1 intersection, we will uniformly sample
     // the points between the intersections.
