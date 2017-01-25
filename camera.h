@@ -86,10 +86,10 @@ class Camera {
                 Ray ray(position, dir);
 
                 // Color average
-                if (rayType == RAY_TRACER)
+                //if (rayType == RAY_TRACER)
                     average += world.spawn( ray , MAX_DEPTH );
-                else
-                    average += world.spawnRayMarch( ray , SAMPLE_NUM );
+                //else
+                //    average += world.spawnRayMarch( ray , SAMPLE_NUM );
             }
         }
 

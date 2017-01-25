@@ -35,7 +35,7 @@ class World {
     double nr;
 
     // pointer to a illuminate function (could be phong, phongblinn, etc)
-    Color (*illuminate)(Object*, Vector, Point, Vector, std::vector<LightSource*>);// = NULL;
+    Color (*illuminate)(Object*, Vector, Point, Vector, std::map<LightSource*, std::vector<Point> >);// = NULL;
 
     // tree
     Kdtree kd;
@@ -52,12 +52,12 @@ public:
         backgroundRadiance = amLight;
         illuminate = illuminatePhong; // from "illuminationModel.h"
     }
-
+/*
     void setUpPhongBlinnIllumination(Color amLight) {
         backgroundRadiance = amLight;
         illuminate = illuminatePhongBlinn; // from "illuminationModel.h"
     }
-
+*/
     void addObject(Object *obj) {
         objectList.push_back(obj);
     }
@@ -85,13 +85,13 @@ public:
             exit(1);
         }
 
-        if ( kd.exists() )
-            return spawnKdtree(ray, depth);
-        else
+        //if ( kd.exists() )
+            //return spawnKdtree(ray, depth);
+        //else
             return spawnIlluminated(ray, depth);
 
     }
-
+/*
     // Spawn will return the color we should use for the pixel in the ray
     Color spawnKdtree( Ray ray, int depth ) {
         Point originRay = ray.getOrigin();
@@ -187,7 +187,7 @@ public:
             return finalColor;
         }
     }
-
+*/
     // Spawn will return the color we should use for the pixel in the ray
     Color spawnIlluminated( Ray ray, int depth ) {
         Point originRay = ray.getOrigin();
@@ -225,7 +225,7 @@ public:
                                   pointHit.z + normal.z * 0.1f );
 
             // lights that are reached/hit
-            std::vector<LightSource*> lightsHitList = lightsReached(originShadowRay, lightList);
+            // std::vector<LightSource*> lightsHitList = lightsReached(originShadowRay, lightList);
 
             // the new function we will use
             std::map<LightSource*, std::vector<Point> > lightsAndPointsReachedMap = lightsReached2(originShadowRay, lightList);
@@ -234,7 +234,7 @@ public:
 
             Color amb = ambientComponent( objectHit, backgroundRadiance, pointHit );
             Color diff_spec = illuminate( objectHit, view, pointHit,
-                    objectHit->getNormal(pointHit), lightsHitList);
+                    objectHit->getNormal(pointHit), lightsAndPointsReachedMap);
 
             Color finalColor = amb + diff_spec;
 
@@ -242,6 +242,7 @@ public:
             // If lights hit is empty, it means the shadow ray might have hit something
             // before reaching the light, i.e. an object
             // In this case we should take into account if the object is transparent
+            /*
             if ( lightsHitList.empty() ) {
               std::vector<LightSource*> lightsHitList = lightsReachedThroughTransparency(originShadowRay, lightList);
 
@@ -252,6 +253,7 @@ public:
 
               finalColor += 0.8 * diff_spec;
             }
+            */
 
             if ( depth > 1 ) {
                 double kr = objectHit->getKr();
@@ -317,7 +319,7 @@ public:
         }
 
     }
-
+/*
     Color spawnRayMarch ( Ray ray, int SAMPLE_NUM ) {
         Point originRay = ray.getOrigin();
         Point intersection;
@@ -419,7 +421,9 @@ public:
 
         return attenuated + inscattering;
     }
+*/
 
+/*
     // This returns a vector of which lights the shadow ray coming from originShadowRay can reach
     std::vector<LightSource*> lightsReached(Point originShadowRay, std::vector<LightSource*> lightList){
         std::vector<LightSource*> lightsHit;
@@ -445,7 +449,7 @@ public:
 
         return lightsHit;
     }
-
+*/
     // This returns a map of which lights the shadow ray coming from originShadowRay can reach
     // and which points it actually hit on the light (necessary for area lights)
     std::map<LightSource*, std::vector<Point> > lightsReached2(Point originShadowRay, std::vector<LightSource*> lightList){
@@ -462,7 +466,7 @@ public:
             // (can always reach a point light, maybe not a spot light)
             if( (*it)->reaches(originShadowRay) ) {
                 // could be an area light
-                std::vector<Point> pointsOnLightSurface = std::vector<Point>(1,(*it)->getPos()); // TODO: change, post will return std::vector eventually
+                std::vector<Point> pointsOnLightSurface = (*it)->getPos();
                 pointsHitOnLight.clear();
                 for(std::vector<Point>::iterator it2 = pointsOnLightSurface.begin() ; it2 < pointsOnLightSurface.end() ; ++it2) {
                     Vector dir( originShadowRay, (*it2), true );
@@ -484,7 +488,7 @@ public:
 
         return result;
     }
-
+/*
     // This returns a vector of which lights the shadow ray coming from originShadowRay can reach
     // But in this case, if there is a transparent object in the way, we consider that the
     // light is still reachable
@@ -620,7 +624,7 @@ public:
 
         return true;
     }
-
+*/
 
 };
 

@@ -14,8 +14,8 @@ public:
 
     LightSource ( Point position, Color color ) : position(position), color(color) {}
 
-    Point getPos () {
-        return position;
+    std::vector<Point> getPos () {
+        return std::vector<Point>(1,position);
     }
 
     Color getColor () {
@@ -143,9 +143,8 @@ public:
     // TODO This will need to return samples of points on the object position?
     // this will require some design changes
     // maybe add check of lightsReached inside olluminationModel.h
-    Point getPos () {
-        // return object->samplePoints();
-        return Point(0,0,0);
+    std::vector<Point> getPos () {
+        return object->samplePoints();
     }
 
     Color getColor () {
