@@ -247,11 +247,14 @@ public:
 };
 
 class Rectangle : public Object {
-    // Polygon can have three or more vertices
-    // here I assume they are definetly on the same plane
+    // Rectangle will have only 4 vertices
+    // the vertices should be in clockwise position, i.e.
+    //     1-----2
+    //     |     |
+    //     0-----3
     std::vector<Point> vertices;
 
-    // normal
+    // normal, calculated based on vertices
     Vector n;
 
     // need shortest distance between origin and polygon for intersection
@@ -266,7 +269,15 @@ public:
     // creating an object
     // if texture = true when creating, 'col' is ignored (function getColorFromTexture will be used instead)
     // normal should be normalized before constructing the polygon
-    Rectangle ( std::vector<Point> vert, Vector n, Color col) : Object(col), vertices(vert), n(n) {
+    Rectangle ( std::vector<Point> vert, Color col) : Object(col), vertices(vert) {
+
+        if (vert.size() > 4) {
+            std::cerr << "Error: When creating a Rectangle object, more than 4 vertices were used as parameter." << std::endl;
+            exit(1);
+        }
+
+        n = cross( Vector(vert[0],vert[3]) , Vector(vert[0],vert[1]) );
+        normalize(n);
 
         // for now I'm assuming all the vertices are on the same plane, and that place
         // has a normal (0,1,0), and all the points are on a plane parallel to the x and z plane
@@ -279,7 +290,15 @@ public:
     // creating an object
     // instead of passing a color, pass a function for texture
     // normal should be normalized before constructing the polygon
-    Rectangle ( std::vector<Point> vert, Vector n, Color (*function)(std::vector<Point>, Point) ) : vertices(vert), n(n) {
+    Rectangle ( std::vector<Point> vert, Color (*function)(std::vector<Point>, Point) ) : vertices(vert) {
+
+        if (vert.size() > 4) {
+            std::cerr << "Error: When creating a Rectangle object, more than 4 vertices were used as parameter." << std::endl;
+            exit(1);
+        }
+
+        n = cross( Vector(vert[0],vert[3]) , Vector(vert[0],vert[1]) );
+        normalize(n);
 
         // for now I'm assuming all the vertices are on the same plane, and that place
         // has a normal (0,1,0), and all the points are on a plane parallel to the x and z plane
@@ -292,6 +311,8 @@ public:
     // NOTE: this intersection is not taking into account the normal yet,
     // in other words, it will return an intersection even if the triangle is
     // "backwards"
+    // TODO: weird, when placing the rectangle on a 'higher' y, it appears on a lower one,
+    // def a problem here or possibly on the procedural texture
     Point intersect (Ray ray) {
         Point o = ray.getOrigin();
         Vector d = ray.getDirection();

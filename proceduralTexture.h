@@ -25,8 +25,8 @@ Color planarCheckerTexture (std::vector<Point> vertices, Point p) {
     double zn = (2 * (p.z - vertices[1].z) / (vertices[0].z - vertices[1].z)) - 1;
     double xn = (2 * (p.x - vertices[1].x) / (vertices[2].x - vertices[1].x)) - 1;
 
-    double u = (zn + 1.0f) / 2.0f;
-    double v = (xn + 1.0f) / 2.0f;
+    double u = (zn + 1.0) / 2.0;
+    double v = (xn + 1.0) / 2.0;
 
     // find row and col
     for (int i = 0; i < (1/checksize); ++i){
