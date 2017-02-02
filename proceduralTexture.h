@@ -15,15 +15,15 @@
 //     0-----3
 //
 // looking down on y
-Color planarCheckerTexture (std::vector<Point> vertices, Point p) {
+Color planarCheckerTexture (Point p1, Point p2, Point p3, Point p4, Point p) {
     Color finalColor;
 
     int row, col;
     double checksize = 0.05;
 
     // need to normalize point between -1 and 1
-    double zn = (2 * (p.z - vertices[1].z) / (vertices[0].z - vertices[1].z)) - 1;
-    double xn = (2 * (p.x - vertices[1].x) / (vertices[2].x - vertices[1].x)) - 1;
+    double zn = (2 * (p.z - p2.z) / (p1.z - p2.z)) - 1;
+    double xn = (2 * (p.x - p2.x) / (p3.x - p2.x)) - 1;
 
     double u = (zn + 1.0) / 2.0;
     double v = (xn + 1.0) / 2.0;

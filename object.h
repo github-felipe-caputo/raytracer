@@ -263,7 +263,7 @@ class Rectangle : public Object {
     // this is a function pointer for a possible texture function,
     // it requires a vector of points (the vertices of the polygon) and a point
     // in the polygon as parameters, and returns the color of that point
-    Color (*colorFromTexture)(std::vector<Point>, Point); // = NULL;
+    Color (*colorFromTexture)(Point, Point, Point, Point, Point); // = NULL;
 public:
 
     // creating an object
@@ -284,7 +284,7 @@ public:
         a = p1.y*(p2.z-p3.z) + p2.y*(p3.z-p1.z) + p3.y*(p1.z-p2.z);
         b = p1.z*(p2.x-p3.x) + p2.z*(p3.x-p1.x) + p3.z*(p1.x-p2.x);
         c = p1.x*(p2.y-p3.y) + p2.x*(p3.y-p1.y) + p3.x*(p1.y-p2.y);
-        dist = -p1.x*(p2.y*p3.z-p3.y*p2.z) - p1.y*(p3.y*p1.z - p1.y*p3.z) - p1.z*(p1.y*p2.z - p2.y*p1.z);
+        dist = -p1.x*(p2.y*p3.z-p3.y*p2.z) - p2.x*(p3.y*p1.z - p1.y*p3.z) - p3.x*(p1.y*p2.z - p2.y*p1.z);
 
         n = cross( Vector(vert[0],vert[3]) , Vector(vert[0],vert[1]) );
         normalize(n);
@@ -295,7 +295,7 @@ public:
     // creating an object
     // instead of passing a color, pass a function for texture
     // normal should be normalized before constructing the polygon
-    Rectangle ( std::vector<Point> vert, Color (*function)(std::vector<Point>, Point) ) : vertices(vert) {
+    Rectangle ( std::vector<Point> vert, Color (*function)(Point, Point, Point, Point, Point) ) {
 
         if (vert.size() != 4) {
             std::cerr << "Error: When creating a Rectangle object, need exactly 4 vertices, but " << vert.size() << " were used." << std::endl;
@@ -310,7 +310,7 @@ public:
         a = p1.y*(p2.z-p3.z) + p2.y*(p3.z-p1.z) + p3.y*(p1.z-p2.z);
         b = p1.z*(p2.x-p3.x) + p2.z*(p3.x-p1.x) + p3.z*(p1.x-p2.x);
         c = p1.x*(p2.y-p3.y) + p2.x*(p3.y-p1.y) + p3.x*(p1.y-p2.y);
-        dist = -p1.x*(p2.y*p3.z-p3.y*p2.z) - p1.y*(p3.y*p1.z - p1.y*p3.z) - p1.z*(p1.y*p2.z - p2.y*p1.z);
+        dist = -p1.x*(p2.y*p3.z-p3.y*p2.z) - p2.x*(p3.y*p1.z - p1.y*p3.z) - p3.x*(p1.y*p2.z - p2.y*p1.z);
 
         n = cross( Vector(vert[0],vert[3]) , Vector(vert[0],vert[1]) );
         normalize(n);
@@ -331,26 +331,22 @@ public:
         // t = -(A*x0 + B*y0 + C*z0 + D) / (A*xd + B*yd + C*zd)
         double t = -(a*o.x + b*o.y + c*o.z + dist) / (a*d.x + b*d.y + c*d.z);
 
-        // ray-plane intersection
-        // double w = -(n.x*o.x + n.y*o.y + n.z*o.z + f) / (n.x*d.x + n.y*d.y + n.z*d.z);
-
         // there was a intersection, let's check if it is between the rectangle boundaries
         if ( t > 0.0 ) {
             // actual intersection point
-            double wx = o.x + d.x * w;
-            double wy = o.y + d.y * w;
-            double wz = o.z + d.z * w;
+            double tx = o.x + d.x * t;
+            double ty = o.y + d.y * t;
+            double tz = o.z + d.z * t;
+            Point intersectionPoint(tx, ty, tz);
 
-            unsigned int i, j;
-            bool result = false;
-            for (i = 0, j = vertices.size() - 1; i < vertices.size(); j = i++) {
-                if ( ((vertices[i].z > wz) != (vertices[j].z > wz)) &&
-                    (wx < (vertices[j].x-vertices[i].x) * (wz-vertices[i].z) / (vertices[j].z-vertices[i].z) + vertices[i].x) )
-                    result = !result;
+            Vector v1(p1,p2,true);
+            Vector v3(p3,p4,true);
+            Vector v4(p1,intersectionPoint,true);
+            Vector v5(p3,intersectionPoint,true);
+
+            if (dot(v1,v4) >= 0 && dot(v3,v5) >= 0) {
+                return intersectionPoint;
             }
-
-            if(result)
-                return Point(wx, wy, wz);
         }
 
         return o;
@@ -378,7 +374,7 @@ public:
         if (*colorFromTexture == NULL)
             return col;
         else
-            return (*colorFromTexture)(vertices,p);
+            return (*colorFromTexture)(p1,p2,p3,p4,p);
     }
 };
 

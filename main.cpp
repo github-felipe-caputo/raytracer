@@ -45,15 +45,15 @@ int main ( void ) {
     //backSphere.setUpReflectionTransmission(0.75, 0.0, 1.0);
 
     std::vector<Point> vertices;
-    vertices.push_back( Point(-1.5,-0.6, 0.0) );
-    vertices.push_back( Point(-1.5,-0.6,-6.0) );
-    vertices.push_back( Point( 0.5,-0.6,-6.0) );
-    vertices.push_back( Point( 0.5,-0.6, 0.0) );
+    vertices.push_back( Point(-1.5,-0.3, 0.0) );
+    vertices.push_back( Point(-1.5,-0.3,-6.0) );
+    vertices.push_back( Point( 0.5,-0.3,-6.0) );
+    vertices.push_back( Point( 0.5,-0.3, 0.0) );
 
-    //vertices.push_back( Point( 0.5,-0.6, 0.0) );
-    //vertices.push_back( Point( 0.5,-0.6,-6.0) );
-    //vertices.push_back( Point(-1.5,-0.6,-6.0) );
-    //vertices.push_back( Point(-1.5,-0.6, 0.0) );
+    //vertices.push_back( Point( 0.5,0.5, 0.0) );
+    //vertices.push_back( Point( 0.5,0.5,-6.0) );
+    //vertices.push_back( Point(-1.5,0.5,-6.0) );
+    //vertices.push_back( Point(-1.5,0.5, 0.0) );
 
     Rectangle checkerFloor( vertices, Color(0.7,0.7,0.7) );
     checkerFloor.setUpPhong( Color(1,1,1), 0.3, 1.0, 0.0, 1.0 );
