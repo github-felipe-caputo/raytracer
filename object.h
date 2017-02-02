@@ -249,16 +249,16 @@ public:
 class Rectangle : public Object {
     // Rectangle will have only 4 vertices
     // the vertices should be in clockwise position, i.e.
-    //     1-----2
+    //     2-----3
     //     |     |
-    //     0-----3
-    std::vector<Point> vertices;
+    //     1-----4
+    Point p1,p2,p3,p4;
 
     // normal, calculated based on vertices
     Vector n;
 
-    // need shortest distance between origin and polygon for intersection
-    double f;
+    // values for plane description
+    double a,b,c,dist;
 
     // this is a function pointer for a possible texture function,
     // it requires a vector of points (the vertices of the polygon) and a point
@@ -269,20 +269,25 @@ public:
     // creating an object
     // if texture = true when creating, 'col' is ignored (function getColorFromTexture will be used instead)
     // normal should be normalized before constructing the polygon
-    Rectangle ( std::vector<Point> vert, Color col) : Object(col), vertices(vert) {
+    Rectangle ( std::vector<Point> vert, Color col) : Object(col) {
 
-        if (vert.size() > 4) {
-            std::cerr << "Error: When creating a Rectangle object, more than 4 vertices were used as parameter." << std::endl;
+        if (vert.size() != 4) {
+            std::cerr << "Error: When creating a Rectangle object, need exactly 4 vertices, but " << vert.size() << " were used." << std::endl;
             exit(1);
         }
 
+        Point p1 = vert[0];
+        Point p2 = vert[1];
+        Point p3 = vert[2];
+        Point p4 = vert[3];
+
+        a = p1.y*(p2.z-p3.z) + p2.y*(p3.z-p1.z) + p3.y*(p1.z-p2.z);
+        b = p1.z*(p2.x-p3.x) + p2.z*(p3.x-p1.x) + p3.z*(p1.x-p2.x);
+        c = p1.x*(p2.y-p3.y) + p2.x*(p3.y-p1.y) + p3.x*(p1.y-p2.y);
+        dist = -p1.x*(p2.y*p3.z-p3.y*p2.z) - p1.y*(p3.y*p1.z - p1.y*p3.z) - p1.z*(p1.y*p2.z - p2.y*p1.z);
+
         n = cross( Vector(vert[0],vert[3]) , Vector(vert[0],vert[1]) );
         normalize(n);
-
-        // for now I'm assuming all the vertices are on the same plane, and that place
-        // has a normal (0,1,0), and all the points are on a plane parallel to the x and z plane
-        // so f will always be y of any of the vertices (they are always the same)
-        f = std::abs( vert[0].y );
 
         colorFromTexture = NULL;
     }
@@ -292,18 +297,23 @@ public:
     // normal should be normalized before constructing the polygon
     Rectangle ( std::vector<Point> vert, Color (*function)(std::vector<Point>, Point) ) : vertices(vert) {
 
-        if (vert.size() > 4) {
-            std::cerr << "Error: When creating a Rectangle object, more than 4 vertices were used as parameter." << std::endl;
+        if (vert.size() != 4) {
+            std::cerr << "Error: When creating a Rectangle object, need exactly 4 vertices, but " << vert.size() << " were used." << std::endl;
             exit(1);
         }
 
+        Point p1 = vert[0];
+        Point p2 = vert[1];
+        Point p3 = vert[2];
+        Point p4 = vert[3];
+
+        a = p1.y*(p2.z-p3.z) + p2.y*(p3.z-p1.z) + p3.y*(p1.z-p2.z);
+        b = p1.z*(p2.x-p3.x) + p2.z*(p3.x-p1.x) + p3.z*(p1.x-p2.x);
+        c = p1.x*(p2.y-p3.y) + p2.x*(p3.y-p1.y) + p3.x*(p1.y-p2.y);
+        dist = -p1.x*(p2.y*p3.z-p3.y*p2.z) - p1.y*(p3.y*p1.z - p1.y*p3.z) - p1.z*(p1.y*p2.z - p2.y*p1.z);
+
         n = cross( Vector(vert[0],vert[3]) , Vector(vert[0],vert[1]) );
         normalize(n);
-
-        // for now I'm assuming all the vertices are on the same plane, and that place
-        // has a normal (0,1,0), and all the points are on a plane parallel to the x and z plane
-        // so f will always be y of any of the vertices (they are always the same)
-        f = std::abs( vert[0].y );
 
         colorFromTexture = function;
     }
@@ -318,11 +328,14 @@ public:
         Vector d = ray.getDirection();
         normalize(d);
 
-        // ray-plane intersection
-        double w = -(n.x*o.x + n.y*o.y + n.z*o.z + f) / (n.x*d.x + n.y*d.y + n.z*d.z);
+        // t = -(A*x0 + B*y0 + C*z0 + D) / (A*xd + B*yd + C*zd)
+        double t = -(a*o.x + b*o.y + c*o.z + dist) / (a*d.x + b*d.y + c*d.z);
 
-        // there was a intersection
-        if ( w > 0.0 ) {
+        // ray-plane intersection
+        // double w = -(n.x*o.x + n.y*o.y + n.z*o.z + f) / (n.x*d.x + n.y*d.y + n.z*d.z);
+
+        // there was a intersection, let's check if it is between the rectangle boundaries
+        if ( t > 0.0 ) {
             // actual intersection point
             double wx = o.x + d.x * w;
             double wy = o.y + d.y * w;
