@@ -154,6 +154,10 @@ struct Vector {
         return Vector(x - rhs.x, y - rhs.y, z - rhs.z);
     }
 
+    Vector operator/(double rhs) {
+        return Vector(x/rhs, y/rhs, z/rhs);
+    }
+
     Vector operator* (double rhs) {
         return Vector(x * rhs, y * rhs, z * rhs);
     }

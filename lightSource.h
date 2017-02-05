@@ -22,6 +22,8 @@ public:
 
     virtual double getAttenuation(Point p) = 0;
 
+    virtual double getNumSamplesOnSurface() = 0;
+
     // Ray Marching
     virtual std::vector<Point> intersect ( Ray ray ) = 0;
 };
@@ -46,6 +48,10 @@ public:
     // Point light attenuation = 1, none
     double getAttenuation (Point p) {
         return 1.0f;
+    }
+
+    double getNumSamplesOnSurface() {
+        return 1; // point light
     }
 
     std::vector<Point> intersect ( Ray ray ) {
@@ -82,6 +88,10 @@ public:
     double getAttenuation (Point p) {
         Vector vObj(position, p, true);
         return std::pow ( dot(vObj, dir), aExp );
+    }
+
+    double getNumSamplesOnSurface() {
+        return 1; // point light
     }
 
     // This intersection will be used for the ray marching,
@@ -147,13 +157,14 @@ public:
 class AreaLight : public LightSource {
     // This will be the object our light source will be based on
     Object *object;
+    int numSamples;
 
 public:
-    AreaLight( Object *object ) : object(object) {
+    AreaLight( Object *object, int numSamples ) : object(object), numSamples(numSamples) {
     }
 
     std::vector<Point> getPos () {
-        return object->samplePoints();
+        return object->samplePoints(numSamples);
     }
 
     Color getColor () {
@@ -168,6 +179,10 @@ public:
     // Point light attenuation = 1, none
     double getAttenuation (Point p) {
         return 1.0f;
+    }
+
+    double getNumSamplesOnSurface() {
+        return numSamples;
     }
 
     // does the Ray ray intersect with this light (for ray marching only, here not usable?)

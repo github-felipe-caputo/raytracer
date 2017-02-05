@@ -49,8 +49,8 @@ class Camera {
     // If we are going ray tracking or ray marching
     int rayType;
 
-    // number of rays we will use per pixel, total is raysPerPixel * raysPerPixel
-    int totalRays;
+    // number of rays we will use per pixel
+    int raysPerPixel;
 
     // for ray marching
     int SAMPLE_NUM;
@@ -68,7 +68,7 @@ class Camera {
         double startx = (firstPixelx + i * unitsWidth);
         double starty = (firstPixely - j * unitsHigh);
 
-        for(int a = 0; a < totalRays; ++a) {
+        for(int a = 0; a < raysPerPixel; ++a) {
             double randx = static_cast <double> (rand()) / (static_cast <double> (RAND_MAX/unitsWidth));
             double randy = static_cast <double> (rand()) / (static_cast <double> (RAND_MAX/unitsHigh));
 
@@ -90,7 +90,7 @@ class Camera {
         }
 
         // get final color, if grid need to average
-        average = (average / totalRays);
+        average = (average / raysPerPixel);
 
         return average;
     }
@@ -105,7 +105,7 @@ public:
     // ray marching here was implemented so far only for volumetric lighthing,
     // so some other values will need to be set up before using it (ka and ks for instance)
     Camera(Point pos, Point look, Vector up, int imH, int imW, double viewH, double viewW, int rayType, int depthOrSamples, int raysPerPixel) :
-        position(pos), lookAt(look), up(up), imageHeight(imH), imageWidth(imW), viewPlaneHeigth(viewH), viewPlaneWidth(viewW), rayType(rayType) {
+        position(pos), lookAt(look), up(up), imageHeight(imH), imageWidth(imW), viewPlaneHeigth(viewH), viewPlaneWidth(viewW), rayType(rayType), raysPerPixel(raysPerPixel) {
 
         // each pixel
         unitsHigh = viewH/imH;
@@ -122,9 +122,6 @@ public:
         u = cross(up,w);
         normalize(u);
         v = cross(w,u);
-
-        // total rays to be shot
-        totalRays = raysPerPixel * raysPerPixel;
 
         if (rayType == RAY_TRACER) {
             MAX_DEPTH = depthOrSamples;

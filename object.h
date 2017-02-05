@@ -10,8 +10,6 @@
 
 #include "triBoxOverlap.h"
 
-#define NUM_POINT_SAMPLES_ON_LIGHT 5
-
 class Object {
 protected:
     // material
@@ -44,7 +42,7 @@ public:
 
     virtual Point intersect (Ray ray) = 0;
 
-    virtual std::vector<Point> samplePoints() = 0;
+    virtual std::vector<Point> samplePoints(int numSamples) = 0;
 
     virtual bool isInside (Voxel v) = 0;
 
@@ -64,7 +62,7 @@ public:
     }
 
     Color getEmissiveColor() {
-        return emissive;
+        return emissiveColor;
     }
 
     bool isEmissive() {
@@ -213,11 +211,11 @@ public:
     }
 
     // returns a number of sample points on the surface of the object
-    std::vector<Point> samplePoints() {
+    std::vector<Point> samplePoints(int numSamples) {
         std::vector<Point> samples;
         double n1, n2, n3;
 
-        for (int i = 0; i < NUM_POINT_SAMPLES_ON_LIGHT; ++i) {
+        for (int i = 0; i < numSamples; ++i) {
             // numbers between -1 and 1
             n1 = static_cast <double> (rand()) / (static_cast <double> (RAND_MAX/2.0)) - 1.0 ;
             n2 = static_cast <double> (rand()) / (static_cast <double> (RAND_MAX/2.0)) - 1.0 ;
@@ -318,11 +316,9 @@ public:
         colorFromTexture = function;
     }
 
-    // NOTE: this intersection is not taking into account the normal yet,
-    // in other words, it will return an intersection even if the triangle is
-    // "backwards"
-    // TODO: weird, when placing the rectangle on a 'higher' y, it appears on a lower one,
-    // def a problem here or possibly on the procedural texture
+    // Rectangle-ray intersection. First check intersection with plane, if it
+    // happened then check intersection between the four points of the
+    // recangle through dot products
     Point intersect (Ray ray) {
         Point o = ray.getOrigin();
         Vector d = ray.getDirection();
@@ -357,10 +353,33 @@ public:
         return o;
     }
 
-    // returns a number of sample points on the surface of the object
-    // TODO
-    std::vector<Point> samplePoints() {
+    // Returns a number of sample points on the surface of the object
+    std::vector<Point> samplePoints(int numSamples) {
         std::vector<Point> samples;
+        double samplesBySide = numSamples / 2.0;
+
+        Vector v1 = Vector(p1,p2) / samplesBySide;
+        Vector v2 = Vector(p1,p4) / samplesBySide;
+
+        for(int i = 0; i < samplesBySide; ++i) {
+            for(int j = 0; j < samplesBySide; ++j) {
+                double startx = p1.x + i * v1.x + j * v2.x;
+                double starty = p1.y + i * v1.y + j * v2.y;
+                double startz = p1.z + i * v1.z + j * v2.z;
+                Point start(startx,starty,startz);
+
+                // numbers between 0 and 1
+                double u = static_cast <double> (rand()) / (static_cast <double> (RAND_MAX));
+                double v = static_cast <double> (rand()) / (static_cast <double> (RAND_MAX));
+
+                double samplex = start.x + (u * v1.x) + (v * v2.x);
+                double sampley = start.y + (u * v1.y) + (v * v2.y);
+                double samplez = start.z + (u * v1.z) + (v * v2.z);
+
+                samples.push_back( Point(samplex,sampley,samplez) );
+            }
+        }
+
         return samples;
     }
 
@@ -500,7 +519,7 @@ public:
 
     // returns a number of sample points on the surface of the object
     // TODO
-    std::vector<Point> samplePoints() {
+    std::vector<Point> samplePoints(int numSamples) {
         std::vector<Point> samples;
         return samples;
     }

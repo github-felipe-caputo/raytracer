@@ -42,6 +42,7 @@ Color illuminatePhong(Object *obj, Vector view, Point point, Vector normal,
 
         double attenuation = lightHit->getAttenuation(point);
         Color lightRadiance = lightHit->getColor();
+        double numSamples = lightHit->getNumSamplesOnSurface();
 
         for(std::vector<Point>::iterator it2 = pointsHit.begin() ; it2 < pointsHit.end() ; ++it2) {
             // diffuse
@@ -60,8 +61,8 @@ Color illuminatePhong(Object *obj, Vector view, Point point, Vector normal,
             specular += lightRadiance * objSpecColor * rvke * attenuation;
         }
 
-        diffuseFinal += diffuse / NUM_POINT_SAMPLES_ON_LIGHT;
-        specularFinal += specular / NUM_POINT_SAMPLES_ON_LIGHT;
+        diffuseFinal += diffuse / numSamples;
+        specularFinal += specular / numSamples;
     }
 
     return kd * diffuseFinal + ks * specularFinal;
