@@ -276,10 +276,10 @@ public:
             exit(1);
         }
 
-        Point p1 = vert[0];
-        Point p2 = vert[1];
-        Point p3 = vert[2];
-        Point p4 = vert[3];
+        p1 = vert[0];
+        p2 = vert[1];
+        p3 = vert[2];
+        p4 = vert[3];
 
         a = p1.y*(p2.z-p3.z) + p2.y*(p3.z-p1.z) + p3.y*(p1.z-p2.z);
         b = p1.z*(p2.x-p3.x) + p2.z*(p3.x-p1.x) + p3.z*(p1.x-p2.x);
@@ -302,10 +302,10 @@ public:
             exit(1);
         }
 
-        Point p1 = vert[0];
-        Point p2 = vert[1];
-        Point p3 = vert[2];
-        Point p4 = vert[3];
+        p1 = vert[0];
+        p2 = vert[1];
+        p3 = vert[2];
+        p4 = vert[3];
 
         a = p1.y*(p2.z-p3.z) + p2.y*(p3.z-p1.z) + p3.y*(p1.z-p2.z);
         b = p1.z*(p2.x-p3.x) + p2.z*(p3.x-p1.x) + p3.z*(p1.x-p2.x);
@@ -328,11 +328,10 @@ public:
         Vector d = ray.getDirection();
         normalize(d);
 
-        // t = -(A*x0 + B*y0 + C*z0 + D) / (A*xd + B*yd + C*zd)
         double t = -(a*o.x + b*o.y + c*o.z + dist) / (a*d.x + b*d.y + c*d.z);
 
         // there was a intersection, let's check if it is between the rectangle boundaries
-        if ( t > 0.0 ) {
+        if ( t >= 0.0 ) {
             // actual intersection point
             double tx = o.x + d.x * t;
             double ty = o.y + d.y * t;
@@ -344,7 +343,13 @@ public:
             Vector v4(p1,intersectionPoint,true);
             Vector v5(p3,intersectionPoint,true);
 
-            if (dot(v1,v4) >= 0 && dot(v3,v5) >= 0) {
+            Vector v1_a(p2,p3,true);
+            Vector v3_a(p4,p1,true);
+            Vector v4_a(p2,intersectionPoint,true);
+            Vector v5_a(p4,intersectionPoint,true);
+
+            if (dot(v1,v4) >= 0.0 && dot(v3,v5) >= 0.0
+                && dot(v1_a,v4_a) >= 0.0 && dot(v3_a,v5_a) >= 0.0 ) {
                 return intersectionPoint;
             }
         }

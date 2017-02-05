@@ -142,12 +142,12 @@ public:
         // Size of canvas
         int pixelNum = imageWidth * imageHeight;
 
-        // Result color of a ray
-        std::vector<Color> colorMap(pixelNum);
-
         int cores = std::thread::hardware_concurrency();
         volatile std::atomic<int> count(0);
         std::vector<std::future<void> > futureVector;
+
+        // Result color of a ray
+        std::vector<Color> colorMap(pixelNum);
 
         while (cores--) {
             futureVector.push_back(
@@ -163,7 +163,10 @@ public:
                     }
                 }));
         }
+
 /*
+        // Result color of a ray
+        std::vector<Color> colorMap;
 
         // this loop is going like
         // consider origin at top left
