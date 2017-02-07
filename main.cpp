@@ -31,10 +31,10 @@ int main ( void ) {
     srand (static_cast <unsigned> (time(0)));
 
     // first create our objects
-    Sphere frontSphere( Point(0.0,0.1,-2.2), 0.4, Color(0.5,0,0.8) );
-    frontSphere.setUpPhong( Color(1,1,1), 0.2, 0.5, 1.0, 50.0 );
-    //frontSphere.setUpPhong( Color(1,1,1), 0.075, 0.075, 0.2, 20.0 );
-    //frontSphere.setUpReflectionTransmission(0.0, 0.8, 0.95);
+    Sphere frontSphere( Point(0.0,0.1,-1.9), 0.4, Color(1,1,1) );
+    //frontSphere.setUpPhong( Color(1,1,1), 0.2, 0.5, 1.0, 50.0 );
+    frontSphere.setUpPhong( Color(1,1,1), 0.075, 0.075, 0.2, 20.0 );
+    frontSphere.setUpReflectionTransmission(0.0, 0.8, 0.95);
 
     //Sphere frontSphere( Point(0.0,0.1,-1.9), 0.4, Texture("textures/earth.jpg") );
     //frontSphere.setUpPhong( Color(1,1,1), 1.0, 1.0, 0.0, 1.0 );
@@ -42,7 +42,7 @@ int main ( void ) {
 
     Sphere backSphere( Point(-0.65,-0.2,-2.5), 0.3, Color(0.7,0.7,0.7) );
     backSphere.setUpPhong( Color(1,1,1), 0.15, 0.25, 1.0, 20.0 );
-    //backSphere.setUpReflectionTransmission(0.75, 0.0, 1.0);
+    backSphere.setUpReflectionTransmission(0.75, 0.0, 1.0);
 
     std::vector<Point> vertices;
     vertices.push_back( Point(-1.5,-0.6, 0.0) );
@@ -55,7 +55,7 @@ int main ( void ) {
     //vertices.push_back( Point(-1.5,0.5,-6.0) );
     //vertices.push_back( Point(-1.5,0.5, 0.0) );
 
-    Rectangle checkerFloor( vertices, Color(0.7,0.7,0.7) );
+    Rectangle checkerFloor( vertices, planarCheckerTexture );
     checkerFloor.setUpPhong( Color(1,1,1), 0.3, 1.0, 0.0, 1.0 );
 
     // create a light source
@@ -80,12 +80,10 @@ int main ( void ) {
     rectangleLightObj.setUpEmissionColor( Color(1,1,1) );
     AreaLight rectangleLight( &rectangleLightObj, 16 );
 
-
-
     // create world, add objects in it
     World world;
     world.addObject(&frontSphere);
-    //world.addObject(&backSphere);
+    world.addObject(&backSphere);
     world.addObject(&checkerFloor);
     //world.addObject(&sphereLightObj); // full white
     world.addObject(&rectangleLightObj); // full white
@@ -104,7 +102,7 @@ int main ( void ) {
     Vector up(0,1,0);
     Point lookAt(0,0,-1);
     Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth,
-        RAY_TRACER, 3, 16);
+        RAY_TRACER, 8, 16);
 
     // render our world, get the color map we will put on canvas
     std::vector<Color> colorMap = cam.render(world);

@@ -1,5 +1,10 @@
 TODO:
 
+- When adding reflections and depth for rays, area light is not completely white! WHY?
+
+- Refactor code so that kdtrees and maybe ray marching work with the changes made to
+light sources and illumination model
+
 - Fix shadow ray through transparent object.
 |-> For now it’s working. The idea is, if the shadow ray does not reach any lights
 |   it would normally mean it’s necessary to cast a shadow. Now, if that happens

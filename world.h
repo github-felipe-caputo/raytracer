@@ -249,7 +249,7 @@ public:
               Color diff_spec = illuminate( objectHit, view, pointHit,
                       objectHit->getNormal(pointHit), lightsAndPointsReachedMapTransp);
 
-              finalColor += 0.8 * diff_spec;
+              finalColor += 0.05 * diff_spec;
             }
             */
 
