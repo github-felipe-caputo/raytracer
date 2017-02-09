@@ -20,11 +20,11 @@ class Canvas {
 
 public:
 
-    /* 
+    /*
      * Canvas
      *
-     * INPUT: 
-     *         
+     * INPUT:
+     *
      *
      * DESCRIPTION:
      *
@@ -54,9 +54,9 @@ public:
 
     void setPixel ( int x, int y, double r, double g, double b ) {
         // Wrap color values if they are over 1
-        if (r > 1) r = 1;
-        if (g > 1) g = 1;
-        if (b > 1) b = 1;
+        if (r > 1.0) r = 1.0;
+        if (g > 1.0) g = 1.0;
+        if (b > 1.0) b = 1.0;
 
         // RGB values
         unsigned int R = (unsigned int)(r * 255);

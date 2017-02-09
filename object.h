@@ -356,7 +356,7 @@ public:
     // Returns a number of sample points on the surface of the object
     std::vector<Point> samplePoints(int numSamples) {
         std::vector<Point> samples;
-        double samplesBySide = numSamples / 2.0;
+        int samplesBySide = numSamples / 2;
 
         Vector v1 = Vector(p1,p2) / samplesBySide;
         Vector v2 = Vector(p1,p4) / samplesBySide;

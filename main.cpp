@@ -109,6 +109,7 @@ int main ( void ) {
 
     // Tone reproduction
     std::vector<Color> toneReprodColorMap = compressionPerceptual(colorMap , 100);
+    //std::vector<Color> toneReprodColorMap = colorMap;
 
     // SFML canvas and window
     Canvas canvas( imageWidth, imageHeight );

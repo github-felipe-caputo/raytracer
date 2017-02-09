@@ -90,16 +90,14 @@ class Camera {
         }
 
         // get final color, if grid need to average
-        average = (average / raysPerPixel);
+        average = (average / static_cast <double> (raysPerPixel));
+
+        // std::cout << " START: " << average.r << " "  << average.g << " "  << average.b << " => " << std::endl;
 
         return average;
     }
 
 public:
-
-    /**
-     * NOTE: I'm not using the up vector yet, just assuming it's positive y
-     */
 
     // rayType = if we are doing ray tracing or ray marching
     // ray marching here was implemented so far only for volumetric lighthing,
