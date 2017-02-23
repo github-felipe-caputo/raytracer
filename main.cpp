@@ -102,7 +102,7 @@ int main ( void ) {
     Vector up(0,1,0);
     Point lookAt(0,0,-1);
     Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth,
-        RAY_TRACER, 8, 16);
+        RAY_TRACER, 8, 1);
 
     // render our world, get the color map we will put on canvas
     std::vector<Color> colorMap = cam.render(world);

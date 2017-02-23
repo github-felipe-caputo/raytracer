@@ -22,7 +22,7 @@ public:
 
     virtual double getAttenuation(Point p) = 0;
 
-    virtual double getNumSamplesOnSurface() = 0;
+    virtual int getNumSamplesOnSurface() = 0;
 
     // Ray Marching
     virtual std::vector<Point> intersect ( Ray ray ) = 0;
@@ -50,7 +50,7 @@ public:
         return 1.0f;
     }
 
-    double getNumSamplesOnSurface() {
+    int getNumSamplesOnSurface() {
         return 1; // point light
     }
 
@@ -90,7 +90,7 @@ public:
         return std::pow ( dot(vObj, dir), aExp );
     }
 
-    double getNumSamplesOnSurface() {
+    int getNumSamplesOnSurface() {
         return 1; // point light
     }
 
@@ -181,7 +181,7 @@ public:
         return 1.0f;
     }
 
-    double getNumSamplesOnSurface() {
+    int getNumSamplesOnSurface() {
         return numSamples;
     }
 

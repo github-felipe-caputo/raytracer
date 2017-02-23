@@ -240,18 +240,20 @@ public:
             // If lights hit is empty, it means the shadow ray might have hit something
             // before reaching the light, i.e. an object
             // In this case we should take into account if the object is transparent
-            /*
+
+            // TODO: PROBLEM IS IN THE CASE SOME RAYS HIT THE LIGHT AND SOME DONT (CHECK)
+
             if ( !allRaysHitLight(lightsAndPointsReachedMap) ) {
-              std::map<LightSource*, std::vector<Point> > lightsAndPointsReachedMapTransp = lightsReachedThroughTransparency(originShadowRay, lightList);
+                std::map<LightSource*, std::vector<Point> > lightsAndPointsReachedMapTransp = lightsReachedThroughTransparency(originShadowRay, lightList);
 
-              Vector view(pointHit, originRay, true);
+                Vector view(pointHit, originRay, true);
 
-              Color diff_spec = illuminate( objectHit, view, pointHit,
-                      objectHit->getNormal(pointHit), lightsAndPointsReachedMapTransp);
+                Color diff_spec = illuminate( objectHit, view, pointHit,
+                        objectHit->getNormal(pointHit), lightsAndPointsReachedMapTransp);
 
-              finalColor += 0.1 * diff_spec;
+                finalColor += 0.1 * diff_spec;
             }
-            */
+
 
             if ( depth > 1 ) {
                 double kr = objectHit->getKr();
@@ -505,8 +507,8 @@ public:
             if (lightHit->getNumSamplesOnSurface() != pointsHit.size()) {
                 return false;
             }
-
         }
+
         return true;
     }
 
