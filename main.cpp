@@ -33,7 +33,7 @@ int main ( void ) {
     // first create our objects
     Sphere frontSphere( Point(0.0,0.1,-1.9), 0.4, Color(1,1,1) );
     //frontSphere.setUpPhong( Color(1,1,1), 0.2, 0.5, 1.0, 50.0 );
-    frontSphere.setUpPhong( Color(1,1,1), 0.075, 0.075, 0.2, 20.0 );
+    //frontSphere.setUpPhong( Color(1,1,1), 0.075, 0.075, 0.2, 20.0 );
     frontSphere.setUpReflectionTransmission(0.0, 0.8, 0.95);
 
     //Sphere frontSphere( Point(0.0,0.1,-1.9), 0.4, Texture("textures/earth.jpg") );
@@ -56,7 +56,7 @@ int main ( void ) {
     //vertices.push_back( Point(-1.5,0.5, 0.0) );
 
     Rectangle checkerFloor( vertices, planarCheckerTexture );
-    checkerFloor.setUpPhong( Color(1,1,1), 0.3, 1.0, 0.0, 1.0 );
+    checkerFloor.setUpPhong( Color(0.9,0.9,0.9), 0.3, 1.0, 0.0, 1.0 );
 
     // create a light source
     //PointLight light( Point(0.0, 5.0, 3.0), Color(1,1,1) );

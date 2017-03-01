@@ -220,9 +220,9 @@ public:
 
             // shadow ray origin should be slightly  different to account for rounding errors
             Vector normal = objectHit->getNormal(pointHit);
-            Point originShadowRay(pointHit.x + normal.x * 0.1f,
-                                  pointHit.y + normal.y * 0.1f,
-                                  pointHit.z + normal.z * 0.1f );
+            Point originShadowRay(pointHit.x + normal.x * 0.1,
+                                  pointHit.y + normal.y * 0.1,
+                                  pointHit.z + normal.z * 0.1 );
 
             // the new function we will use
             std::map<LightSource*, std::vector<Point> > lightsAndPointsReachedMap = lightsReached(originShadowRay, lightList);
@@ -241,17 +241,22 @@ public:
             // before reaching the light, i.e. an object
             // In this case we should take into account if the object is transparent
 
-            // TODO: PROBLEM IS IN THE CASE SOME RAYS HIT THE LIGHT AND SOME DONT (CHECK)
-
             if ( !allRaysHitLight(lightsAndPointsReachedMap) ) {
-                std::map<LightSource*, std::vector<Point> > lightsAndPointsReachedMapTransp = lightsReachedThroughTransparency(originShadowRay, lightList);
 
-                Vector view(pointHit, originRay, true);
+                std::map<LightSource*, std::vector<Point> > lightsAndPointsReachedMapTransp = lightsReachedThroughTransparency(originShadowRay,
+                                                                                                                lightsAndPointsReachedMap);
+/*
+                if ( !lightsAndPointsReachedMapTransp.empty() ) {
+                    finalColor = Color(0,1,0);
+                }
+*/
 
+                // TODO: still problems when only a few rays hit
                 Color diff_spec = illuminate( objectHit, view, pointHit,
-                        objectHit->getNormal(pointHit), lightsAndPointsReachedMapTransp);
+                        objectHit->getNormal(pointHit), lightsAndPointsReachedMapTransp );
 
                 finalColor += 0.1 * diff_spec;
+
             }
 
 
@@ -480,10 +485,11 @@ public:
                         pointsHitOnLight.push_back( *it2 );
                     }
                 }
+
                 if ( !pointsHitOnLight.empty() ) {
-                    //std::cout << " START: " << (*it)->getColor().r << " "  << (*it)->getColor().g << " "  << (*it)->getColor().b << " => " << pointsHitOnLight[0].x << " " << pointsHitOnLight[0].y << " " << pointsHitOnLight[0].z << std::endl;
                     result.insert(std::pair<LightSource*, std::vector<Point> >(*it, pointsHitOnLight));
                 }
+
             }
         }
 
@@ -504,7 +510,9 @@ public:
             LightSource *lightHit = (it->first);
             std::vector<Point> pointsHit = (it->second);
 
-            if (lightHit->getNumSamplesOnSurface() != pointsHit.size()) {
+            if (pointsHit.size() < lightHit->getNumSamplesOnSurface()) {
+                // If points hit is less than the num samples of surface, then dis difference
+                // are the shadow rays we need to shoot again and see if they go through transparent objetcs
                 return false;
             }
         }
@@ -515,41 +523,89 @@ public:
     // This returns a vector of which lights the shadow ray coming from originShadowRay can reach
     // But in this case, if there is a transparent object in the way, we consider that the
     // light is still reachable
-    std::map<LightSource*, std::vector<Point> > lightsReachedThroughTransparency(Point originShadowRay, std::vector<LightSource*> lightList) {
-        std::vector<LightSource*> lightsHit;
+    std::map<LightSource*, std::vector<Point> > lightsReachedThroughTransparency(Point originShadowRay,
+                            std::map<LightSource*, std::vector<Point> > lightsAndPointsReachedMap) {
         std::vector<Object*>::iterator itObj;
 
         std::map<LightSource*, std::vector<Point>> result;
         std::vector<Point> pointsHitOnLight;
 
-        // For every light source, let's see if a ray from originShadowRay can reach it
-        for(std::vector<LightSource*>::iterator it = lightList.begin() ; it < lightList.end() ; ++it) {
+        // if the map is empty, no light was reached, i.e, this point is in complete shadow
+        // in this case, we need to shoot all points for all lights!
+        if (lightsAndPointsReachedMap.empty()) {
 
-            // If this ray can actually reach the lights
-            // (can always reach a point light, maybe not a spot light)
-            if( (*it)->reaches(originShadowRay) ) {
-                // could be an area light
-                std::vector<Point> pointsOnLightSurface = (*it)->getPos();
-                pointsHitOnLight.clear();
-                for(std::vector<Point>::iterator it2 = pointsOnLightSurface.begin() ; it2 < pointsOnLightSurface.end() ; ++it2) {
+            for(std::vector<LightSource*>::iterator it = lightList.begin() ; it < lightList.end() ; ++it) {
+
+                // If this ray can actually reach the lights
+                // (can always reach a point light, maybe not a spot light)
+                if( (*it)->reaches(originShadowRay) ) {
+                    // could be an area light
+                    std::vector<Point> pointsOnLightSurface = (*it)->getPos();
+                    for(std::vector<Point>::iterator it2 = pointsOnLightSurface.begin() ; it2 < pointsOnLightSurface.end() ; ++it2) {
+                        Vector dir( originShadowRay, (*it2), true );
+                        Ray fromPointToLight(originShadowRay, dir);
+
+                        for(itObj = objectList.begin() ; itObj < objectList.end() ; ++itObj) {
+                            if ( !(*itObj)->isEmissive() && // ignore emissive objects, our area lights
+                                 (*itObj)->getKt() == 0 &&  // only consider if object transparency = 0 (not transparent at all)
+                                 originShadowRay != (*itObj)->intersect(fromPointToLight) ) {
+                                break;
+                            }
+                        }
+
+                        if ( itObj == objectList.end() ) { // if it went through the whole loop, then it hits the light!
+                            pointsHitOnLight.push_back( *it2 );
+                        }
+                    }
+
+                    if ( !pointsHitOnLight.empty() ) {
+                        result.insert(std::pair<LightSource*, std::vector<Point> >(*it, pointsHitOnLight));
+                        pointsHitOnLight.clear();
+                    }
+
+                }
+            }
+
+            return result;
+
+        }
+
+
+
+        for (std::map<LightSource*, std::vector<Point> >::iterator it=lightsAndPointsReachedMap.begin(); it!=lightsAndPointsReachedMap.end(); ++it) {
+            LightSource *lightHit = (it->first);
+            std::vector<Point> pointsHit = (it->second);
+
+            if (pointsHit.size() < lightHit->getNumSamplesOnSurface()) {
+                // If points hit is less than the num samples of surface, then dis difference
+                // are the shadow rays we need to shoot again and see if they go through transparent objetcs
+                int numRaysDidntHitLight = lightHit->getNumSamplesOnSurface() - pointsHit.size();
+                std::vector<Point> pointsOnLightSurface = lightHit->getPos();
+
+                std::vector<Point>::iterator it2 = pointsOnLightSurface.begin();
+                for(int i = 0; i < numRaysDidntHitLight && it2 < pointsOnLightSurface.end() ; ++it2, ++i) {
                     Vector dir( originShadowRay, (*it2), true );
                     Ray fromPointToLight(originShadowRay, dir);
 
-                    for(itObj = objectList.begin() ; itObj < objectList.end() ; ++itObj)
-                        if ( !(*itObj)->isEmissive() && (*itObj)->getKt() == 0 && originShadowRay != (*itObj)->intersect(fromPointToLight) ) // emissive object should not block, it's light
+                    for(itObj = objectList.begin() ; itObj < objectList.end() ; ++itObj) {
+                        if ( !(*itObj)->isEmissive() && // ignore emissive objects, our area lights
+                             (*itObj)->getKt() == 0 &&  // only consider if object transparency = 0 (not transparent at all)
+                             originShadowRay != (*itObj)->intersect(fromPointToLight) ) {
                             break;
+                        }
+                    }
 
                     if ( itObj == objectList.end() ) { // if it went through the whole loop, then it hits the light!
                         pointsHitOnLight.push_back( *it2 );
                     }
                 }
+
                 if ( !pointsHitOnLight.empty() ) {
-                    //std::cout << " START: " << (*it)->getColor().r << " "  << (*it)->getColor().g << " "  << (*it)->getColor().b << " => " << pointsHitOnLight[0].x << " " << pointsHitOnLight[0].y << " " << pointsHitOnLight[0].z << std::endl;
-                    result.insert(std::pair<LightSource*, std::vector<Point> >(*it, pointsHitOnLight));
+                    result.insert(std::pair<LightSource*, std::vector<Point> >(lightHit, pointsHitOnLight));
+                    pointsHitOnLight.clear();
                 }
             }
         }
-
         return result;
     }
 /*
