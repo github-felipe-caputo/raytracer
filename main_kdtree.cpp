@@ -58,10 +58,10 @@ int main ( void ) {
 
     // create camera
     Point pos(0,0.1,0.3);
-    Vector lookAt(0,-0.5,0); // not being used yet
-    Vector up(0,1,0); // not being used yet
+    Vector up(0,1,0);
+    Point lookAt(0,0,-1);
     Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth,
-        RAY_TRACER, 1, RAY_CENTER);
+        RAY_TRACER, 1, 1);
 
     // render our world, get the color map we will put on canvas
     clock_t time_c = clock();

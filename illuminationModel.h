@@ -67,13 +67,14 @@ Color illuminatePhong(Object *obj, Vector view, Point point, Vector normal,
 
     return kd * diffuseFinal + ks * specularFinal;
 }
-/*
-Color illuminatePhongBlinn(Object *obj, Vector view, Point point, Vector normal, std::vector<LightSource*> lightList) {
-    if (lightList.empty())
+
+Color illuminatePhongBlinn(Object *obj, Vector view, Point point, Vector normal,
+    std::map<LightSource*, std::vector<Point> > lightsAndPointsReachedMap) {
+    if (lightsAndPointsReachedMap.empty())
         return Color(0,0,0);
 
-    Color diffuse;
-    Color specular;
+    Color diffuse, diffuseFinal;
+    Color specular, specularFinal;
 
     Color objColor = obj->getColor(point);
     Color objSpecColor = obj->getSpecularColor();
@@ -85,27 +86,37 @@ Color illuminatePhongBlinn(Object *obj, Vector view, Point point, Vector normal,
     normalize(view);
     normalize(normal);
 
-    // let's calculate diffuse and specular values for each light
-    for(std::vector<LightSource*>::iterator it = lightList.begin() ; it < lightList.end() ; ++it) {
-        double attenuation = (*it)->getAttenuation(point);
-        Color lightRadiance = (*it)->getColor();
+    // For each light, for each point reached on the light
+    for (std::map<LightSource*, std::vector<Point> >::iterator it=lightsAndPointsReachedMap.begin(); it!=lightsAndPointsReachedMap.end(); ++it) {
+        LightSource *lightHit = (it->first);
+        std::vector<Point> pointsHit = (it->second);
 
-        // diffuse
-        Vector s(point, (*it)->getPos(), true);
-        double sn = std::max(dot( s, normal ),0.0);
+        double attenuation = lightHit->getAttenuation(point);
+        Color lightRadiance = lightHit->getColor();
+        double numSamples = lightHit->getNumSamplesOnSurface();
 
-        // spec
-        Vector h = s + view;
-        normalize(h);
+        for(std::vector<Point>::iterator it2 = pointsHit.begin() ; it2 < pointsHit.end() ; ++it2) {
+            // diffuse
+            Vector s(point, (*it2), true);
+            double sn = std::max(dot( s, normal ),0.0);
 
-        double rvke = std::pow( std::max(dot( normal, h ), 0.0), ke );
+            // spec
+            Vector h = s + view;
+            normalize(h);
 
-        // calculate it
-        diffuse += lightRadiance * objColor * sn * attenuation;
-        specular += lightRadiance * objSpecColor * rvke * attenuation;
+            double rvke = std::pow( std::max(dot( normal, h ), 0.0), ke );
+
+            // calculate it
+            diffuse += lightRadiance * objColor * sn * attenuation;
+            specular += lightRadiance * objSpecColor * rvke * attenuation;
+        }
+
+        diffuseFinal += diffuse / numSamples;
+        specularFinal += specular / numSamples;
     }
 
-    return kd * diffuse + ks * specular;
+    return kd * diffuseFinal + ks * specularFinal;
+
 }
-*/
+
 #endif
