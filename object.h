@@ -471,13 +471,11 @@ public:
 
     // Code based on Tomas Akenine-Möller code at
     // http://fileadmin.cs.lth.se/cs/Personal/Tomas_Akenine-Moller/code/
-    //
     Point intersect (Ray ray) {
         Point o = ray.getOrigin();
         Vector d = ray.getDirection();
         normalize(d);
 
-        double EPSILON = 0.000001;
         double t, u, v, det, inv_det;
         Vector pvec, tvec, qvec;
 
@@ -491,9 +489,6 @@ public:
         inv_det = 1.0 / det;
 
         qvec = cross(tvec,edge1);
-
-        if (det < EPSILON)
-            return o;
 
         u = dot(tvec, pvec);
         if (u < 0.0 || u > det)

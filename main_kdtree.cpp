@@ -18,8 +18,8 @@
 #include "kdtree.h"
 
 // pixels
-int imageHeight = 1024;
-int imageWidth = 1024;
+int imageHeight = 512;
+int imageWidth = 512;
 
 // keeping the aspect ratio of the window pixels
 double viewPlaneHeigth = 0.5;
@@ -31,7 +31,7 @@ int main ( void ) {
     sf::RenderWindow window(sf::VideoMode(imageWidth, imageHeight), "Ray Tracer");
 
     // Get the triangles from the bunny fily
-    std::vector<Triangle> bunny = readPlyFile("plyFiles/bun_zipper_res2", Color(1,0.2,0.2));
+    std::vector<Triangle> bunny = readPlyFile("plyFiles/bun_zipper", Color(1,0.2,0.2));
 
     // create a light source
     PointLight light( Point(0.0, 5.0, 3.0), Color(1,1,1) );
@@ -51,7 +51,7 @@ int main ( void ) {
 
     // Create Tree
     clock_t time_a = clock();
-    world.createKdTree(-10,10,-10,10,-10,10);
+    world.createKdTree(-5,5,-5,5,-5,5);
     clock_t time_b = clock();
 
     std::cout << "Time to build tree (in milisecs): " << 1000 * (time_b - time_a) / CLOCKS_PER_SEC << std::endl;

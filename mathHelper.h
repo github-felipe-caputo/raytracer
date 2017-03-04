@@ -339,12 +339,12 @@ struct Voxel
             return (zFar+zNear)/2.0;
     }
 
-    bool intersect (Ray ray, double t0, double t1, Point &in, Point &out) {
+    bool intersect (Ray ray, double t0, double t1) {
         Point o = ray.getOrigin();
         Vector d = ray.getDirection();
         double tmin, tmax, tymin, tymax, tzmin, tzmax;
 
-        double divx = 1 / d.x;
+        double divx = 1.0 / d.x;
         if (divx >= 0) {
             tmin = (xLeft - o.x) * divx;
             tmax = (xRight - o.x) * divx;
@@ -354,7 +354,7 @@ struct Voxel
             tmax = (xLeft - o.x) * divx;
         }
 
-        double divy = 1 / d.y;
+        double divy = 1.0 / d.y;
         if (divy >= 0) {
             tymin = (yBottom - o.y) * divy;
             tymax = (yTop - o.y) * divy;
@@ -373,7 +373,7 @@ struct Voxel
         if (tymax < tmax)
             tmax = tymax;
 
-        double divz = 1 / d.z;
+        double divz = 1.0 / d.z;
         if (divz >= 0) {
             tzmin = (zFar - o.z) * divz;
             tzmax = (zNear - o.z) * divz;
@@ -391,9 +391,6 @@ struct Voxel
         if (tzmax < tmax)
             tmax = tzmax;
 
-        in = Point(o.x + d.x * tmin, o.y + d.y * tmin, o.z + d.z * tmin);
-        out = Point(o.x + d.x * tmax, o.y + d.y * tmax, o.z + d.z * tmax);
-
         return ( (tmin < t1) && (tmax > t0) );
     }
 
@@ -402,9 +399,9 @@ struct Voxel
     }
 
     Point getHalfLenghts() {
-        return Point((xRight - xLeft) / 2.0,
-                     (yTop - yBottom) / 2.0,
-                     (zNear - zFar) / 2.0  );
+        return Point(std::abs(xRight - xLeft) / 2.0,
+                     std::abs(yTop - yBottom) / 2.0,
+                     std::abs(zNear - zFar)   / 2.0);
     }
 
 };

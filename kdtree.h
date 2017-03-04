@@ -45,9 +45,6 @@ class Kdtree {
         node (std::vector<Object*> objectList, Voxel v) : objectList(objectList), v(v) {
             leaf = true;
         }
-
-
-
     };
 
     node *root;
@@ -70,11 +67,8 @@ public:
 
     node* buildKdTree (std::vector<Object*> objectList, Voxel V, int currentSubdiv) {
         if (terminate(objectList)) {
-            //std::cout << V.xLeft << " " << V.xRight << " " << V.yBottom << " " << V.yTop << " " << V.zFar << " " << V.zNear << std::endl;
             return new node(objectList, V);
         }
-
-        //std::cout << V.xLeft << " " << V.xRight << " " << V.yBottom << " " << V.yTop << " " << V.zFar << " " << V.zNear << std::endl;
 
         // partition plane -> spatial median
         Voxel vFront = V.splitFront(currentSubdiv);
@@ -85,25 +79,23 @@ public:
         std::vector<Object*> objectListRear;
 
         for(std::vector<Object*>::iterator it = objectList.begin() ; it < objectList.end() ; ++it) {
-            if ((*it)->isInside(vFront))
+            if ((*it)->isInside(vFront)) {
                 objectListFront.push_back((*it));
-            if ((*it)->isInside(vRear))
+            }
+            if ((*it)->isInside(vRear)) {
                 objectListRear.push_back((*it));
+            }
         }
 
         // new subdiv
-        int newSubDiv;
-        if (currentSubdiv == SUBDIV_Z)
-            newSubDiv = SUBDIV_X;
-        else
-            newSubDiv = currentSubdiv + 1;
+        int newSubDiv = (currentSubdiv + 1) % 3;
 
         return new node (currentSubdiv, V.splitVal(currentSubdiv), V,
             buildKdTree(objectListFront, vFront, newSubDiv), buildKdTree(objectListRear, vRear, newSubDiv) );
     }
 
     bool terminate (std::vector<Object*> objectList) {
-        return (objectList.size() <= 30);
+        return (objectList.size() < 30);
     }
 
     Object* traverse (Ray ray) {
@@ -114,10 +106,6 @@ public:
     Object* traverse (Ray ray, node *n) {
         // if it's a leaf, try intersectoins
         if (n->leaf) {
-            // If no objects are in the list, don't even need to check further
-            if (n->objectList.empty())
-                return NULL;
-
             Point originRay = ray.getOrigin();
             Point intersection;
 
@@ -129,268 +117,42 @@ public:
                 intersection = (*it)->intersect(ray);
                 vPoint.push_back( intersection );
                 vDist.push_back( distance(originRay, intersection) );
-
-                //std::cout << intersection.x << " " << intersection.y << " " << intersection.z << " " << std::endl;
-                //std::cout << originRay.x << " " << originRay.y << " " << originRay.z << " " << std::endl;
             }
 
             // we find the minimum distance on vDist, which would be closest intersection
             int objHit( indexMinElement(vDist) );
 
             if (objHit == -1) {
-                //std::cout << n->objectList.size() << " " << "NULL" << std::endl;
                 return NULL;
             }
-            //std::cout << n->objectList.size() << " " << (n->objectList[objHit])->getNormal(Point(1,1,1)).x << std::endl;
 
             // obj hit
             return n->objectList[objHit];
         }
-        else 
-        {
-            // get entry and exit point of ray box intersection 
-            Point in, out;
 
-            if ( (n->v).intersect(ray, 0, 1000, in, out) ) {
-                double coordEntry, coordExit;
-                Object *a, *b;
+        if ( (n->v).intersect(ray, 0, 1000) ) {
+            Object *a = traverse(ray, n->rear);
+            Object *b = traverse(ray, n->front);
+            Point origin = ray.getOrigin();
 
-                if (n->subdiv == SUBDIV_X) {
-                    coordEntry = in.x;
-                    coordExit = out.x;
-                } else if (n->subdiv == SUBDIV_Y) {
-                    coordEntry = in.y;
-                    coordExit = out.y;
-                } else {
-                    coordEntry = in.z;
-                    coordExit = out.z;
-                }
-
-                if(coordEntry <= n->subdivVal) {
-                    if (coordExit < n->subdivVal) {
-                        return traverse(ray, n->rear);
-                    } else {
-                        if (coordExit == n->subdivVal) {
-                            return traverse(ray, n->rear);
-                        } else {
-                            a = traverse(ray, n->rear);
-                            b = traverse(ray, n->front);
-                            Point origin = ray.getOrigin();
-
-                            if (a == NULL && b == NULL) {
-                                return NULL;
-                            } else if (a == NULL && b != NULL) {
-                                if (distance(origin, b->intersect(ray)) == 0)
-                                    return NULL;
-                                else
-                                    return b;
-                            } else if (a != NULL && b == NULL) {
-                                if (distance(origin, a->intersect(ray)) == 0)
-                                    return NULL;
-                                else
-                                    return a;
-                            } else {
-                                double distRayA = distance(origin, a->intersect(ray));
-                                double distRayB = distance(origin, b->intersect(ray));
-
-                                // they are both zero, no intersection with the objects
-                                if (distRayA == 0 && distRayB == 0)
-                                    return NULL;
-                                else if (distRayA == 0 && distRayB != 0)
-                                    return b;
-                                else if (distRayA != 0 && distRayB == 0)
-                                    return a;
-                                else if (distRayA < distRayB)
-                                    return a;
-                                else
-                                    return b;
-                            }
-                        }
-                    }
-                } else {
-                    if (coordExit > n->subdivVal) {
-                        return traverse(ray, n->front);
-                    } else {
-                        a = traverse(ray, n->front);
-                        b = traverse(ray, n->rear);
-                        Point origin = ray.getOrigin();
-
-                        if (a == NULL && b == NULL) {
-                            return NULL;
-                        } else if (a == NULL && b != NULL) {
-                            if (distance(origin, b->intersect(ray)) == 0)
-                                return NULL;
-                            else
-                                return b;
-                        } else if (a != NULL && b == NULL) {
-                            if (distance(origin, a->intersect(ray)) == 0)
-                                return NULL;
-                            else
-                                return a;
-                        } else {
-                            double distRayA = distance(origin, a->intersect(ray));
-                            double distRayB = distance(origin, b->intersect(ray));
-
-                            // they are both zero, no intersection with the objects
-                            if (distRayA == 0 && distRayB == 0)
-                                return NULL;
-                            else if (distRayA == 0 && distRayB != 0)
-                                return b;
-                            else if (distRayA != 0 && distRayB == 0)
-                                return a;
-                            else if (distRayA < distRayB)
-                                return a;
-                            else
-                                return b;
-                        }
-                    }
-                }
+            if (a == NULL || b == NULL) {
+                return (a == NULL) ? b : a;
             } else {
-                return NULL;
-            }
+                double distRayA = distance(origin, a->intersect(ray));
+                double distRayB = distance(origin, b->intersect(ray));
 
-        }
-    }
-/*
-
-    Point traverse (Ray ray, node *n) {
-
-        // if it's a leaf, try intersectoins
-        if (n->leaf) {
-            std::cout << "here???" << std::endl;
-            Point originRay = ray.getOrigin();
-            Point intersection;
-
-            std::vector<Point> vPoint;
-            std::vector<double> vDist;
-
-            // we will go through the objects in the voxel and look for intersections
-            for(std::vector<Object*>::iterator it = n->objectList.begin() ; it < n->objectList.end() ; ++it) {
-                intersection = (*it)->intersect(ray);
-                vPoint.push_back( intersection );
-                vDist.push_back( distance(originRay, intersection) );
-            }
-
-            // we find the minimum distance on vDist, which would be closest intersection
-            int objHit( indexMinElement(vDist) );
-
-            // object hit is
-            // n->objectList[objHit];
-
-            if (objHit == -1)
-                return ray.getOrigin();
-
-            // point hit
-            return vPoint[objHit];
-        }
-        else 
-        {
-            // get entry and exit point of ray box intersection 
-            Point in;
-            Point out;
-
-            if ( (n->v).intersect(ray, 0, 100, in, out) ) {
-
-                double coordEntry, coordExit;
-                Point a, b;
-
-                if (n->subdiv == SUBDIV_X) {
-                    coordEntry = in.x;
-                    coordExit = out.x;
-                } else if (n->subdiv == SUBDIV_Y) {
-                    coordEntry = in.y;
-                    coordExit = out.y;
+                // they are both zero, no intersection with the objects
+                if (distRayA == 0 && distRayB == 0) {
+                    return NULL;
+                } else if (distRayA < distRayB) {
+                    return a;
                 } else {
-                    coordEntry = in.z;
-                    coordExit = out.z;
+                    return b;
                 }
-
-                if(coordEntry <= n->subdivVal) {
-                    if (coordExit < n->subdivVal) {
-                        return traverse(ray, n->rear);
-                    } else {
-                        if (coordExit == n->subdivVal) {
-                            // let's move they ray a little because the next intersect will return false
-                            // if it's tangent to a plane
-                            Point o = ray.getOrigin();
-                            Vector d = ray.getDirection();
-                            Ray newRay;
-
-                            if (n->subdiv == SUBDIV_X) {
-                                newRay = Ray(Point(o.x-0.0001,o.y,o.z) , d);
-                            } else if (n->subdiv == SUBDIV_Y) {
-                                newRay = Ray(Point(o.x,o.y-0.0001,o.z) , d);
-                            } else {
-                                newRay = Ray(Point(o.x,o.y,o.z-0.0001) , d);
-                            }
-
-                            return traverse(newRay, n->rear);
-                        } else {
-                            Ray newRay(rayPlaneIntersection(ray,n->subdiv,n->subdivVal), ray.getDirection() );
-                            a = traverse(ray, n->rear);
-                            b = traverse(newRay, n->front);
-
-                            if (a == ray.getOrigin() && b != newRay.getOrigin())
-                                return b;
-                            else if (a != ray.getOrigin() && b == newRay.getOrigin())
-                                return a;
-
-                            if (distance(ray.getOrigin() , a) < distance(ray.getOrigin() , b))
-                                return a;
-                            else
-                                return b;
-
-                        }
-                    }
-                } else {
-                    if (coordExit > n->subdivVal) {
-                        return traverse(ray, n->front);
-                    } else {
-                        Ray newRay(rayPlaneIntersection(ray,n->subdiv,n->subdivVal), ray.getDirection() );
-                        a = traverse(ray, n->front);
-                        b = traverse(newRay, n->rear);
-
-                        if (a == ray.getOrigin() && b != newRay.getOrigin())
-                            return b;
-                        else if (a != ray.getOrigin() && b == newRay.getOrigin())
-                            return a;
-
-                        if (distance(ray.getOrigin() , a) < distance(ray.getOrigin() , b))
-                            return a;
-                        else
-                            return b;
-                    }
-                }
-            } else {
-                return ray.getOrigin();
             }
 
         }
-    }
-*/
-    Point rayPlaneIntersection (Ray ray, int subdiv, double val) {
-        Point o = ray.getOrigin();
-        Vector d = ray.getDirection();
-        normalize(d);
-
-        Vector n;
-
-        if (subdiv == SUBDIV_X){
-            n = Vector(1,0,0);
-        } else if (subdiv == SUBDIV_Y){
-            n = Vector(0,1,0);
-        } else {
-            n = Vector(0,0,1);
-        }
-
-        // ray-plane intersection
-        double w = -(n.x*o.x + n.y*o.y + n.z*o.z + val) / (n.x*d.x + n.y*d.y + n.z*d.z);
-
-        double wx = o.x + d.x * w;
-        double wy = o.y + d.y * w;
-        double wz = o.z + d.z * w;  
-
-        return Point(wx, wy, wz);
+        return NULL;
     }
 
 };
