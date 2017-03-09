@@ -25,7 +25,7 @@ plyfile.o: libs/plyfile.c
 
 # Dependencies
 
-main.o: canvas.h mathHelper.h object.h world.h camera.h lightSource.h illuminationModel.h proceduralTexture.h texture.h kdtree.h toneReproduction.h readPly.h
+main.o: canvas.h mathHelper.h object.h world.h camera.h lightSource.h illuminationModel.h proceduralTexture.h texture.h kdtree.h toneReproduction.h readPly.h transform.h
 
 # Clean
 

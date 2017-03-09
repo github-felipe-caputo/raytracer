@@ -52,6 +52,10 @@ public:
     // a texture
     virtual Color getColor (Point p) = 0;
 
+    virtual void setPoints (std::vector<Point> vertices) = 0;
+
+    virtual std::vector<Point> getPoints () = 0;
+
     Color getColor() {
         return col;
     }
@@ -210,6 +214,15 @@ public:
         return (d <= r*r);
     }
 
+    // Set point in sphere, definetly only one (center)
+    void setPoints (std::vector<Point> vertices) {
+        c = vertices[0];
+    }
+
+    std::vector<Point> getPoints () {
+        return std::vector<Point>(1,c);
+    }
+
     // returns a number of sample points on the surface of the object
     std::vector<Point> samplePoints(int numSamples) {
         std::vector<Point> samples;
@@ -279,13 +292,7 @@ public:
         p3 = vert[2];
         p4 = vert[3];
 
-        a = p1.y*(p2.z-p3.z) + p2.y*(p3.z-p1.z) + p3.y*(p1.z-p2.z);
-        b = p1.z*(p2.x-p3.x) + p2.z*(p3.x-p1.x) + p3.z*(p1.x-p2.x);
-        c = p1.x*(p2.y-p3.y) + p2.x*(p3.y-p1.y) + p3.x*(p1.y-p2.y);
-        dist = -p1.x*(p2.y*p3.z-p3.y*p2.z) - p2.x*(p3.y*p1.z - p1.y*p3.z) - p3.x*(p1.y*p2.z - p2.y*p1.z);
-
-        n = cross( Vector(vert[0],vert[3]) , Vector(vert[0],vert[1]) );
-        normalize(n);
+        canculatePlaneAndNormal();
 
         colorFromTexture = NULL;
     }
@@ -305,13 +312,7 @@ public:
         p3 = vert[2];
         p4 = vert[3];
 
-        a = p1.y*(p2.z-p3.z) + p2.y*(p3.z-p1.z) + p3.y*(p1.z-p2.z);
-        b = p1.z*(p2.x-p3.x) + p2.z*(p3.x-p1.x) + p3.z*(p1.x-p2.x);
-        c = p1.x*(p2.y-p3.y) + p2.x*(p3.y-p1.y) + p3.x*(p1.y-p2.y);
-        dist = -p1.x*(p2.y*p3.z-p3.y*p2.z) - p2.x*(p3.y*p1.z - p1.y*p3.z) - p3.x*(p1.y*p2.z - p2.y*p1.z);
-
-        n = cross( Vector(vert[0],vert[3]) , Vector(vert[0],vert[1]) );
-        normalize(n);
+        canculatePlaneAndNormal();
 
         colorFromTexture = function;
     }
@@ -383,6 +384,23 @@ public:
         return samples;
     }
 
+    void setPoints (std::vector<Point> vertices) {
+        p1 = vertices[0];
+        p2 = vertices[1];
+        p3 = vertices[2];
+        p4 = vertices[3];
+        canculatePlaneAndNormal();
+    }
+
+    std::vector<Point> getPoints () {
+        std::vector<Point> vertices(4);
+        vertices[0] = p1;
+        vertices[1] = p2;
+        vertices[2] = p3;
+        vertices[3] = p4;
+        return vertices;
+    }
+
     // checks if this object is inside a voxel
     // returns true if even part of the object is inside of it
     // TODO
@@ -399,6 +417,16 @@ public:
             return col;
         else
             return (*colorFromTexture)(p1,p2,p3,p4,p);
+    }
+
+    void canculatePlaneAndNormal() {
+        a = p1.y*(p2.z-p3.z) + p2.y*(p3.z-p1.z) + p3.y*(p1.z-p2.z);
+        b = p1.z*(p2.x-p3.x) + p2.z*(p3.x-p1.x) + p3.z*(p1.x-p2.x);
+        c = p1.x*(p2.y-p3.y) + p2.x*(p3.y-p1.y) + p3.x*(p1.y-p2.y);
+        dist = -p1.x*(p2.y*p3.z-p3.y*p2.z) - p2.x*(p3.y*p1.z - p1.y*p3.z) - p3.x*(p1.y*p2.z - p2.y*p1.z);
+
+        n = cross( Vector(p1,p4) , Vector(p1,p2) );
+        normalize(n);
     }
 };
 
@@ -517,6 +545,11 @@ public:
     std::vector<Point> samplePoints(int numSamples) {
         std::vector<Point> samples;
         return samples;
+    }
+
+    void setPoints (std::vector<Point> vert) {
+        vertices = vert;
+        normal = cross( Vector(vert[0],vert[1],true), Vector(vert[0],vert[2],true));
     }
 
     std::vector<Point> getPoints () {
