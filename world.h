@@ -114,9 +114,9 @@ public:
 
             // shadow ray origin should be slightly  different to account for rounding errors
             Vector normal = objectHit->getNormal(pointHit);
-            Point originShadowRay(pointHit.x + normal.x * 0.1f,
-                                  pointHit.y + normal.y * 0.1f,
-                                  pointHit.z + normal.z * 0.1f );
+            Point originShadowRay(pointHit.x + normal.x * 0.01,
+                                  pointHit.y + normal.y * 0.01,
+                                  pointHit.z + normal.z * 0.01 );
 
             // the new function we will use
             std::map<LightSource*, std::vector<Point> > lightsAndPointsReachedMap = lightsReached(originShadowRay, lightList);
@@ -158,18 +158,18 @@ public:
                         normal = -1.0 * objNormal;
                         nit = objectHit->getNr() / nr;
 
-                        transmittedRayOrigin = Point(pointHit.x + objNormal.x * 0.1f,
-                                                     pointHit.y + objNormal.y * 0.1f,
-                                                     pointHit.z + objNormal.z * 0.1f );
+                        transmittedRayOrigin = Point(pointHit.x + objNormal.x * 0.1,
+                                                     pointHit.y + objNormal.y * 0.1,
+                                                     pointHit.z + objNormal.z * 0.1 );
 
                     } else { // outside
                         normal = objNormal;
                         nit = nr / objectHit->getNr();
 
                         // the ray needs to go out a bit inside the object to be sure
-                        transmittedRayOrigin = Point(pointHit.x + objNormal.x * -0.1f,
-                                                     pointHit.y + objNormal.y * -0.1f,
-                                                     pointHit.z + objNormal.z * -0.1f );
+                        transmittedRayOrigin = Point(pointHit.x + objNormal.x * -0.1,
+                                                     pointHit.y + objNormal.y * -0.1,
+                                                     pointHit.z + objNormal.z * -0.1 );
                     }
 
                     double aux = 1.0 + (pow(nit,2) * (pow( dot(-1.0 * rayDir,normal) , 2) - 1.0));
@@ -222,9 +222,9 @@ public:
 
             // shadow ray origin should be slightly  different to account for rounding errors
             Vector normal = objectHit->getNormal(pointHit);
-            Point originShadowRay(pointHit.x + normal.x * 0.1,
-                                  pointHit.y + normal.y * 0.1,
-                                  pointHit.z + normal.z * 0.1 );
+            Point originShadowRay(pointHit.x + normal.x * 0.01,
+                                  pointHit.y + normal.y * 0.01,
+                                  pointHit.z + normal.z * 0.01 );
 
             // the new function we will use
             std::map<LightSource*, std::vector<Point> > lightsAndPointsReachedMap = lightsReached(originShadowRay, lightList);
@@ -285,18 +285,18 @@ public:
                         normal = -1.0 * objNormal;
                         nit = objectHit->getNr() / nr;
 
-                        transmittedRayOrigin = Point(pointHit.x + objNormal.x * 0.1f,
-                                                     pointHit.y + objNormal.y * 0.1f,
-                                                     pointHit.z + objNormal.z * 0.1f );
+                        transmittedRayOrigin = Point(pointHit.x + objNormal.x * 0.01,
+                                                     pointHit.y + objNormal.y * 0.01,
+                                                     pointHit.z + objNormal.z * 0.01 );
 
                     } else { // outside
                         normal = objNormal;
                         nit = nr / objectHit->getNr();
 
                         // the ray needs to go out a bit inside the object to be sure
-                        transmittedRayOrigin = Point(pointHit.x + objNormal.x * -0.1f,
-                                                     pointHit.y + objNormal.y * -0.1f,
-                                                     pointHit.z + objNormal.z * -0.1f );
+                        transmittedRayOrigin = Point(pointHit.x + objNormal.x * -0.01,
+                                                     pointHit.y + objNormal.y * -0.01,
+                                                     pointHit.z + objNormal.z * -0.01 );
                     }
 
                     double aux = 1.0 + (pow(nit,2) * (pow( dot(-1.0 * rayDir,normal) , 2) - 1.0));
@@ -443,9 +443,14 @@ public:
                     Vector dir( originShadowRay, (*it2), true );
                     Ray fromPointToLight(originShadowRay, dir);
 
-                    for(itObj = objectList.begin() ; itObj < objectList.end() ; ++itObj)
-                        if ( !(*itObj)->isEmissive() && originShadowRay != (*itObj)->intersect(fromPointToLight) ) // emissive object should not block, it's light
+                    for(itObj = objectList.begin() ; itObj < objectList.end() ; ++itObj) {
+                        double distOriginAndLight = distance(originShadowRay, pointsOnLightSurface[0]);
+                        double distOriginIntersection = distance(originShadowRay, (*itObj)->intersect(fromPointToLight));
+                        if ( !(*itObj)->isEmissive() && distOriginIntersection != 0
+                            && distOriginIntersection < distOriginAndLight) { // emissive object should not block, it's light
                             break;
+                        }
+                    }
 
                     if ( itObj == objectList.end() ) { // if it went through the whole loop, then it hits the light!
                         pointsHitOnLight.push_back( *it2 );

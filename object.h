@@ -328,7 +328,7 @@ public:
         double t = -(a*o.x + b*o.y + c*o.z + dist) / (a*d.x + b*d.y + c*d.z);
 
         // there was a intersection, let's check if it is between the rectangle boundaries
-        if ( t >= 0.0 ) {
+        if ( t > 0.0 ) {
             // actual intersection point
             double tx = o.x + d.x * t;
             double ty = o.y + d.y * t;
