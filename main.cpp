@@ -26,8 +26,8 @@
 #include "kdtree.h"
 
 // pixels
-int imageHeight = 512;
-int imageWidth = 512;
+int imageHeight = 256;
+int imageWidth = 256;
 
 // keeping the aspect ratio of the window pixels
 double viewPlaneHeigth = 0.5;
@@ -87,19 +87,20 @@ int main ( void ) {
     //v.push_back( Point(-1.5,-0.6,-6.0) );
     //v.push_back( Point( 0.5,-0.6,-6.0) );
     //v.push_back( Point( 0.5,-0.6, 0.0) );
-    v.push_back( Point( 0.25,0.0, 0.25) );
-    v.push_back( Point( 0.25,0.0,-2.25) );
-    v.push_back( Point(-0.25,0.0,-2.25) );
-    v.push_back( Point(-0.25,0.0, 0.25) );
+    v.push_back( Point( 0.05,0.0, 0.05) );
+    v.push_back( Point( 0.05,0.0,-0.05) );
+    v.push_back( Point(-0.05,0.0,-0.05) );
+    v.push_back( Point(-0.05,0.0, 0.05) );
     Rectangle rectangleLightObj( v, Color(1,1,1) );
     rectangleLightObj.setUpEmissionColor( Color(1,1,1) );
     AreaLight rectangleLight( &rectangleLightObj, 16 );
 
     // transforms
-    translate(&rectangleLightObj, 0, 0.7, 0);
+    translate(&rectangleLightObj, 0, 0.1, -0.3);
 
     for (unsigned int i = 0; i < bunny.size() ; ++i) {
-        translate(&bunny[i], 0, -0.1, 0);
+        scale(&bunny[i], 0.5, 0.5, 0.5);
+        translate(&bunny[i], 0, -0.1, -0.3);
     }
 
     // create world, add objects in it
@@ -135,7 +136,7 @@ int main ( void ) {
     #endif
 
     // create camera
-    Point pos(0,0.1,0.3);
+    Point pos(0,0.0,0.0);
     Vector up(0,1,0);
     Point lookAt(0,0,-1);
     Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, 1, 1);
