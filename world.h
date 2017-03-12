@@ -437,14 +437,16 @@ public:
             // (can always reach a point light, maybe not a spot light)
             if( (*it)->reaches(originShadowRay) ) {
                 // could be an area light
+                double distOriginAndLight = (*it)->getMinDistance(originShadowRay);
                 std::vector<Point> pointsOnLightSurface = (*it)->getPos();
                 pointsHitOnLight.clear();
                 for(std::vector<Point>::iterator it2 = pointsOnLightSurface.begin() ; it2 < pointsOnLightSurface.end() ; ++it2) {
                     Vector dir( originShadowRay, (*it2), true );
                     Ray fromPointToLight(originShadowRay, dir);
 
+                    // TODO: better to check if the lght is an area light then simply intersect with it and get distance
+
                     for(itObj = objectList.begin() ; itObj < objectList.end() ; ++itObj) {
-                        double distOriginAndLight = distance(originShadowRay, pointsOnLightSurface[0]);
                         double distOriginIntersection = distance(originShadowRay, (*itObj)->intersect(fromPointToLight));
                         if ( !(*itObj)->isEmissive() && distOriginIntersection != 0
                             && distOriginIntersection < distOriginAndLight) { // emissive object should not block, it's light

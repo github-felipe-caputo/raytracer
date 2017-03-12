@@ -24,6 +24,8 @@ public:
 
     virtual int getNumSamplesOnSurface() = 0;
 
+    virtual double getMinDistance(Point origin) = 0;
+
     // Ray Marching
     virtual std::vector<Point> intersect ( Ray ray ) = 0;
 };
@@ -58,6 +60,10 @@ public:
         // does nothing so far
         std::vector<Point> intersections;
         return intersections;
+    }
+
+    double getMinDistance(Point origin) {
+        return distance(origin,position);
     }
 };
 
@@ -152,6 +158,10 @@ public:
 
         return intersections;
     }
+
+    double getMinDistance(Point origin) {
+        return distance(origin,position);
+    }
 };
 
 class AreaLight : public LightSource {
@@ -183,6 +193,20 @@ public:
 
     int getNumSamplesOnSurface() {
         return numSamples;
+    }
+
+    double getMinDistance(Point origin) {
+        std::vector<Point> points = getPos();
+        double minDistance = distance(origin,points[0]);
+
+        for(std::vector<Point>::iterator it = points.begin() ; it < points.end() ; ++it) {
+            double newDistance = distance(origin, *it);
+            if (minDistance > newDistance) {
+                minDistance = newDistance;
+            }
+        }
+
+        return minDistance;
     }
 
     // does the Ray ray intersect with this light (for ray marching only, here not usable?)

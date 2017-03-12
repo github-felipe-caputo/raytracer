@@ -57,8 +57,8 @@ int main ( void ) {
     vertices.push_back( Point(-1,0,-1) );
     vertices.push_back( Point( 1,0,-1) );
     vertices.push_back( Point( 1,0, 1) );
-    Rectangle floorRectangle( vertices, Color(1.0,0.0,0.0) );
-    floorRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.5, 1.0, 0.0, 1.0 );
+    Rectangle floorRectangle( vertices, Color(0.725,0.71,0.68) );
+    floorRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.5, 0.7, 0.0, 1.0 );
 
     // CEILING
     vertices.clear();
@@ -66,8 +66,8 @@ int main ( void ) {
     vertices.push_back( Point( 1,0.0,-1) );
     vertices.push_back( Point(-1,0.0,-1) );
     vertices.push_back( Point(-1,0.0, 1) );
-    Rectangle ceilingRectangle( vertices, Color(0.0,1.0,0.0) );
-    ceilingRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.5, 1.0, 0.0, 1.0 );
+    Rectangle ceilingRectangle( vertices, Color(0.725,0.71,0.68) );
+    ceilingRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.5, 0.7, 0.0, 1.0 );
 
     // LEFT
     vertices.clear();
@@ -75,8 +75,8 @@ int main ( void ) {
     vertices.push_back( Point( 0.0, 1,-1) );
     vertices.push_back( Point( 0.0,-1,-1) );
     vertices.push_back( Point( 0.0,-1, 1) );
-    Rectangle leftRectangle( vertices, Color(0.0,0.0,1.0) );
-    leftRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.5, 1.0, 0.0, 1.0 );
+    Rectangle leftRectangle( vertices, Color(0.63,0.065,0.05) );
+    leftRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.5, 0.7, 0.0, 1.0 );
 
     // RIGHT
     vertices.clear();
@@ -84,8 +84,8 @@ int main ( void ) {
     vertices.push_back( Point( 0.0,-1,-1) );
     vertices.push_back( Point( 0.0, 1,-1) );
     vertices.push_back( Point( 0.0, 1, 1) );
-    Rectangle rightRectangle( vertices, Color(1.0,0.0,1.0) );
-    rightRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.5, 1.0, 0.0, 1.0 );
+    Rectangle rightRectangle( vertices, Color(0.14,0.45,0.091) );
+    rightRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.5, 0.7, 0.0, 1.0 );
 
     // FORWARD
     vertices.clear();
@@ -93,8 +93,8 @@ int main ( void ) {
     vertices.push_back( Point(  1,-1, 0.0) );
     vertices.push_back( Point( -1,-1, 0.0) );
     vertices.push_back( Point( -1, 1, 0.0) );
-    Rectangle forwardRectangle( vertices, Color(0.0,1.0,1.0) );
-    forwardRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.5, 1.0, 0.0, 1.0 );
+    Rectangle forwardRectangle( vertices, Color(0.725,0.71,0.68) );
+    forwardRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.5, 0.7, 0.0, 1.0 );
 
     // BACK
     vertices.clear();
@@ -103,7 +103,7 @@ int main ( void ) {
     vertices.push_back( Point(  1,-1, 0.0) );
     vertices.push_back( Point(  1, 1, 0.0) );
     Rectangle backRectangle( vertices, Color(0.0,0.0,0.0) );
-    backRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.5, 1.0, 0.0, 1.0 );
+    backRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.5, 0.7, 0.0, 1.0 );
 
 
 
@@ -126,10 +126,10 @@ int main ( void ) {
     //v.push_back( Point(-1.5,-0.6,-6.0) );
     //v.push_back( Point( 0.5,-0.6,-6.0) );
     //v.push_back( Point( 0.5,-0.6, 0.0) );
-    v.push_back( Point( 0.5,0.0, 0.5) );
-    v.push_back( Point( 0.5,0.0,-0.5) );
-    v.push_back( Point(-0.5,0.0,-0.5) );
-    v.push_back( Point(-0.5,0.0, 0.5) );
+    v.push_back( Point( 0.3,0.0, 0.3) );
+    v.push_back( Point( 0.3,0.0,-0.3) );
+    v.push_back( Point(-0.3,0.0,-0.3) );
+    v.push_back( Point(-0.3,0.0, 0.3) );
     Rectangle rectangleLightObj( v, Color(1,1,1) );
     rectangleLightObj.setUpEmissionColor( Color(1,1,1) );
     AreaLight rectangleLight( &rectangleLightObj, 16 );
@@ -138,7 +138,7 @@ int main ( void ) {
 
     // light
     translate(&sphereLightObj, 0, 0.0, -3);
-    translate(&rectangleLightObj, 0, 0.8, -3);
+    translate(&rectangleLightObj, 0, 0.9, -3);
 
     // walls
     translate(&floorRectangle, 0, -1, -3);
@@ -164,11 +164,11 @@ int main ( void ) {
     //world.addObject(&frontSphere);
     //world.addObject(&backSphere);
 
-    //world.addObject(&floorRectangle);
-    //world.addObject(&ceilingRectangle);
+    world.addObject(&floorRectangle);
+    world.addObject(&ceilingRectangle);
     world.addObject(&leftRectangle);
     world.addObject(&rightRectangle);
-    //world.addObject(&forwardRectangle);
+    world.addObject(&forwardRectangle);
     //world.addObject(&backRectangle);
 
     world.addObject(&sphereLightObj); // full white
@@ -199,7 +199,7 @@ int main ( void ) {
     #endif
 
     // create camera
-    Point pos(0.0,0.0,1.0);
+    Point pos(0.0,0.0,0);
     Vector up(0.0,1.0,0.0);
     Point lookAt(0.0,0.0,-1.0);
     Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, 1, 1);
