@@ -377,7 +377,11 @@ public:
                 double sampley = start.y + (u * v1.y) + (v * v2.y);
                 double samplez = start.z + (u * v1.z) + (v * v2.z);
 
-                samples.push_back( Point(samplex,sampley,samplez) );
+                Point samplePoint(samplex + 0.0 * n.x,
+                                  sampley + 0.0 * n.y,
+                                  samplez + 0.0 * n.z); 
+
+                samples.push_back( samplePoint );
             }
         }
 

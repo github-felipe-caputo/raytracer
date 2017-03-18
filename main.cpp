@@ -11,6 +11,10 @@
 #define MULTI_THREADED
 #define CANVAS_DISPLAY
 
+// define for scenes
+//#define CLASSIC
+#define CORNELL_BOX
+
 #include "canvas.h"
 #include "mathHelper.h"
 #include "transform.h"
@@ -37,19 +41,57 @@ int main ( void ) {
     // set up random number seed
     srand (static_cast <unsigned> (time(0)));
 
+    #ifdef CLASSIC
+
     // first create our objects
-    Sphere frontSphere( Point(0.0,0.1,-1.9), 0.4, Color(1,1,1) );
-    //frontSphere.setUpPhong( Color(1,1,1), 0.2, 0.5, 1.0, 50.0 );
+    Sphere frontSphere( Point(0,0,0), 0.4, Color(1,1,1) );
     frontSphere.setUpPhong( Color(1,1,1), 0.075, 0.075, 0.2, 20.0 );
     frontSphere.setUpReflectionTransmission(0.0, 0.8, 0.95);
 
-    //Sphere frontSphere( Point(0.0,0.1,-1.9), 0.4, Texture("textures/earth.jpg") );
-    //frontSphere.setUpPhong( Color(1,1,1), 1.0, 1.0, 0.0, 1.0 );
-    //frontSphere.setUpReflectionTransmission(0.0, 0.0, 0.0);
-
     Sphere backSphere( Point(0,0,0), 0.3, Color(0.7,0.7,0.7) );
     backSphere.setUpPhong( Color(1,1,1), 0.15, 0.25, 1.0, 20.0 );
-    //backSphere.setUpReflectionTransmission(0.75, 0.0, 1.0);
+    backSphere.setUpReflectionTransmission(0.75, 0.0, 1.0);
+
+    // Checker floor
+    std::vector<Point> vertices;
+    vertices.push_back( Point(-0.7,0, 1) );
+    vertices.push_back( Point(-0.7,0,-2.5) );
+    vertices.push_back( Point( 1,0,-2.5) );
+    vertices.push_back( Point( 1,0, 1) );
+    Rectangle checkerFloor( vertices, planarCheckerTexture );
+    checkerFloor.setUpPhong( Color(1,1,1), 0.3, 1.0, 0.0, 1.0 );
+
+    translate(&backSphere, -0.6, -0.1, -2.5);
+    translate(&frontSphere, 0, 0.1, -1.9);
+    translate(&checkerFloor, -0.5, -0.5, -1.5);
+
+    // rectangle light
+    std::vector<Point> v;
+    v.push_back( Point( 0.25,0.0, 0.25) );
+    v.push_back( Point( 0.25,0.0,-0.25) );
+    v.push_back( Point(-0.25,0.0,-0.25) );
+    v.push_back( Point(-0.25,0.0, 0.25) );
+    Rectangle rectangleLightObj( v, Color(1,1,1) );
+    rectangleLightObj.setUpEmissionColor( Color(1,1,1) );
+    AreaLight rectangleLight( &rectangleLightObj, 8 );
+
+    // light
+    translate(&rectangleLightObj, 0, 0.8, -2);
+
+    // create world, add objects in it
+    World world;
+    world.addObject(&frontSphere);
+    world.addObject(&backSphere);
+    world.addObject(&checkerFloor);
+
+    world.addObject(&rectangleLightObj); // full white
+
+    world.addLight(&rectangleLight);
+    world.setUpPhongIllumination( Color(0.25,0.61,1.00) );
+
+    #endif
+
+    #ifdef CORNELL_BOX
 
     // FLOOR
     std::vector<Point> vertices;
@@ -58,16 +100,40 @@ int main ( void ) {
     vertices.push_back( Point( 1,0,-1) );
     vertices.push_back( Point( 1,0, 1) );
     Rectangle floorRectangle( vertices, Color(0.725,0.71,0.68) );
-    floorRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.5, 0.7, 0.0, 1.0 );
+    floorRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.2, 0.3, 0.0, 1.0 );
 
     // CEILING
     vertices.clear();
     vertices.push_back( Point( 1,0.0, 1) );
     vertices.push_back( Point( 1,0.0,-1) );
+    vertices.push_back( Point( 0.25,0.0,-1) );
+    vertices.push_back( Point( 0.25,0.0, 1) );
+    Rectangle ceilingRectangle1( vertices, Color(0.725,0.71,0.68) );
+    ceilingRectangle1.setUpPhong( Color(0.9,0.9,0.9), 0.1, 0.7, 0.0, 1.0 );
+
+    vertices.clear();
+    vertices.push_back( Point(-0.25,0.0, 1) );
+    vertices.push_back( Point(-0.25,0.0,-1) );
     vertices.push_back( Point(-1,0.0,-1) );
     vertices.push_back( Point(-1,0.0, 1) );
-    Rectangle ceilingRectangle( vertices, Color(0.725,0.71,0.68) );
-    ceilingRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.5, 0.7, 0.0, 1.0 );
+    Rectangle ceilingRectangle2( vertices, Color(0.725,0.71,0.68) );
+    ceilingRectangle2.setUpPhong( Color(0.9,0.9,0.9), 0.1, 0.7, 0.0, 1.0 );
+
+    vertices.clear();
+    vertices.push_back( Point( 0.25,0.0, 1) );
+    vertices.push_back( Point( 0.25,0.0, 0.25) );
+    vertices.push_back( Point(-0.25,0.0, 0.25) );
+    vertices.push_back( Point(-0.25,0.0, 1) );
+    Rectangle ceilingRectangle3( vertices, Color(0.725,0.71,0.68) );
+    ceilingRectangle3.setUpPhong( Color(0.9,0.9,0.9), 0.1, 0.7, 0.0, 1.0 );
+
+    vertices.clear();
+    vertices.push_back( Point( 0.25,0.0, -0.25) );
+    vertices.push_back( Point( 0.25,0.0, -1) );
+    vertices.push_back( Point(-0.25,0.0, -1) );
+    vertices.push_back( Point(-0.25,0.0, -0.25) );
+    Rectangle ceilingRectangle4( vertices, Color(0.725,0.71,0.68) );
+    ceilingRectangle4.setUpPhong( Color(0.9,0.9,0.9), 0.1, 0.7, 0.0, 1.0 );
 
     // LEFT
     vertices.clear();
@@ -76,7 +142,7 @@ int main ( void ) {
     vertices.push_back( Point( 0.0,-1,-1) );
     vertices.push_back( Point( 0.0,-1, 1) );
     Rectangle leftRectangle( vertices, Color(0.63,0.065,0.05) );
-    leftRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.5, 0.7, 0.0, 1.0 );
+    leftRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.2, 0.7, 0.0, 1.0 );
 
     // RIGHT
     vertices.clear();
@@ -85,7 +151,7 @@ int main ( void ) {
     vertices.push_back( Point( 0.0, 1,-1) );
     vertices.push_back( Point( 0.0, 1, 1) );
     Rectangle rightRectangle( vertices, Color(0.14,0.45,0.091) );
-    rightRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.5, 0.7, 0.0, 1.0 );
+    rightRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.2, 0.7, 0.0, 1.0 );
 
     // FORWARD
     vertices.clear();
@@ -94,7 +160,7 @@ int main ( void ) {
     vertices.push_back( Point( -1,-1, 0.0) );
     vertices.push_back( Point( -1, 1, 0.0) );
     Rectangle forwardRectangle( vertices, Color(0.725,0.71,0.68) );
-    forwardRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.5, 0.7, 0.0, 1.0 );
+    forwardRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.2, 0.7, 0.0, 1.0 );
 
     // BACK
     vertices.clear();
@@ -106,11 +172,63 @@ int main ( void ) {
     backRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.5, 0.7, 0.0, 1.0 );
 
 
+    // rectangle light
+    std::vector<Point> v;
+    v.push_back( Point( 0.25,0.0, 0.25) );
+    v.push_back( Point( 0.25,0.0,-0.25) );
+    v.push_back( Point(-0.25,0.0,-0.25) );
+    v.push_back( Point(-0.25,0.0, 0.25) );
+    Rectangle rectangleLightObj( v, Color(1,1,1) );
+    rectangleLightObj.setUpEmissionColor( Color(1,1,1) );
+    AreaLight rectangleLight( &rectangleLightObj, 8 );
+
+    // scaled light object for the `illusion` of big light
+    std::vector<Point> v2;
+    v2.push_back( Point( 1,0, 1) );
+    v2.push_back( Point( 1,0,-1) );
+    v2.push_back( Point(-1,0,-1) );
+    v2.push_back( Point(-1,0, 1) );
+    Rectangle rectangleLightScaled( v2, Color(1,1,1) );
+    rectangleLightScaled.setUpEmissionColor( Color(1,1,1) );
+
+
+
+    translate(&floorRectangle, 0, -1, -3);
+    translate(&ceilingRectangle1, 0, 1, -3);
+    translate(&ceilingRectangle2, 0, 1, -3);
+    translate(&ceilingRectangle3, 0, 1, -3);
+    translate(&ceilingRectangle4, 0, 1, -3);
+    translate(&leftRectangle, -1, 0, -3);
+    translate(&rightRectangle, 1, 0, -3);
+    translate(&forwardRectangle, 0, 0, -4);
+    translate(&backRectangle, 0, 0, -2);
+
+    translate(&rectangleLightScaled, 0, 1.05, -3);
+    translate(&rectangleLightObj, 0, 1.15, -3);
+
+    // create world, add objects in it
+    World world;
+    world.addObject(&floorRectangle);
+    world.addObject(&ceilingRectangle1);
+    world.addObject(&ceilingRectangle2);
+    world.addObject(&ceilingRectangle3);
+    world.addObject(&ceilingRectangle4);
+    world.addObject(&leftRectangle);
+    world.addObject(&rightRectangle);
+    world.addObject(&forwardRectangle);
+    //world.addObject(&backRectangle);
+
+    world.addObject(&rectangleLightScaled);
+    //world.addObject(&rectangleLightObj); // full white
+
+    world.addLight(&rectangleLight);
+    world.setUpPhongIllumination( Color(0.25,0.61,1.00) );
+
+    #endif
+/*
 
     // Get the triangles from the bunny fily
     std::vector<Triangle> bunny = readPlyFile("plyFiles/bun_zipper_res4", Color(1,0.2,0.2));
-
-
 
     // create a light source
     PointLight light( Point(0, 0, -3), Color(1,1,1) );
@@ -120,59 +238,16 @@ int main ( void ) {
     sphereLightObj.setUpEmissionColor( Color(1,1,1) );
     AreaLight sphereLight( &sphereLightObj, 16 );
 
-    // rectangle light
-    std::vector<Point> v;
-    //v.push_back( Point(-1.5,-0.6, 0.0) );
-    //v.push_back( Point(-1.5,-0.6,-6.0) );
-    //v.push_back( Point( 0.5,-0.6,-6.0) );
-    //v.push_back( Point( 0.5,-0.6, 0.0) );
-    v.push_back( Point( 0.3,0.0, 0.3) );
-    v.push_back( Point( 0.3,0.0,-0.3) );
-    v.push_back( Point(-0.3,0.0,-0.3) );
-    v.push_back( Point(-0.3,0.0, 0.3) );
-    Rectangle rectangleLightObj( v, Color(1,1,1) );
-    rectangleLightObj.setUpEmissionColor( Color(1,1,1) );
-    AreaLight rectangleLight( &rectangleLightObj, 16 );
-
-    // transforms
-
     // light
     translate(&sphereLightObj, 0, 0.0, -3);
-    translate(&rectangleLightObj, 0, 0.9, -3);
-
-    // walls
-    translate(&floorRectangle, 0, -1, -3);
-    translate(&ceilingRectangle, 0, 1, -3);
-    translate(&leftRectangle, -1, 0, -3);
-    translate(&rightRectangle, 1, 0, -3);
-    translate(&forwardRectangle, 0, 0, -4);
-    translate(&backRectangle, 0, 0, -2);
-
-    // objects
-    translate(&backSphere, 0, 0, -3);
 
 
-
-/*
     for (unsigned int i = 0; i < bunny.size() ; ++i) {
         scale(&bunny[i], 0.5, 0.5, 0.5);
         translate(&bunny[i], 0, -0.1, -0.3);
     }
 */
-    // create world, add objects in it
-    World world;
-    //world.addObject(&frontSphere);
-    //world.addObject(&backSphere);
 
-    world.addObject(&floorRectangle);
-    world.addObject(&ceilingRectangle);
-    world.addObject(&leftRectangle);
-    world.addObject(&rightRectangle);
-    world.addObject(&forwardRectangle);
-    //world.addObject(&backRectangle);
-
-    world.addObject(&sphereLightObj); // full white
-    //world.addObject(&rectangleLightObj); // full white
 /*
     // Add the triangles from the bunny in the world
     for (unsigned int i = 0; i < bunny.size() ; ++i) {
@@ -180,14 +255,17 @@ int main ( void ) {
         world.addObject(&bunny[i]);
     }
 */
+
+/*
     // add light and set up phong
     //world.addLight(&light);
     //world.addLight(&light2);
-    world.addLight(&sphereLight);
-    //world.addLight(&rectangleLight);
+    //world.addLight(&sphereLight);
+    world.addLight(&rectangleLight);
     //world.setUpPhongBlinnIllumination( Color(0.25,0.61,1.00) );
     world.setUpPhongIllumination( Color(0.25,0.61,1.00) );
     //world.setUpPhongIllumination( Color(0.8,0.2,0.2) ); // RED
+*/
 
     #ifdef KD_TREE
         std::cout << "Status: Using KD Tree." << std::endl;
@@ -202,7 +280,7 @@ int main ( void ) {
     Point pos(0.0,0.0,0);
     Vector up(0.0,1.0,0.0);
     Point lookAt(0.0,0.0,-1.0);
-    Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, 1, 1);
+    Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, 1, 8);
 
     // render our world, get the color map we will put on canvas
     std::vector<Color> colorMap = cam.render(world);
