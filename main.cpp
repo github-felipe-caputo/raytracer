@@ -7,13 +7,13 @@
 #include <SFML/Graphics.hpp>
 
 // defines for certain operations
-//#define KD_TREE
+#define KD_TREE
 #define MULTI_THREADED
 #define CANVAS_DISPLAY
 
 // define for scenes
-//#define CLASSIC
-#define CORNELL_BOX
+#define CLASSIC
+//#define CORNELL_BOX
 
 #include "canvas.h"
 #include "mathHelper.h"
@@ -280,7 +280,7 @@ int main ( void ) {
     Point pos(0.0,0.0,0);
     Vector up(0.0,1.0,0.0);
     Point lookAt(0.0,0.0,-1.0);
-    Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, 1, 8);
+    Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, 1, 1);
 
     // render our world, get the color map we will put on canvas
     std::vector<Color> colorMap = cam.render(world);
