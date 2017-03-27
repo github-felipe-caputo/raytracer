@@ -74,7 +74,7 @@ class Camera {
             Ray ray(position, dir);
 
             // Color average
-                average += world.spawn( ray , MAX_DEPTH );
+            average += world.spawn( ray , MAX_DEPTH );
         }
 
         // get final color, if grid need to average

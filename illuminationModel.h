@@ -11,7 +11,7 @@ Color ambientComponent(Object *obj, Color ambientLight, Point point) {
     Color objColor = obj->getColor(point);
     double ka = obj->getKa();
 
-    return ka * ambientLight * objColor;
+    return ka * objColor;
 }
 
 // needs the object because we will use diffuse and specular color,

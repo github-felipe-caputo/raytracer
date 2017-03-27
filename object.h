@@ -298,6 +298,7 @@ public:
         vertices.push_back(p1);
         vertices.push_back(p2);
         vertices.push_back(p3);
+        colorFromTexture = NULL;
         normal = cross( Vector(vertices[0],vertices[1],true), Vector(vertices[0],vertices[2],true));
     }
 
@@ -306,6 +307,7 @@ public:
         vertices.push_back(p1);
         vertices.push_back(p2);
         vertices.push_back(p3);
+        colorFromTexture = NULL;
     }
 
     Triangle (Point p1, Point p2, Point p3, Color (*function)(std::vector<Point>, Point)) {

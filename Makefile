@@ -2,8 +2,10 @@ CC =		    gcc
 CCFLAGS = 		#-Wall
 CXX = 			g++
 CXXFLAGS = 		-Wall \
-				-std=c++11 \
-				-I/usr/local/include
+			-m64 \
+			-O3 \
+			-std=c++11 \
+			-I/usr/local/include
 LDFLAGS =		-L/usr/local/lib
 LDLIBS =		-lsfml-graphics -lsfml-window -lsfml-system
 

@@ -141,7 +141,7 @@ public:
                     Vector reflectedDir = reflect(rayDir, objectHit->getNormal(pointHit), VECTOR_INCOMING );
 
                     // Recursion !
-                    finalColor += kr * spawnKdtree( Ray(originShadowRay, reflectedDir) , --depth);
+                    finalColor += kr * spawnKdtree( Ray(originShadowRay, reflectedDir) , depth-1);
                 }
                 if ( kt > 0 ) {
                     // Direction of incoming ray
@@ -158,18 +158,18 @@ public:
                         normal = -1.0 * objNormal;
                         nit = objectHit->getNr() / nr;
 
-                        transmittedRayOrigin = Point(pointHit.x + objNormal.x * 0.1,
-                                                     pointHit.y + objNormal.y * 0.1,
-                                                     pointHit.z + objNormal.z * 0.1 );
+                        transmittedRayOrigin = Point(pointHit.x + objNormal.x * 0.01,
+                                                     pointHit.y + objNormal.y * 0.01,
+                                                     pointHit.z + objNormal.z * 0.01 );
 
                     } else { // outside
                         normal = objNormal;
                         nit = nr / objectHit->getNr();
 
                         // the ray needs to go out a bit inside the object to be sure
-                        transmittedRayOrigin = Point(pointHit.x + objNormal.x * -0.1,
-                                                     pointHit.y + objNormal.y * -0.1,
-                                                     pointHit.z + objNormal.z * -0.1 );
+                        transmittedRayOrigin = Point(pointHit.x + objNormal.x * -0.01,
+                                                     pointHit.y + objNormal.y * -0.01,
+                                                     pointHit.z + objNormal.z * -0.01 );
                     }
 
                     double aux = 1.0 + (pow(nit,2) * (pow( dot(-1.0 * rayDir,normal) , 2) - 1.0));
@@ -177,14 +177,13 @@ public:
                     // If Total Internal Reflection
                     if (aux < 0) {
                         // Same thing as reflected ray
-                        Vector reflectedDir = reflect(rayDir, objectHit->getNormal(pointHit), VECTOR_INCOMING );
-                        finalColor += kt * spawnKdtree( Ray(transmittedRayOrigin, reflectedDir), --depth);
+                        Vector reflectedDir = reflect(rayDir, normal, VECTOR_INCOMING );
+                        finalColor += kt * spawnKdtree( Ray(transmittedRayOrigin, reflectedDir), depth-1);
                     } else {
                         Vector transmittedDir = nit * rayDir + (nit * dot(-1.0 * rayDir,normal) - sqrt(aux) ) * normal;
-                        finalColor += kt * spawnKdtree( Ray(transmittedRayOrigin, transmittedDir), --depth);
+                        finalColor += kt * spawnKdtree( Ray(transmittedRayOrigin, transmittedDir), depth-1);
                     }
                 }
-
             }
             return finalColor;
         }
@@ -278,8 +277,6 @@ public:
 
                     Point transmittedRayOrigin;
 
-                    //std::cout << dot(rayDir,objNormal) << std::endl;
-
                     // inside
                     if (dot(-1 * rayDir,objNormal) < 0) {
                         normal = -1.0 * objNormal;
@@ -311,7 +308,6 @@ public:
                         finalColor += kt * spawnIlluminated( Ray(transmittedRayOrigin, transmittedDir), depth-1);
                     }
                 }
-
             }
 
             return finalColor;
