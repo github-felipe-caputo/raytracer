@@ -9,7 +9,7 @@
 // defines for certain operations
 #define KD_TREE
 #define MULTI_THREADED
-#define CANVAS_DISPLAY
+//#define CANVAS_DISPLAY
 
 // define for scenes
 //#define CLASSIC
@@ -32,8 +32,8 @@
 #include "kdtree.h"
 
 // pixels
-int imageHeight = 1024;
-int imageWidth = 1024;
+int imageHeight = 512;
+int imageWidth = 512;
 
 // keeping the aspect ratio of the window pixels
 double viewPlaneHeigth = 0.25;
@@ -194,38 +194,18 @@ int main ( void ) {
 
     #ifdef CLOSE_UP_BUNNY
 
-    Sphere middleSphere( Point(0,0,0), 0.18, Color(1,1,1) );
-    middleSphere.setUpPhong( Color(1,1,1), 0.15, 0.0, 0.2, 20.0 );
-    middleSphere.setUpReflectionTransmission(1.0, 0.0, 0.98);
-
-    Sphere middleGreenSphere( Point(0,0,0), 0.18, Color(0,1,0) );
-    middleGreenSphere.setUpPhong( Color(1,1,1), 0.75, 0.75, 0.0, 40.0 );
-
-    Sphere leftSphere( Point(0,0,0), 0.18, Color(1,1,1) );
-    leftSphere.setUpPhong( Color(1,1,1), 0.15, 0.0, 0.2, 20.0 );
-    leftSphere.setUpReflectionTransmission(1.0, 0.0, 0.98);
-
-    Sphere leftRedSphere( Point(0,0,0), 0.18, Color(1,0,0) );
-    leftRedSphere.setUpPhong( Color(1,1,1), 0.75, 0.75, 0.0, 40.0 );
-
-    Sphere rightSphere( Point(0,0,0), 0.18, Color(1,1,1) );
-    rightSphere.setUpPhong( Color(1,1,1), 0.15, 0.0, 0.2, 20.0 );
-    rightSphere.setUpReflectionTransmission(1.0, 0.0, 0.98);
-
-    Sphere rightBlueSphere( Point(0,0,0), 0.18, Color(0,0,1) );
-    rightBlueSphere.setUpPhong( Color(1,1,1), 0.75, 0.75, 0.0, 40.0 );
-
     // Get the triangles from the bunny fily
-    std::vector<Triangle> bunny = readPlyFile("plyFiles/bun_zipper", Color(1,1,1));
+    std::vector<Triangle> bunny = readPlyFile("plyFiles/bun_zipper", Color(0.4,0.4,0.4));
 
     // FLOOR
     std::vector<Point> vertices;
-    vertices.push_back( Point(-3,0, 3) );
+    vertices.push_back( Point(-3,0, 5) );
     vertices.push_back( Point(-3,0,-3) );
     vertices.push_back( Point( 3,0,-3) );
-    vertices.push_back( Point( 3,0, 3) );
+    vertices.push_back( Point( 3,0, 5) );
     Rectangle floorRectangle( vertices, Color(1,1,1) );
     floorRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.5, 0.9, 0.0, 1.0 );
+    floorRectangle.setUpReflectionTransmission(0.3, 0.0, 1.0);
 
     // FORWARD WALL
     vertices.clear();
@@ -235,15 +215,6 @@ int main ( void ) {
     vertices.push_back( Point( -2.6, 2, 0.0) );
     Rectangle forwardRectangle( vertices, Color(1,1,1) );
     forwardRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.5, 0.9, 0.0, 1.0 );
-
-    // RIGHT
-    vertices.clear();
-    vertices.push_back( Point( 0.0,-2, 3) );
-    vertices.push_back( Point( 0.0,-2,-3) );
-    vertices.push_back( Point( 0.0, 2,-3) );
-    vertices.push_back( Point( 0.0, 2, 3) );
-    Rectangle rightRectangle( vertices, Color(1,1,1) );
-    rightRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.5, 0.9, 0.0, 1.0 );
 
     // rectangle light
     std::vector<Point> v;
@@ -255,43 +226,25 @@ int main ( void ) {
     rectangleLightObj.setUpEmissionColor( Color(1,1,1) );
     AreaLight rectangleLight( &rectangleLightObj, 8 );
 
-    translate(&middleSphere, -0.6, -0.82, -1.5);
-    translate(&middleGreenSphere, 0.5, -0.82, -1.7);
-    translate(&leftSphere, -1, -0.82, -4);
-    translate(&leftRedSphere, -1, -0.82, -3);
-    translate(&rightSphere, 0.8, -0.82, -2.4);
-    translate(&rightBlueSphere, 1, -0.82, -4);
-
     translate(&floorRectangle, 0, -1, -3);
-    translate(&forwardRectangle, 0, 0, -7);
-    translate(&rightRectangle, 5, 0, -3);
+    translate(&forwardRectangle, 0, 0, -5);
 
-    translate(&rectangleLightObj, -3, 2, -3);
+    translate(&rectangleLightObj, -1, 2, -1);
 
     for (unsigned int i = 0; i < bunny.size() ; ++i) {
         scale(&bunny[i], 8, 8, 8);
-        translate(&bunny[i], 0, -1.3, -3);
+        translate(&bunny[i], 0, -1.29, -2);
     }
 
     World world;
 
     // Add the triangles from the bunny in the world
     for (unsigned int i = 0; i < bunny.size() ; ++i) {
-        bunny[i].setUpPhong( Color(1,1,1), 0.6, 0.8, 0.2, 20.0 );
+        bunny[i].setUpPhong( Color(0.7,0.7,0.7), 1, 0.5, 1, 0.6 );
         world.addObject(&bunny[i]);
     }
-
-
-    world.addObject(&middleSphere);
-    world.addObject(&middleGreenSphere);
-    world.addObject(&leftSphere);
-    world.addObject(&leftRedSphere);
-    world.addObject(&rightSphere);
-    world.addObject(&rightBlueSphere);
-
     world.addObject(&floorRectangle);
     world.addObject(&forwardRectangle);
-    world.addObject(&rightRectangle);
     world.addObject(&rectangleLightObj); // full white
 
 
@@ -300,10 +253,10 @@ int main ( void ) {
 
     Point pos(0.0,0.3,3);
     Vector up(0.0,1.0,0.0);
-    Point lookAt(0.0,-0.2,-1.0);
+    Point lookAt(0.0,-0.4,-1.0);
 
     // create camera
-    Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, 4, 8);
+    Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, 2, 10);
 
     #endif
 
@@ -531,6 +484,8 @@ int main ( void ) {
             // end the current frame
             window.display();
         }
+    #else
+        canvas.savePicture();
     #endif
 
     std::cout << "Status: Done." << std::endl;

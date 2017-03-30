@@ -114,8 +114,12 @@ public:
         // Size of canvas
         int pixelNum = imageWidth * imageHeight;
 
+        //double tenPercentIncrement = pixelNum * 0.1;
+        //int tenPercentIncrementInt = 10;
+
         int cores = std::thread::hardware_concurrency();
         volatile std::atomic<int> count(0);
+        volatile std::atomic<double> tenPercentIncrement(0.01);
         std::vector<std::future<void> > futureVector;
 
         #ifdef MULTI_THREADED
@@ -126,15 +130,20 @@ public:
 
             while (cores--) {
                 futureVector.push_back(
-                    std::async([=, &colorMap, &world, &count]()
+                    std::async([=, &colorMap, &world, &count, &tenPercentIncrement]()
                     {
                         while (true) {
                             int index = count++;
                             if (index >= pixelNum)
                                 break;
+                            if (index > pixelNum * tenPercentIncrement) {
+                                std::cout << "Status: Image processing: " << 100 * tenPercentIncrement << "% complete..." << std::endl;
+                                tenPercentIncrement = 0.01 + tenPercentIncrement;
+                            }
                             int i = index / imageWidth;
                             int j = index % imageWidth;
                             colorMap[index] = getColorInPixel(world,i,j);
+
                         }
                     }));
             }

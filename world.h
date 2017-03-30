@@ -114,9 +114,9 @@ public:
 
             // shadow ray origin should be slightly  different to account for rounding errors
             Vector normal = objectHit->getNormal(pointHit);
-            Point originShadowRay(pointHit.x + normal.x * 0.01,
-                                  pointHit.y + normal.y * 0.01,
-                                  pointHit.z + normal.z * 0.01 );
+            Point originShadowRay(pointHit.x + normal.x * 0.001,
+                                  pointHit.y + normal.y * 0.001,
+                                  pointHit.z + normal.z * 0.001 );
 
             // the new function we will use
             std::map<LightSource*, std::vector<Point> > lightsAndPointsReachedMap = lightsReached(originShadowRay, lightList);

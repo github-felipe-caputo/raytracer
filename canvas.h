@@ -66,6 +66,10 @@ public:
         // Set color
         myImage.setPixel (x, y, sf::Color (R, G, B));
     }
+
+    void savePicture() {
+        myImage.saveToFile("test.png");
+    }
 };
 
 #endif
