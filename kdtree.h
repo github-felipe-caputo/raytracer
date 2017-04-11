@@ -102,6 +102,10 @@ public:
         return traverse (ray, root);
     }
 
+    Object* traverseForLight (Ray ray, LightSource* lightSource) {
+        return traverseForLight (ray, root, lightSource);
+    }
+
     // Will return the closest object the ray hits, or NULL if it doesn't hit anything
     Object* traverse (Ray ray, node *n) {
         // if it's a leaf, try intersectoins
@@ -133,6 +137,59 @@ public:
         if ( (n->v).intersect(ray, 0, 1000) ) {
             Object *a = traverse(ray, n->rear);
             Object *b = traverse(ray, n->front);
+            Point origin = ray.getOrigin();
+
+            if (a == NULL || b == NULL) {
+                return (a == NULL) ? b : a;
+            } else {
+                double distRayA = distance(origin, a->intersect(ray));
+                double distRayB = distance(origin, b->intersect(ray));
+
+                // they are both zero, no intersection with the objects
+                if (distRayA == 0 && distRayB == 0) {
+                    return NULL;
+                } else if (distRayA < distRayB) {
+                    return a;
+                } else {
+                    return b;
+                }
+            }
+
+        }
+        return NULL;
+    }
+
+    Object* traverseForLight (Ray ray, node *n, LightSource* lightSource) {
+        // if it's a leaf, try intersectoins
+        if (n->leaf) {
+            Point originRay = ray.getOrigin();
+            Point intersection;
+
+            std::vector<Point> vPoint;
+            std::vector<double> vDist;
+
+            double distOriginAndLight = lightSource->getMinDistance(originRay);
+            
+            // we will go through the objects in the voxel and look for intersections
+            std::vector<Object*>::iterator it;
+            for(it = n->objectList.begin() ; it < n->objectList.end() ; ++it) {
+                double distOriginIntersection = distance(originRay, (*it)->intersect(ray));
+                if ( !(*it)->isEmissive() && distOriginIntersection != 0 && distOriginIntersection < distOriginAndLight) {
+                    break;
+                }
+            }
+
+            if ( it == n->objectList.end() ) { // if it went through the whole loop, then it hits the light!
+                return NULL;
+            }
+
+            // obj hit
+            return (*it);
+        }
+
+        if ( (n->v).intersect(ray, 0, 1000) ) {
+            Object *a = traverseForLight(ray, n->rear, lightSource);
+            Object *b = traverseForLight(ray, n->front, lightSource);
             Point origin = ray.getOrigin();
 
             if (a == NULL || b == NULL) {

@@ -2,7 +2,7 @@ CC =		    gcc
 CCFLAGS = 		#-Wall
 CXX = 			g++
 CXXFLAGS = 		-Wall \
-			-m64 \
+			-march=native \
 			-O3 \
 			-std=c++11 \
 			-I/usr/local/include

@@ -10,6 +10,7 @@
 #define KD_TREE
 #define MULTI_THREADED
 //#define CANVAS_DISPLAY
+//#define SHOW_PROGRESS
 
 // define for scenes
 //#define CLASSIC
@@ -32,8 +33,8 @@
 #include "kdtree.h"
 
 // pixels
-int imageHeight = 512;
-int imageWidth = 512;
+int imageHeight = 1024;
+int imageWidth = 1024;
 
 // keeping the aspect ratio of the window pixels
 double viewPlaneHeigth = 0.25;
@@ -93,6 +94,11 @@ int main ( void ) {
 
     world.addLight(&light);
     world.setUpPhongIllumination( Color(0.25,0.61,1.00) );
+
+    Point pos(0.0,0.0,0.0);
+    Vector up(0.0,1.0,0.0);
+    Point lookAt(0.0,0.0,-1.0);
+    Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, 8, 8);
 
     #endif
 
@@ -195,7 +201,7 @@ int main ( void ) {
     #ifdef CLOSE_UP_BUNNY
 
     // Get the triangles from the bunny fily
-    std::vector<Triangle> bunny = readPlyFile("plyFiles/bun_zipper", Color(0.4,0.4,0.4));
+    std::vector<Triangle> bunny = readPlyFile("plyFiles/bun_zipper_res4", Color(0.2125,0.1275,0.054));
 
     // FLOOR
     std::vector<Point> vertices;
@@ -205,7 +211,6 @@ int main ( void ) {
     vertices.push_back( Point( 3,0, 5) );
     Rectangle floorRectangle( vertices, Color(1,1,1) );
     floorRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.5, 0.9, 0.0, 1.0 );
-    floorRectangle.setUpReflectionTransmission(0.3, 0.0, 1.0);
 
     // FORWARD WALL
     vertices.clear();
@@ -216,6 +221,9 @@ int main ( void ) {
     Rectangle forwardRectangle( vertices, Color(1,1,1) );
     forwardRectangle.setUpPhong( Color(0.9,0.9,0.9), 0.5, 0.9, 0.0, 1.0 );
 
+    // point light
+    PointLight light( Point(-1, 2, -1), Color(1,1,1) );
+
     // rectangle light
     std::vector<Point> v;
     v.push_back( Point( 0.8,0.0, 0.8) );
@@ -224,7 +232,7 @@ int main ( void ) {
     v.push_back( Point(-0.8,0.0, 0.8) );
     Rectangle rectangleLightObj( v, Color(1,1,1) );
     rectangleLightObj.setUpEmissionColor( Color(1,1,1) );
-    AreaLight rectangleLight( &rectangleLightObj, 8 );
+    AreaLight rectangleLight( &rectangleLightObj, 6 );
 
     translate(&floorRectangle, 0, -1, -3);
     translate(&forwardRectangle, 0, 0, -5);
@@ -240,13 +248,12 @@ int main ( void ) {
 
     // Add the triangles from the bunny in the world
     for (unsigned int i = 0; i < bunny.size() ; ++i) {
-        bunny[i].setUpPhong( Color(0.7,0.7,0.7), 1, 0.5, 1, 0.6 );
+        bunny[i].setUpPhong( Color(0.714,0.4284,0.18144), 1, 1, 0.8, 0.1 );
         world.addObject(&bunny[i]);
     }
     world.addObject(&floorRectangle);
     world.addObject(&forwardRectangle);
     world.addObject(&rectangleLightObj); // full white
-
 
     world.addLight(&rectangleLight);
     world.setUpPhongIllumination( Color(0.1,0.1,0.1) );
@@ -256,7 +263,7 @@ int main ( void ) {
     Point lookAt(0.0,-0.4,-1.0);
 
     // create camera
-    Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, 2, 10);
+    Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth, 1, 8);
 
     #endif
 
@@ -359,8 +366,6 @@ int main ( void ) {
     Rectangle rectangleLightScaled( v2, Color(1,1,1) );
     rectangleLightScaled.setUpEmissionColor( Color(1,1,1) );
 
-
-
     translate(&floorRectangle, 0, -1, -3);
     translate(&ceilingRectangle1, 0, 1, -3);
     translate(&ceilingRectangle2, 0, 1, -3);
@@ -438,7 +443,7 @@ int main ( void ) {
     #ifdef KD_TREE
         std::cout << "Status: Using KD Tree." << std::endl;
         // Create Tree
-        world.createKdTree(-10,10,-10,10,-10,10);
+        world.createKdTree(-5,5,-5,5,-5,5);
     #else
         std::cout << "Status: Using regular ray traversal." << std::endl;
     #endif

@@ -119,7 +119,7 @@ public:
                                   pointHit.z + normal.z * 0.001 );
 
             // the new function we will use
-            std::map<LightSource*, std::vector<Point> > lightsAndPointsReachedMap = lightsReached(originShadowRay, lightList);
+            std::map<LightSource*, std::vector<Point> > lightsAndPointsReachedMap = lightsReachedKdTree(originShadowRay, lightList);
 
             Vector view(pointHit, originRay, true);
 
@@ -440,8 +440,6 @@ public:
                     Vector dir( originShadowRay, (*it2), true );
                     Ray fromPointToLight(originShadowRay, dir);
 
-                    // TODO: better to check if the lght is an area light then simply intersect with it and get distance
-
                     for(itObj = objectList.begin() ; itObj < objectList.end() ; ++itObj) {
                         double distOriginIntersection = distance(originShadowRay, (*itObj)->intersect(fromPointToLight));
                         if ( !(*itObj)->isEmissive() && distOriginIntersection != 0
@@ -451,6 +449,44 @@ public:
                     }
 
                     if ( itObj == objectList.end() ) { // if it went through the whole loop, then it hits the light!
+                        pointsHitOnLight.push_back( *it2 );
+                    }
+                }
+
+                if ( !pointsHitOnLight.empty() ) {
+                    result.insert(std::pair<LightSource*, std::vector<Point> >(*it, pointsHitOnLight));
+                }
+
+            }
+        }
+
+        return result;
+    }
+
+    // This returns a map of which lights the shadow ray coming from originShadowRay can reach
+    // and which points it actually hit on the light (necessary for area lights)
+    std::map<LightSource*, std::vector<Point> > lightsReachedKdTree(Point originShadowRay, std::vector<LightSource*> lightList){
+        std::vector<LightSource*> lightsHit;
+        std::vector<Object*>::iterator itObj;
+
+        std::map<LightSource*, std::vector<Point>> result;
+        std::vector<Point> pointsHitOnLight;
+
+        // For every light source, let's see if a ray from originShadowRay can reach it
+        for(std::vector<LightSource*>::iterator it = lightList.begin() ; it < lightList.end() ; ++it) {
+
+            // If this ray can actually reach the lights
+            // (can always reach a point light, maybe not a spot light)
+            if( (*it)->reaches(originShadowRay) ) {
+                std::vector<Point> pointsOnLightSurface = (*it)->getPos();
+                pointsHitOnLight.clear();
+                for(std::vector<Point>::iterator it2 = pointsOnLightSurface.begin() ; it2 < pointsOnLightSurface.end() ; ++it2) {
+                    Vector dir( originShadowRay, (*it2), true );
+                    Ray fromPointToLight(originShadowRay, dir);
+
+                    Object* objectHit = kd.traverseForLight(fromPointToLight,*it);
+
+                    if ( objectHit == NULL ) { // if it went through the whole loop, then it hits the light!
                         pointsHitOnLight.push_back( *it2 );
                     }
                 }

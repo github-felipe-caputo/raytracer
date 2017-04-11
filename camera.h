@@ -114,16 +114,13 @@ public:
         // Size of canvas
         int pixelNum = imageWidth * imageHeight;
 
-        //double tenPercentIncrement = pixelNum * 0.1;
-        //int tenPercentIncrementInt = 10;
-
-        int cores = std::thread::hardware_concurrency();
-        volatile std::atomic<int> count(0);
-        volatile std::atomic<double> tenPercentIncrement(0.01);
-        std::vector<std::future<void> > futureVector;
-
         #ifdef MULTI_THREADED
             std::cout << "Status: Using multi threaded ray tracer." << std::endl;
+
+            int cores = std::thread::hardware_concurrency();
+            volatile std::atomic<int> count(0);
+            volatile std::atomic<double> tenPercentIncrement(0.01);
+            std::vector<std::future<void> > futureVector;
 
             // Result color of a ray
             std::vector<Color> colorMap(pixelNum);
@@ -136,10 +133,12 @@ public:
                             int index = count++;
                             if (index >= pixelNum)
                                 break;
-                            if (index > pixelNum * tenPercentIncrement) {
-                                std::cout << "Status: Image processing: " << 100 * tenPercentIncrement << "% complete..." << std::endl;
-                                tenPercentIncrement = 0.01 + tenPercentIncrement;
-                            }
+                            #ifdef SHOW_PROGRESS
+                                if (index > pixelNum * tenPercentIncrement) {
+                                    std::cout << "Status: Image processing: " << 100 * tenPercentIncrement << "% complete..." << std::endl;
+                                    tenPercentIncrement = 0.01 + tenPercentIncrement;
+                                }
+                            #endif
                             int i = index / imageWidth;
                             int j = index % imageWidth;
                             colorMap[index] = getColorInPixel(world,i,j);
@@ -149,6 +148,9 @@ public:
             }
         #else
             std::cout << "Status: Using single thread ray tracer." << std::endl;
+
+            int count = 0;
+            double tenPercentIncrement = 0.01;
 
             // Result color of a ray
             std::vector<Color> colorMap;
@@ -162,6 +164,13 @@ public:
             for(int i = 0; i < imageWidth; ++i) {
                 for(int j = 0; j < imageHeight; ++j) {
                     colorMap.push_back( getColorInPixel(world,i,j) );
+                    #ifdef SHOW_PROGRESS
+                        count++;
+                        if (count > pixelNum * tenPercentIncrement) {
+                            std::cout << "Status: Image processing: " << 100 * tenPercentIncrement << "% complete..." << std::endl;
+                            tenPercentIncrement = 0.01 + tenPercentIncrement;
+                        }
+                    #endif
                 }
             }
         #endif
