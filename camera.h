@@ -55,9 +55,9 @@ public:
     // rayType = if we are doing ray tracing or ray marching
     // ray marching here was implemented so far only for volumetric lighthing,
     // so some other values will need to be set up before using it (ka and ks for instance)
-    Camera(Point pos, Vector look, Vector up, int imH, int imW, double viewH, double viewW, int rayType, int depthOrSamples, int gridOrCenter) : 
+    Camera(Point pos, Vector look, Vector up, int imH, int imW, double viewH, double viewW, int rayType, int depthOrSamples, int gridOrCenter) :
         position(pos), lookAt(look), up(up), imageHeight(imH), imageWidth(imW), viewPlaneHeigth(viewH), viewPlaneWidth(viewW), rayType(rayType), gridOrCenter(gridOrCenter) {
-        
+
         // each pixel
         unitsHigh = viewH/imH;
         unitsWidth = viewW/imW;
@@ -111,14 +111,14 @@ public:
         //    go through the rows in the column
         // then go to next column
 
-        if(gridOrCenter == RAY_CENTER) 
+        if(gridOrCenter == RAY_CENTER)
         {
             for(int i = 0; i < imageWidth; ++i) {
                 for(int j = 0; j < imageHeight; ++j) {
                     dx = firstPlanex + (unitsWidth/2.0) + i * unitsWidth;
                     dy = firstPlaney - (unitsHigh/2.0) - j * unitsHigh;
                     dz = focalLength;
-                    
+
                     // vector direction, normalize
                     Vector dir(dx,dy,dz, true);
 
@@ -129,8 +129,8 @@ public:
                     colorMap.push_back( world.spawn( ray , MAX_DEPTH ) );
                 }
             }
-        } 
-        else 
+        }
+        else
         {
             for(int i = 0; i < imageWidth; ++i) {
                 for(int j = 0; j < imageHeight; ++j) {
@@ -140,8 +140,8 @@ public:
                     /// lets make a grid of 9 rays
                     for (int a = 1; a < 4; ++a) {
                         for (int b = 1; b < 4; ++b) {
-                            dx = firstPlanex + (unitsWidth * (0.25 * a)) + i * unitsWidth;
-                            dy = firstPlaney - (unitsHigh * (0.25 * b)) - j * unitsHigh;
+                            dx = firstPlanex + (unitsWidth * (1/4 * a)) + i * unitsWidth;
+                            dy = firstPlaney - (unitsHigh * (1/4 * b)) - j * unitsHigh;
                             dz = focalLength;
 
                             // vector direction, normalize
@@ -188,14 +188,14 @@ public:
         //    go through the rows in the column
         // then go to next column
 
-        if(gridOrCenter == RAY_CENTER) 
+        if(gridOrCenter == RAY_CENTER)
         {
             for(int i = 0; i < imageWidth; ++i) {
                 for(int j = 0; j < imageHeight; ++j) {
                     dx = firstPlanex + (unitsWidth/2.0) + i * unitsWidth;
                     dy = firstPlaney - (unitsHigh/2.0) - j * unitsHigh;
                     dz = focalLength;
-                    
+
                     // vector direction, normalize
                     Vector dir(dx,dy,dz, true);
 
@@ -206,8 +206,8 @@ public:
                     colorMap.push_back( world.spawnRayMarch( ray , SAMPLE_NUM ) );
                 }
             }
-        } 
-        else 
+        }
+        else
         {
             for(int i = 0; i < imageWidth; ++i) {
                 for(int j = 0; j < imageHeight; ++j) {
@@ -217,8 +217,8 @@ public:
                     /// lets make a grid of 9 rays
                     for (int a = 1; a < 4; ++a) {
                         for (int b = 1; b < 4; ++b) {
-                            dx = firstPlanex + (unitsWidth * (0.25 * a)) + i * unitsWidth;
-                            dy = firstPlaney - (unitsHigh * (0.25 * b)) - j * unitsHigh;
+                            dx = firstPlanex + (unitsWidth * (1.0/4.0 * a)) + i * unitsWidth;
+                            dy = firstPlaney - (unitsHigh * (1.0/4.0 * b)) - j * unitsHigh;
                             dz = focalLength;
 
                             // vector direction, normalize

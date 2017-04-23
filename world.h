@@ -100,14 +100,14 @@ public:
 
         // if nothing was hit
         if (objectHit == NULL) {
-            return backgroundRadiance; 
+            return backgroundRadiance;
         } else {
             Point pointHit = objectHit->intersect(ray);
 
             // shadow ray origin should be slightly  different to account for rounding errors
             Vector normal = objectHit->getNormal(pointHit);
-            Point originShadowRay(pointHit.x + normal.x * 0.1f, 
-                                  pointHit.y + normal.y * 0.1f,  
+            Point originShadowRay(pointHit.x + normal.x * 0.1f,
+                                  pointHit.y + normal.y * 0.1f,
                                   pointHit.z + normal.z * 0.1f );
 
             // lights that are reached/hit
@@ -116,11 +116,11 @@ public:
             Vector view(pointHit, originRay, true);
 
             Color amb = ambientComponent( objectHit, backgroundRadiance, pointHit );
-            Color diff_spec = illuminate( objectHit, view, pointHit, 
+            Color diff_spec = illuminate( objectHit, view, pointHit,
                     objectHit->getNormal(pointHit), lightsHitList);
 
             Color finalColor = amb + diff_spec;
-            
+
             if ( depth > 1 ) {
                 double kr = objectHit->getKr();
                 double kt = objectHit->getKt();
@@ -144,7 +144,7 @@ public:
                     double nit;
 
                     Point transmittedRayOrigin;
-                    
+
                     //std::cout << dot(rayDir,objNormal) << std::endl;
 
                     // inside
@@ -152,8 +152,8 @@ public:
                         normal = -1.0 * objNormal;
                         nit = objectHit->getNr() / nr;
 
-                        transmittedRayOrigin = Point(pointHit.x + objNormal.x * 0.1f, 
-                                                     pointHit.y + objNormal.y * 0.1f,  
+                        transmittedRayOrigin = Point(pointHit.x + objNormal.x * 0.1f,
+                                                     pointHit.y + objNormal.y * 0.1f,
                                                      pointHit.z + objNormal.z * 0.1f );
 
                     } else { // outside
@@ -161,8 +161,8 @@ public:
                         nit = nr / objectHit->getNr();
 
                         // the ray needs to go out a bit inside the object to be sure
-                        transmittedRayOrigin = Point(pointHit.x + objNormal.x * -0.1f, 
-                                                     pointHit.y + objNormal.y * -0.1f,  
+                        transmittedRayOrigin = Point(pointHit.x + objNormal.x * -0.1f,
+                                                     pointHit.y + objNormal.y * -0.1f,
                                                      pointHit.z + objNormal.z * -0.1f );
                     }
 
@@ -178,7 +178,7 @@ public:
                         finalColor += kt * spawnKdtree( Ray(transmittedRayOrigin, transmittedDir), --depth);
                     }
                 }
-                
+
             }
             return finalColor;
         }
@@ -198,7 +198,7 @@ public:
             vPoint.push_back( intersection );
             vDist.push_back( distance(originRay, intersection) );
         }
-        
+
         // we find the minimum distance on vDist, which would be closest intersection
         int objHit( indexMinElement(vDist) );
 
@@ -211,8 +211,8 @@ public:
 
             // shadow ray origin should be slightly  different to account for rounding errors
             Vector normal = objectHit->getNormal(pointHit);
-            Point originShadowRay(pointHit.x + normal.x * 0.1f, 
-                                  pointHit.y + normal.y * 0.1f,  
+            Point originShadowRay(pointHit.x + normal.x * 0.1f,
+                                  pointHit.y + normal.y * 0.1f,
                                   pointHit.z + normal.z * 0.1f );
 
             // lights that are reached/hit
@@ -221,7 +221,7 @@ public:
             Vector view(pointHit, originRay, true);
 
             Color amb = ambientComponent( objectHit, backgroundRadiance, pointHit );
-            Color diff_spec = illuminate( objectHit, view, pointHit, 
+            Color diff_spec = illuminate( objectHit, view, pointHit,
                     objectHit->getNormal(pointHit), lightsHitList);
 
             Color finalColor = amb + diff_spec;
@@ -238,7 +238,7 @@ public:
                 // For every light source, let's see if a ray from originShadowRay can reach it
                 for(std::vector<LightSource*>::iterator it2 = lightList.begin() ; it2 < lightList.end() ; ++it2) {
 
-                    // If this ray can actually reach the lights 
+                    // If this ray can actually reach the lights
                     // (can always reach a point light, maybe not a spot light)
                     if( (*it2)->reaches(pointHit) ) {
                         Vector dir( pointHit, (*it2)->getPos(), true );
@@ -272,14 +272,14 @@ public:
                     double kt = vObjs[objHit]->getKt();
 
                     Point transmittedRayOrigin;
-                    
+
                     // inside
                     if (dot(-1.0 * rayDir,objNormal) < 0) {
                         normal = -1.0 * objNormal;
                         nit = vObjs[objHit]->getNr() / nr;
 
-                        transmittedRayOrigin = Point(vPoint[objHit].x + objNormal.x * 0.1f, 
-                                                     vPoint[objHit].y + objNormal.y * 0.1f,  
+                        transmittedRayOrigin = Point(vPoint[objHit].x + objNormal.x * 0.1f,
+                                                     vPoint[objHit].y + objNormal.y * 0.1f,
                                                      vPoint[objHit].z + objNormal.z * 0.1f );
 
                         // std::cout << "why" << std::endl;
@@ -288,8 +288,8 @@ public:
                         nit = nr / vObjs[objHit]->getNr();
 
                         // the ray needs to go a bit inside the object to be sure
-                        transmittedRayOrigin = Point(vPoint[objHit].x + objNormal.x * -0.1f, 
-                                                     vPoint[objHit].y + objNormal.y * -0.1f,  
+                        transmittedRayOrigin = Point(vPoint[objHit].x + objNormal.x * -0.1f,
+                                                     vPoint[objHit].y + objNormal.y * -0.1f,
                                                      vPoint[objHit].z + objNormal.z * -0.1f );
 
                         // std::cout << "why2" << std::endl;
@@ -312,7 +312,7 @@ public:
                 }
             }
 */
-            
+
             if ( depth > 1 ) {
                 double kr = objectHit->getKr();
                 double kt = objectHit->getKt();
@@ -336,7 +336,7 @@ public:
                     double nit;
 
                     Point transmittedRayOrigin;
-                    
+
                     //std::cout << dot(rayDir,objNormal) << std::endl;
 
                     // inside
@@ -344,8 +344,8 @@ public:
                         normal = -1.0 * objNormal;
                         nit = objectHit->getNr() / nr;
 
-                        transmittedRayOrigin = Point(pointHit.x + objNormal.x * 0.1f, 
-                                                     pointHit.y + objNormal.y * 0.1f,  
+                        transmittedRayOrigin = Point(pointHit.x + objNormal.x * 0.1f,
+                                                     pointHit.y + objNormal.y * 0.1f,
                                                      pointHit.z + objNormal.z * 0.1f );
 
                     } else { // outside
@@ -353,8 +353,8 @@ public:
                         nit = nr / objectHit->getNr();
 
                         // the ray needs to go out a bit inside the object to be sure
-                        transmittedRayOrigin = Point(pointHit.x + objNormal.x * -0.1f, 
-                                                     pointHit.y + objNormal.y * -0.1f,  
+                        transmittedRayOrigin = Point(pointHit.x + objNormal.x * -0.1f,
+                                                     pointHit.y + objNormal.y * -0.1f,
                                                      pointHit.z + objNormal.z * -0.1f );
                     }
 
@@ -370,12 +370,12 @@ public:
                         finalColor += kt * spawnIlluminated( Ray(transmittedRayOrigin, transmittedDir), depth-1);
                     }
                 }
-                
+
             }
-            
+
             return finalColor;
         }
-        
+
     }
 
     Color spawnRayMarch ( Ray ray, int SAMPLE_NUM ) {
@@ -396,13 +396,13 @@ public:
             vPoint.push_back( intersection );
             vDist.push_back( distance(originRay, intersection) );
         }
-        
+
         // we find the minimum distance on vDist, which would be closest intersection
         int objHit( indexMinElement(vDist) );
 
-        // For the color of the object, if it was hit or not 
+        // For the color of the object, if it was hit or not
         Color objectColor;
-        
+
         if (objHit == -1) {
             objectColor = Color(0,0,0);
         } else {
@@ -411,9 +411,9 @@ public:
 
             // shadow ray origin should be slightly  different to account for rounding errors
             Vector normal = objectHit->getNormal(pointHit);
-            Point originShadowRay(pointHit.x + normal.x * 0.1f, 
-                                  pointHit.y + normal.y * 0.1f,  
-                                  pointHit.z + normal.z * 0.1f );
+            Point originShadowRay(pointHit.x + normal.x * 0.1,
+                                  pointHit.y + normal.y * 0.1,
+                                  pointHit.z + normal.z * 0.1 );
 
             // lights that are reached/hit
             std::vector<LightSource*> lightsHitList = lightsReached(originShadowRay, lightList);
@@ -421,7 +421,7 @@ public:
             Vector view(pointHit, originRay, true);
 
             Color amb = ambientComponent( objectHit, backgroundRadiance, pointHit );
-            Color diff_spec = illuminate( objectHit, view, pointHit, 
+            Color diff_spec = illuminate( objectHit, view, pointHit,
                     objectHit->getNormal(pointHit), lightsHitList);
 
             objectColor = amb + diff_spec;
@@ -430,10 +430,10 @@ public:
         // for one light source
         //if ( !lightList[0]->reaches(vPoint[objHit]) )
           // objectColor = Color(0,0,0);
-        
+
         // Now color through sampling light
         Color inscattering;
-        
+
         // For every light source, get intersections
         for(std::vector<LightSource*>::iterator it = lightList.begin() ; it < lightList.end() ; ++it) {
             std::vector<Point> lightIntersections;
@@ -445,14 +445,14 @@ public:
 
             // now for those sample values
             // lets not use the object yet
-            
+
             for(std::vector<Point>::iterator it2 = lightIntersections.begin() ; it2 < lightIntersections.end() ; ++it2 ) {
                 if (reachesLight((*it2), objectList, (*it))) {
                     double distLightPoint = distance((*it)->getPos() , (*it2));
                     double distOriginPoint = distance(originRay , (*it2));
 
                     double cosAngle = dot( Vector((*it)->getPos(), (*it2), true) , Vector((*it2), originRay, true) );
-                    
+
                     if ( density == CONSTANT_DENSITY ) {
                         double g = 0.3;
                         inscattering += (( (3.0/(16.0*PI)) * (1.0 - cosAngle*cosAngle) + (1.0/(4.0*PI)) * ( ((1.0 - g) * (1.0 - g)) / std::pow(1.0 + g*g - 2*g*cosAngle,1.5))) / (ka+ks)) * (*it)->getColor() * (1.0 - std::exp( -1.0 * (ka+ks) * distOriginPoint ));
@@ -460,7 +460,7 @@ public:
                         double phase = ((3.0/(16.0*PI)) * (1.0 - cosAngle*cosAngle));
                         inscattering += ( phase / std::pow(distLightPoint,2)) * ((*it)->getColor()) * std::exp( -1.0 * (ka+ks) * (distLightPoint + distOriginPoint) );
                     }
-                } 
+                }
             }
 
             if(!lightIntersections.empty()) {
@@ -469,15 +469,15 @@ public:
                 else
                     inscattering = 50 * inscattering / lightIntersections.size();
             }
-            
+
         }
 
         Color attenuated = objectColor;
         if (objHit != -1) {
             attenuated = objectColor * std::exp(-1 * (ka + ks) * vDist[objHit] );
         }
-        
-        return attenuated + inscattering; 
+
+        return attenuated + inscattering;
     }
 
     // This returns a vector of which lights the shadow ray coming from originShadowRay can reach
@@ -488,14 +488,14 @@ public:
         // For every light source, let's see if a ray from originShadowRay can reach it
         for(std::vector<LightSource*>::iterator it2 = lightList.begin() ; it2 < lightList.end() ; ++it2) {
 
-            // If this ray can actually reach the lights 
+            // If this ray can actually reach the lights
             // (can always reach a point light, maybe not a spot light)
             if( (*it2)->reaches(originShadowRay) ) {
                 Vector dir( originShadowRay, (*it2)->getPos(), true );
                 Ray fromPointToLight(originShadowRay, dir);
 
-                for(it = objectList.begin() ; it < objectList.end() ; ++it) 
-                    if ( originShadowRay != (*it)->intersect(fromPointToLight) ) 
+                for(it = objectList.begin() ; it < objectList.end() ; ++it)
+                    if ( originShadowRay != (*it)->intersect(fromPointToLight) )
                         break;
 
                 if ( it == objectList.end() ) // if it went through the whole loop, then it hits the light!
@@ -560,7 +560,7 @@ public:
                 double val = i * (1.0/SAMPLE_NUM);
                 samples.push_back( firstPoint + val * (secondPoint - firstPoint) );
             }
-        } 
+        }
         // if doesn go to the ifs, inter = 0, sample is empty
 
         return samples;
@@ -586,7 +586,7 @@ public:
                     break;
                 samples.push_back( newPoint );
             }
-        } 
+        }
         // if doesn go to the ifs, inter = 0, sample is empty
 
         return samples;
@@ -608,12 +608,12 @@ public:
                     return false;
                 }
             }
-                
+
         }
 
         return true;
     }
-    
+
 
 };
 

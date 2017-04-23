@@ -15,11 +15,11 @@ public:
 
     Point getPos () {
         return position;
-    } 
+    }
 
     Color getColor () {
         return color;
-    } 
+    }
 
     virtual bool reaches(Point p) = 0;
     virtual double getAttenuation(Point p) = 0;
@@ -30,7 +30,7 @@ public:
 
 class PointLight : public LightSource {
 public:
-    PointLight( Point position, Color color ) : LightSource(position, color) {} 
+    PointLight( Point position, Color color ) : LightSource(position, color) {}
 
     // Point light can always be reached
     bool reaches (Point p) {
@@ -55,14 +55,14 @@ class SpotLight : public LightSource {
     double aExp; // attenuation exponent;
 
 public:
-    SpotLight( Point position, Color color, Vector dir, double angle, double aExp = 0 ) : LightSource(position, color), dir(dir), angle(angle), aExp(aExp) {} 
+    SpotLight( Point position, Color color, Vector dir, double angle, double aExp = 0 ) : LightSource(position, color), dir(dir), angle(angle), aExp(aExp) {}
 
     // SpotLight might not be reached depending on the angle and direction
     bool reaches (Point p) {
         Vector vObj(position, p, true);
         double cosa = dot(vObj, dir);
 
-        return (cosa >= std::cos(angle * PI / 180.0f));
+        return (cosa >= std::cos(angle * PI / 180.0));
     }
 
     double getAttenuation (Point p) {
@@ -86,7 +86,7 @@ public:
         Matrix d(dir);
         Matrix u(direction);
 
-        Matrix m = d * d.transpose() - std::pow(std::cos(angle * PI / 180.0f),2) * indentityMatrix();
+        Matrix m = d * d.transpose() - std::pow(std::cos(angle * PI / 180.0),2) * indentityMatrix();
         Matrix mc2 = u.transpose() * m * u; // matrix with one row and one col
         Matrix mc1 = u.transpose() * m * delta; // matrix with one row and one col
         Matrix mc0 = delta.transpose() * m * delta; // matrix with one row and one col
@@ -103,7 +103,7 @@ public:
 
             // there was a intersection
             if (w1 > 0.0) {
-                Point inter(origin.x + direction.x * w1, origin.y + direction.y * w1, origin.z + direction.z * w1); 
+                Point inter(origin.x + direction.x * w1, origin.y + direction.y * w1, origin.z + direction.z * w1);
                 // if we are hitting the actual cone
                 if (dot( dir , Vector(position, inter, true) ) >= 0)
                     intersections.push_back( inter );
@@ -113,18 +113,18 @@ public:
             w1 = - (c1 - sqrt(c1c1minusc0c2)) / c2;
             w2 = - (c1 + sqrt(c1c1minusc0c2)) / c2;
 
-            if (w1 > 0.0) { 
-                Point inter1(origin.x + direction.x * w1, origin.y + direction.y * w1, origin.z + direction.z * w1); 
+            if (w1 > 0.0) {
+                Point inter1(origin.x + direction.x * w1, origin.y + direction.y * w1, origin.z + direction.z * w1);
                 if ( dot( dir , Vector(position, inter1, true) ) >= 0 )
                     intersections.push_back( inter1 );
             }
 
-            if (w2 > 0.0) { 
-                Point inter2(origin.x + direction.x * w2, origin.y + direction.y * w2, origin.z + direction.z * w2); 
+            if (w2 > 0.0) {
+                Point inter2(origin.x + direction.x * w2, origin.y + direction.y * w2, origin.z + direction.z * w2);
                 if ( dot( dir , Vector(position, inter2, true) ) >= 0 )
-                    intersections.push_back( inter2 ); 
+                    intersections.push_back( inter2 );
             }
-        } 
+        }
 
         return intersections;
     }
