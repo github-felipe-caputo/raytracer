@@ -17,9 +17,10 @@
 // define for scenes
 //#define THREE_SPHERES
 //#define SPOTLIGHT
-#define SPACE
+//#define SPACE
+#define NO_OBJECTS
 
-#define VARIABLE // comment for constant
+//#define VARIABLE // comment for constant
 //#define CANVAS_DISPLAY
 
 // pixels
@@ -171,6 +172,35 @@ int main ( void ) {
         Vector up(0,1,0); // not being used yet
         Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth,
             RAY_MARCHING, 300, RAY_GRID);
+
+        // render our world, get the color map we will put on canvas
+        std::vector<Color> toneReprodColorMap = cam.render(world);
+    #endif
+
+    #ifdef NO_OBJECTS
+        // create a light source
+        PointLight light( Point(0.0, 1.0, -8.0), Color(1,1,1) );
+
+        // create world, add objects in it
+        World world;
+
+        // add light and set up phong
+        world.addLight(&light);
+        world.setUpPhongIllumination( Color(0.25,0.61,1.00) );
+
+        // We are doing ray marching, se need to add values for participant media
+        #ifdef VARIABLE
+            world.addParticipantMedia(0.01,0.01,VARIABLE_DENSITY);
+        #else
+            world.addParticipantMedia(0.01,0.01,CONSTANT_DENSITY);
+        #endif
+
+        // create camera
+        Point pos(0,0,1.5);
+        Vector lookAt(0,-0.5,0); // not being used yet
+        Vector up(0,1,0); // not being used yet
+        Camera cam(pos, lookAt, up, imageHeight, imageWidth, viewPlaneHeigth, viewPlaneWidth,
+            RAY_MARCHING, 50, RAY_GRID);
 
         // render our world, get the color map we will put on canvas
         std::vector<Color> toneReprodColorMap = cam.render(world);
