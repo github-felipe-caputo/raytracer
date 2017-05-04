@@ -10,7 +10,7 @@ A `Makefile` is available on the repo as an example.
 
 ## Versions
 
-Not really about versions per se, but there are 2 "different" engines here. On master you have the full ray tracer engine, with all the good stuff (multithreads, kd-trees, textures, area lights, etc). But there is one branch from this repo called 'raymarching', and as the name implies, this branch is slightly different and includes the ray marching stuff that I added to create volumetric lights and volumetric shadows.
+Not really about versions per se, but there are 2 "different" engines here. On master you have the full ray tracer engine, with all the good stuff (multithreads, kd-trees, textures, area lights, etc). But there is one branch from this repo called `rayMarching`, and as the name implies, this branch is slightly different and includes the ray marching stuff that I added to create volumetric lights and volumetric shadows.
 
 ## Read more at
 
