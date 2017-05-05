@@ -4,7 +4,7 @@ A Ray Tracer written in C++.
 ## Compiling the code
 To compile the code the only dependency is the following, used only to create a canvas and display the pixels. Everything else in the engine is done from the ground up.
 
-- [Simple and Fast Multimedia Library](https://www.sfml-dev.org/) - A library to load images in OpenGL.
+- [Simple and Fast Multimedia Library](https://www.sfml-dev.org/) - A library to help displaying images in a canvas.
 
 A `Makefile` is available on the repo as an example.
 
