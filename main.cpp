@@ -398,47 +398,6 @@ int main ( void ) {
     world.setUpPhongIllumination( Color(0.25,0.61,1.00) );
 
     #endif
-/*
-
-    // Get the triangles from the bunny fily
-    std::vector<Triangle> bunny = readPlyFile("plyFiles/bun_zipper_res4", Color(1,0.2,0.2));
-
-    // create a light source
-    PointLight light( Point(0, 0, -3), Color(1,1,1) );
-    //PointLight light2( Point(-5.0f, 3.0f, 0.0f), Color(1,1,1) );
-
-    Sphere sphereLightObj( Point(0.0, 0.0, 0.0), 0.3, Color(1,1,1) );
-    sphereLightObj.setUpEmissionColor( Color(1,1,1) );
-    AreaLight sphereLight( &sphereLightObj, 16 );
-
-    // light
-    translate(&sphereLightObj, 0, 0.0, -3);
-
-
-    for (unsigned int i = 0; i < bunny.size() ; ++i) {
-        scale(&bunny[i], 0.5, 0.5, 0.5);
-        translate(&bunny[i], 0, -0.1, -0.3);
-    }
-*/
-
-/*
-    // Add the triangles from the bunny in the world
-    for (unsigned int i = 0; i < bunny.size() ; ++i) {
-        bunny[i].setUpPhong( Color(1,1,1), 0.6, 0.35, 0.2, 20.0 );
-        world.addObject(&bunny[i]);
-    }
-*/
-
-/*
-    // add light and set up phong
-    //world.addLight(&light);
-    //world.addLight(&light2);
-    //world.addLight(&sphereLight);
-    world.addLight(&rectangleLight);
-    //world.setUpPhongBlinnIllumination( Color(0.25,0.61,1.00) );
-    world.setUpPhongIllumination( Color(0.25,0.61,1.00) );
-    //world.setUpPhongIllumination( Color(0.8,0.2,0.2) ); // RED
-*/
 
     #ifdef KD_TREE
         std::cout << "Status: Using KD Tree." << std::endl;
